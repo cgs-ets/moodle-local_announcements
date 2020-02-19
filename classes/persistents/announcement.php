@@ -638,6 +638,7 @@ class announcement extends persistent {
     public static function get_audience_ccgroup_descriptions($tags) {
         global $DB;
 
+        $providers = audience_loader::get();
         $ccgroups = array();
 
         // Check each audience selection for CCs.
@@ -648,7 +649,8 @@ class announcement extends persistent {
                           FROM {ann_audience_ccgroups}
                          WHERE audiencetype = ?
                            AND (? LIKE code OR code = '*')";
-                    $params = array($audience->audiencetype, $item->code);
+                    $code = $providers[$audience->audienceprovider]::true_code($item->code);
+                    $params = array($audience->audiencetype, $code);
                     $rows = $DB->get_records_sql($sql, $params);
                     foreach ($rows as $ccgroup) {
                         $ccgroups[] = $ccgroup->description;
