@@ -1,0 +1,83 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+    @package   local_announcements
+    @copyright 2020 Michael Vangelovski, Canberra Grammar School <michael.vangelovski@cgs.act.edu.au>
+    @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+{{!
+    @template local_announcements/announcement
+
+    View for a single announcement.
+}}
+
+<div data-id="{{id}}" class="announcement{{^isavailable}} unavailable{{/isavailable}}{{#ismodpending}} modpending{{/ismodpending}}{{#ismodrejected}} modrejected{{/ismodrejected}}">
+    {{#iscreator}}
+    <div class="actions">
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="actions-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actions-dropdown">
+                <a class="dropdown-item action-viewusers" href="#">Users</a>
+                <a class="dropdown-item action-edit" href="{{config.wwwroot}}/local/announcements/post.php?edit={{id}}">Edit</a>
+                <a class="dropdown-item action-delete" href="#">Delete</a>
+            </div>
+        </div>
+    </div>
+    {{/iscreator}}
+    {{^iscreator}}
+        {{#canaudit}}
+            <div class="actions">
+                <a class="btn btn-secondary action-viewusers" href="#">View users</a>
+            </div>
+        {{/canaudit}}
+    {{/iscreator}}
+    <div class="header">
+        <div class="userphoto"><a href="{{authorurl}}" title="{{authorfullname}} profile"><img src="{{authorphoto}}" alt="{{authorfullname}}" title="{{authorfullname}}" /></a></div>
+        <div class="subject">{{subject}}</div>
+        <div class="meta">
+            {{^isavailable}}<div class="availability">{{#str}} list:announcementunavailable, local_announcements {{/str}}</div>{{/isavailable}}
+            {{#ismodpending}}<div class="moderationstatus">{{#str}} list:announcementmodpending, local_announcements, {{#modinfo}}{{moduserfullname}}{{/modinfo}} {{/str}}</div>{{/ismodpending}}
+            {{#ismodrejected}}<div class="moderationstatus">{{#str}} list:announcementmodrejected, local_announcements, {{#modinfo}}{{actioneduserfullname}}{{/modinfo}} {{/str}}</div>{{/ismodrejected}}
+            <div class="time">🕑 {{readabletime}}</div>
+            <div class="audiences">📣
+                <ul class="audience-list comma-list">
+                {{#audiences}}
+                    <li class="{{conditiontype}}">{{#conditions}}<span>{{#url}}<a href="{{url}}">{{name}}</a>{{/url}}{{^url}}{{name}}{{/url}}</span>{{/conditions}}</li>
+                {{/audiences}}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="message">{{{message}}}</div>
+    {{#formattedattachments.0}}
+        <div class="attachments">
+            Attachments:
+            <ul class="comma-list">
+            {{#formattedattachments}}
+                <li><a target="_blank" href="{{path}}">{{{iconimage}}} {{filename}}</a></li>
+            {{/formattedattachments}}
+            </ul>
+        </div>
+    {{/formattedattachments.0}}
+    {{#modinfo}}
+        {{#modcomment}}{{#displaycomment}}
+        <div class="modcomment">
+            <div class="userphoto"><img src="{{actioneduserphoto}}" alt="{{actioneduserfullname}}" title="{{actioneduserfullname}}" /></div> 
+            {{{modcomment}}}
+        </div>
+        {{/displaycomment}}{{/modcomment}}
+    {{/modinfo}}
+</div>

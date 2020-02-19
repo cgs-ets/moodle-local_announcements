@@ -1,0 +1,240 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+    @package   local_announcements
+    @copyright 2020 Michael Vangelovski, Canberra Grammar School <michael.vangelovski@cgs.act.edu.au>
+    @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+{{!
+    @template local_announcements/message_mod_pending_html
+
+    Template for moderationmail
+}}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--[if !mso]><!-->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--<![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style type="text/css">
+        /* Basics */
+        body {
+            margin: 0 !important;
+            padding: 0;
+            background-color: #f2f4f6;
+        }
+        table {
+            border-spacing: 0;
+            font-family: sans-serif;
+            color: #333333;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+        td {
+            padding: 0;
+        }
+        img {
+            border: 0;
+        }
+        div[style*="margin: 16px 0"] { 
+            margin:0 !important;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            background-color: #f2f4f6;
+            padding: 30px;
+        }
+        .webkit {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .outer {
+            Margin: 0 auto;
+            width: 100%;
+            max-width: 700px;
+            background-color: #f2f4f6;
+        }
+        .inner {
+            background-color: #ffffff;
+        }
+        .contents {
+            width: 100%;
+        }
+        .footer td {
+            Padding: 5px;
+        }
+        .footer td {
+            color: #999999;
+            font-size: 12px;
+            Padding-top: 4px;
+        }
+        .prefs td {
+            color: #999999;
+            font-size: 12px;
+            Padding-bottom: 4px;
+            text-align: right;
+        }
+        p {
+            Margin: 0;
+        }
+        a {
+            color: #0645AD;
+            text-decoration: underline;
+        }
+        .full-width-image img {
+            width: 100%;
+            max-width: 700px;
+            height: auto;
+        }
+
+        /* One column layout */
+        /*.one-column .contents {
+            text-align: left;
+        }*/
+        .one-column p {
+            font-size: 16px;
+            Margin-bottom: 10px;
+        }
+        /* Announcement styling */
+        .announcement td.announcement-padding {
+            padding: 20px 20px;
+            border-bottom: 2px solid #dddddd;
+        }
+        .announcement-content td.actions {
+            float: right;
+            font-size: 13px;
+        }
+        .subject td {
+            font-weight: bold;
+            font-size: 17px;
+            Margin-bottom: 0px;
+        }
+        .metainfo td {
+            font-size: 13px;
+            color: #7a7a7a;
+        }
+        .announcement-content .message td {
+            padding: 15px 0;
+        }
+        /* Buttons */
+        .button {
+          background-color: #3869D4;
+          border-top: 10px solid #3869D4;
+          border-right: 18px solid #3869D4;
+          border-bottom: 10px solid #3869D4;
+          border-left: 18px solid #3869D4;
+          display: inline-block;
+          color: #FFF;
+          text-decoration: none;
+          border-radius: 3px;
+          box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16);
+          -webkit-text-size-adjust: none;
+        }
+        .button:hover {
+          color: #FFF;
+          text-decoration: none;
+        }
+        .button--green {
+          background-color: #22BC66;
+          border-top: 10px solid #22BC66;
+          border-right: 18px solid #22BC66;
+          border-bottom: 10px solid #22BC66;
+          border-left: 18px solid #22BC66;
+        }
+        .button--yellow {
+          background-color: #F8C734;
+          border-top: 10px solid #F1C63F;
+          border-right: 18px solid #F1C63F;
+          border-bottom: 10px solid #F1C63F;
+          border-left: 18px solid #F1C63F;
+        }
+    </style>
+    <!--[if (gte mso 9)|(IE)]>
+    <style type="text/css">
+        table {border-collapse: collapse;}
+    </style>
+    <![endif]-->
+</head>
+<body>
+    <center class="wrapper">
+        <div class="webkit">
+            <!--[if (gte mso 9)|(IE)]>
+            <table width="700" align="center">
+            <tr>
+            <td>
+            <![endif]-->
+            <table class="outer" align="center" width="100%">
+                <tr> 
+                    <td class="one-column" height="20"></td> 
+                </tr>
+                <tr>
+                    <td class="one-column">
+                        <table width="100%">
+                            <tr>
+                                <td class="inner contents">
+                                {{#posts}}
+                                    {{>local_announcements/message_announcement_html}}
+                                {{/posts}}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr> 
+                    <td class="one-column" height="10"></td> 
+                </tr>
+                <!-- Action -->
+                <tr>
+                    <td align="center">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td align="center">
+                                    <table border="0" cellspacing="0" cellpadding="0">
+                                        <tr>
+                                            <td>
+                                                <a href="{{{approve_url}}}" class="button button--green" target="_blank">Approve post</a>
+                                            </td>
+                                            <td>&nbsp;</td>
+                                            <td>
+                                                <a href="{{{moderation_url}}}" class="button button--yellow" target="_blank">More options</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- Action -->
+                <tr> 
+                    <td class="one-column" height="20"></td> 
+                </tr>
+            </table>
+            <!--[if (gte mso 9)|(IE)]>
+            </td>
+            </tr>
+            </table>
+            <![endif]-->
+        </div>
+    </center>
+</body>
+</html>

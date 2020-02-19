@@ -1,0 +1,42 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+    @package   local_announcements
+    @copyright 2020 Michael Vangelovski, Canberra Grammar School <michael.vangelovski@cgs.act.edu.au>
+    @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+{{!
+    @template local_announcements/content
+
+    Announcements content template.
+}}
+
+<div class="local_announcements">
+    <div class="lann-list">
+    {{#list}}
+        {{#announcements}}
+            {{>local_announcements/announcement}}
+        {{/announcements}}
+        {{^announcements.0}}{{#str}} list:announcementnotfound, local_announcements {{/str}}{{/announcements.0}}
+    {{/list}}
+    </div>
+    <div class="lann-footer">
+        <a id="btn-viewall" class="btn btn-secondary" href="{{config.wwwroot}}/local/announcements/">{{# str }} list:viewallannouncements, local_announcements {{/ str }}</a>
+        {{#canpost}}
+        <a id="btn-newannouncement" class="btn btn-secondary" href="{{config.wwwroot}}/local/announcements/post.php">{{# str }} list:addanewannouncement, local_announcements {{/ str }}</a>
+        {{/canpost}}
+    </div>
+</div>

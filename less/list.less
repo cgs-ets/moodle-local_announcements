@@ -1,0 +1,159 @@
+#page-local-announcements-view {
+	#region-main {
+	    border: 0;
+	    padding: 0;
+	}
+}
+#page-local-announcements-index {
+	#region-main {
+	    background-color: #f4f6f8;
+	    overflow: visible;
+	}
+	/* Modals */
+	.modal {
+		.userslist {
+			a {
+				display: inline-block;
+				margin-right: 10px;
+			}
+		}
+	}
+}
+.local_announcements {
+	.lann-header {
+	    margin-bottom: 15px;
+    	text-align: right;
+    	&>* {
+		    display: inline-block;
+		    margin-left: 10px;
+		}
+		.auditing-icon {
+			position: relative;
+		    color: #000;
+		    text-align: center;
+		    width: 25px;
+    		height: 25px;
+		    &.auditing-is-on {
+		    	background-color: rgba(204, 169, 44, 0.4);
+		    }
+		    .tip {
+			    display: none;
+			    position: absolute;
+			    bottom: 36px;
+			    font-size: 12px;
+			    width: 187px;
+			    margin-left: -81px;
+			    background-color: rgba(0,0,0,0.9);
+			    color: #fff;
+			    border-radius: 9px;
+			    z-index: 1000;
+			    padding: 6px 6px 10px;
+			    line-height: 1.4;
+			    &:after {
+				    content: " ";
+				    position: absolute;
+				    top: 100%;
+				    left: 50%;
+				    margin-left: -5px;
+				    border-width: 5px;
+				    border-style: solid;
+				    border-color: black transparent transparent transparent;
+				}
+			}
+			&:hover {
+				.tip {
+			    	display: block;
+				}
+			}
+		}
+		.dropdown-menu {
+			text-align: right;
+		}
+	}
+	.lann-list {
+		.announcement {
+			margin-bottom: 20px;
+			padding: 15px;
+			background-color: #fff;
+			color: #000;
+			position: relative;
+			box-shadow: 2px 2px 2px 0px #e4e6e8;
+			border: 1px solid #ddd;
+			overflow: hidden;
+			&.unavailable, &.modpending {
+				background-color: #f8dec4;
+			}
+			&.modrejected {
+				background-color: #f8d7da;
+    			border-color: #f5c6cb;
+			}
+			.actions {
+				opacity: 0;
+			    float: right;
+			    font-size: 13px;
+				transition: opacity 0.5s ease;
+			    .inline-list li {
+				    display: inline-block;
+				    margin-left: 8px;
+				}
+			}
+			.subject {
+				font-weight: 700;
+				font-size: 16px;
+				padding: 6px 11px;
+			}
+			.meta {
+			    clear: both;
+			    font-size: 13px;
+	    		color: #000;
+			}
+			.availability, .moderationstatus {
+				font-style: italic;
+			}
+			.message {
+			    padding: 15px 0;
+			    p:last-of-type {
+			    	margin-bottom: 0;
+			    }
+			}
+			.userphoto {
+				position: relative;
+				border-radius: 50%;
+				overflow: hidden;
+				float: left;
+				margin-right: 10px;
+			}
+			&.removing {
+				//box-shadow: 0px 0px 10px 0px #1177d1;
+				background-color: #F8DEC4;
+			}
+			.modcomment {
+				background: #fff3cd;
+				border: 1px solid #f5c6cb;
+				padding: 7px 18px 7px 10px;
+				display: inline-block;
+				border-radius: 5px;
+				font-size: 13px;
+				.userphoto img {
+				    height: 30px;
+				    width: 30px;
+				}
+			}
+		}
+	}
+	a.next {
+		display: none;
+	}
+	.loader {
+		width: 100%;
+		height: 94px;
+		padding: 22px;
+		margin-bottom: 10px;
+	}
+	&.preloads-completed {
+		.lann-list .announcement .actions{
+			opacity: 1;
+		}
+	}
+}
+

@@ -1,0 +1,28 @@
+{
+  "name": "local_announcements",
+  "private": true,
+  "description": "Announcements plugin for Moodle",
+  "devDependencies": {
+    "grunt": "^1.0.4",
+    "grunt-contrib-less": "^1.4.1",
+    "grunt-contrib-uglify": "^4.0.1"
+  },
+  "engines": {
+    "node": ">=8.9 <9"
+  },
+  "version": "1.0.0",
+  "main": "Gruntfile.js",
+  "dependencies": {
+    "grunt-contrib-watch": "^1.1.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://cgs-ets@bitbucket.org/cgs-ets/moodle-local_announcements.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/cgs-ets/moodle-local_announcements#readme"
+}

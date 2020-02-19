@@ -1,0 +1,81 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+    @package   local_announcements
+    @copyright 2020 Michael Vangelovski, Canberra Grammar School <michael.vangelovski@cgs.act.edu.au>
+    @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+{{!
+    @template local_announcements/audience_selector
+
+    View for the audience selector component
+}}
+
+<div class="audience-selector">
+    <div class="view-users"><a class="btn btn-secondary btn-small" href="#" id="action-viewusers"><i class="fa fa-users"></i> Preview recipients</a></div>
+    <div class="tags">
+        <div class="tags-list"></div>
+        <div class="loader"><div class="circle spin"></div></div>
+    </div>
+    <div class="ccgroups-status">
+        <div class="status"></div>
+        <div class="ajax"><span>Checking for additional recipients</span> <span class="loader"><span class="circle spin"></span></span></div>
+    </div>
+    <div class="moderation-status">
+        <div class="status"></div>
+        <div class="description"></div>
+        <div class="ajax"><span>Checking moderation requirements</span> <span class="loader"><span class="circle spin"></span></span></div>
+    </div>
+    <div class="intersection-workspace">
+        <div class="intersection-tags-list"></div>
+        <div class="intersection-buttons">
+            <a href="#" class="intersection-finish-btn btn btn-success">{{#str}} audienceselector:finishintersection, local_announcements {{/str}}</a>
+            <a href="#" class="intersection-cancel-btn btn btn-secondary">{{#str}} audienceselector:cancelintersection, local_announcements {{/str}}</a>
+        </div>
+        <div class="loader"><div class="circle spin"></div></div>
+    </div>
+    <div class="tabs">
+        {{#audiencetypes}}
+            <a href="#" class="audience-tab btn btn-primary{{#intersectable}} contents-intersectable{{/intersectable}}" data-audienceid="{{id}}" data-audiencetype="{{type}}" data-audienceprovider="{{provider}}">{{nameplural}}</a>
+        {{/audiencetypes}}
+    </div>
+    <div class="pages">
+        {{#audiencetypes}}
+            <div id="contents-{{type}}" class="contents{{#filterable}} contents-filterable{{/filterable}}{{#intersectable}} contents-intersectable{{/intersectable}}" data-audiencetype="{{type}}" data-audienceprovider="{{provider}}" data-audiencenamesingular="{{namesingular}}" data-audiencenameplural="{{nameplural}}" data-audiencehasroles="{{#roletypes.0}}true{{/roletypes.0}}{{^roletypes.0}}false{{/roletypes.0}}">
+                <p class="info">{{#str}} audienceselector:audienceitemsinfo, local_announcements, {{nameplural}} {{/str}}</p>
+                {{#filterable}}
+                    <input type="text" class="audience-filter audience-filter-{{type}} form-control" placeholder="{{#str}} audienceselector:filterplaceholder, local_announcements, {{namesingular}} {{/str}}"></input>
+                {{/filterable}}
+                <div class="items"></div>
+                {{#roletypes.0}}
+                    <p class="info">{{#str}} audienceselector:roleitemsinfo, local_announcements {{/str}}</p>
+                    <div class="roles">        
+                        <ul>
+                            {{#roletypes}}
+                                <li class="{{type}}-role"><label><input class="role" type="checkbox" value="{{key}}" data-name="{{name}}" {{#ticked}}checked{{/ticked}}> {{name}}</label></li>
+                            {{/roletypes}}
+                        </ul>
+                    </div>
+                {{/roletypes.0}}
+                <div class="buttons">
+                    <a href="#" class="audience-add-btn btn btn-success">{{#str}} audienceselector:addaudience, local_announcements {{/str}}</a>{{#intersectable}}
+                    <a href="#" class="audience-intersect-btn btn btn-success">{{#str}} audienceselector:createintersection, local_announcements {{/str}}</a>{{/intersectable}}
+                </div>
+            </div>
+        {{/audiencetypes}}
+        <div class="loader"><div class="circle spin"></div></div>
+    </div>
+</div>

@@ -1,0 +1,37 @@
+@import "helpers";
+#page-local-announcements-moderation #region-main {
+	background-color: #f4f6f8;
+}
+#page-local-announcements-moderation.moderation-single #region-main {
+	background-color: #fff;
+    border: 0;
+    padding: 0;
+}
+.local_announcements.lann-moderation {
+	.lann-mod-nav {
+		margin-bottom: 10px;
+	    border-radius: 2px;
+	    overflow: hidden;
+	}
+	.announcement {
+		overflow: visible; // To allow for menu overhang.
+		.actions {
+			opacity: 0;
+			transition: opacity 0.5s ease;
+			position: absolute;
+		    right: 15px;
+		    top: 10px;
+		    &>div {
+		    	float: left;
+		    }
+		}
+		.meta {
+    		.author:before {
+			    content: "👤";
+			    display: inline-block;
+    			padding-right: 6px;
+			}
+		}
+	}
+}
+

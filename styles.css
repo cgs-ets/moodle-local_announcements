@@ -1,0 +1,690 @@
+.comma-list {
+  display: inline;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.comma-list li,
+.comma-list span {
+  display: inline;
+}
+.comma-list li:after,
+.comma-list span:after {
+  content: ", ";
+}
+.comma-list li:last-child:after,
+.comma-list span:last-child:after {
+  content: "" !important;
+}
+.comma-list .intersection span:after {
+  content: " + ";
+}
+.inline-list {
+  display: inline;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.inline-list li {
+  display: inline;
+}
+.inline-list li:after {
+  content: " ";
+}
+.inline-list li:last-child:after {
+  content: "";
+}
+.loader {
+  display: none;
+  float: left;
+  padding: 40px 0 40px;
+  width: 100%;
+}
+.loader .circle {
+  display: block;
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  border-top-color: #595959;
+  border-left-color: #595959;
+  text-indent: -9999px;
+  margin: 0 auto;
+}
+.loading-overlay {
+  display: none;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  -webkit-transition: all 2s ease-out;
+  -moz-transition: all 2s ease-out;
+  -o-transition: all 2s ease-out;
+  transition: all 2s ease-out;
+}
+.loading-overlay .loader {
+  display: block;
+  position: absolute;
+  top: 50%;
+  height: 50px;
+  margin-top: -25px;
+  padding: 0;
+}
+.loading-overlay .loader .circle {
+  border-top-color: #fff;
+  border-left-color: #fff;
+}
+.loading-overlay.active {
+  display: block;
+  opacity: 1;
+}
+.round {
+  border-radius: 50%;
+  overflow: hidden;
+}
+.spin {
+  -webkit-animation: spin 0.6s linear 0s infinite;
+  -moz-animation: spin 0.6s linear 0s infinite;
+  -o-animation: spin 0.6s linear 0s infinite;
+  animation: spin 0.6s linear 0s infinite;
+}
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@-moz-keyframes spin {
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to {
+    -moz-transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.pulse {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 0 #cca92c;
+  animation: pulse 2s infinite;
+}
+.pulse:hover {
+  animation: none;
+}
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(204, 169, 44, 0.4);
+  }
+  70% {
+    -webkit-box-shadow: 0 0 0 10px rgba(204, 169, 44, 0);
+  }
+  100% {
+    -webkit-box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
+  }
+}
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(204, 169, 44, 0.4);
+    box-shadow: 0 0 0 0 rgba(204, 169, 44, 0.4);
+  }
+  70% {
+    -moz-box-shadow: 0 0 0 10px rgba(204, 169, 44, 0);
+    box-shadow: 0 0 0 10px rgba(204, 169, 44, 0);
+  }
+  100% {
+    -moz-box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
+    box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
+  }
+}
+.audience-selector {
+  position: relative;
+}
+.audience-selector .tags {
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+.audience-selector .tags .tags-list {
+  float: left;
+}
+.audience-selector .tags .box-group {
+  position: relative;
+  display: inline-block;
+  margin-right: 32px;
+  margin-bottom: 10px;
+  vertical-align: top;
+}
+.audience-selector .tags .box-group:last-child .box:last-child:after {
+  display: none;
+}
+.audience-selector .tags .box-group .box {
+  display: inline-block;
+  background-color: #deeaff;
+  padding: 9px 18px;
+  width: 280px;
+  margin-bottom: -1px;
+  position: relative;
+  float: left;
+  border: 1px dashed #000;
+}
+.audience-selector .tags .box-group .box:last-child:after {
+  content: "";
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  right: -26px;
+  z-index: 10;
+  top: 10px;
+  background-image: url(pix/i/union.png);
+  background-size: 100%;
+  background-color: #deeaff;
+}
+.audience-selector .tags .box-group .box .subhead {
+  font-size: 85%;
+  display: block;
+  line-height: 1;
+  font-weight: 600;
+  color: #000;
+}
+.audience-selector .tags .box-group .box .audiences {
+  margin-bottom: 8px;
+}
+.audience-selector .tags .box-group .box .remove-tag {
+  color: #66a6d0;
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  line-height: 1;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+}
+.audience-selector .tags .box-group .box .remove-tag .icon {
+  width: 13px;
+  height: 13px;
+}
+.audience-selector .tags .box-group-intersection .box {
+  margin-right: -1px;
+}
+.audience-selector .tags .box-group-intersection .box .remove-tag {
+  display: none;
+}
+.audience-selector .tags .box-group-intersection .box:last-child .remove-tag {
+  display: block;
+}
+.audience-selector .tags .box-group-intersection .box:after {
+  content: "";
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  right: -10px;
+  z-index: 10;
+  top: 10px;
+  background-image: url(pix/i/intersection.png);
+  background-size: 100%;
+}
+.audience-selector .tags .loader {
+  width: 94px;
+  height: 94px;
+  padding: 22px;
+  margin-bottom: 10px;
+}
+.audience-selector .tags .loader.show {
+  display: inline-block;
+}
+.audience-selector .intersection-workspace {
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+.audience-selector .intersection-workspace .intersection-tags-list {
+  display: inline;
+}
+.audience-selector .intersection-workspace .box {
+  display: inline-block;
+  background-color: #bdfcda;
+  padding: 9px 18px;
+  width: 280px;
+  margin-right: -1px;
+  margin-bottom: 10px;
+  position: relative;
+  float: left;
+  border: 1px dashed #000;
+}
+.audience-selector .intersection-workspace .box:last-child {
+  margin-right: 10px;
+}
+.audience-selector .intersection-workspace .box:after {
+  content: "";
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  right: -10px;
+  z-index: 10;
+  top: 10px;
+  background-image: url(pix/i/intersection.png);
+  background-size: 100%;
+  background-color: #bdfcda;
+}
+.audience-selector .intersection-workspace .box:last-child:after {
+  display: none;
+}
+.audience-selector .intersection-workspace .box .subhead {
+  font-size: 85%;
+  display: block;
+  line-height: 1;
+  font-weight: 600;
+  color: #000;
+}
+.audience-selector .intersection-workspace .box .audiences {
+  margin-bottom: 8px;
+}
+.audience-selector .intersection-workspace .intersection-buttons {
+  float: left;
+}
+.audience-selector .intersection-workspace .intersection-buttons .btn {
+  display: none;
+  margin-bottom: 8px;
+}
+.audience-selector .intersection-workspace.has-tags .intersection-buttons .intersection-cancel-btn {
+  display: block;
+}
+.audience-selector .intersection-workspace.has-tags.has-multiple-tags .intersection-buttons .intersection-finish-btn {
+  display: block;
+}
+.audience-selector .intersection-workspace .loader {
+  width: 94px;
+  height: 94px;
+  padding: 22px;
+  margin-bottom: 10px;
+}
+.audience-selector .intersection-workspace .loader.show {
+  display: inline-block;
+}
+.audience-selector .intersection-workspace.warn {
+  border: 1px solid red;
+  padding: 10px 10px 0;
+  display: inline-block;
+}
+.audience-selector .moderation-status,
+.audience-selector .ccgroups-status {
+  overflow: hidden;
+  font-size: 13px;
+  color: #777;
+  font-style: italic;
+  display: none;
+  margin-bottom: 5px;
+}
+.audience-selector .moderation-status .status,
+.audience-selector .ccgroups-status .status {
+  display: none;
+}
+.audience-selector .moderation-status .description,
+.audience-selector .ccgroups-status .description {
+  display: none;
+}
+.audience-selector .moderation-status .description.active,
+.audience-selector .ccgroups-status .description.active {
+  display: inline;
+}
+.audience-selector .moderation-status .ajax,
+.audience-selector .ccgroups-status .ajax {
+  display: none;
+}
+.audience-selector .moderation-status .ajax .loader,
+.audience-selector .ccgroups-status .ajax .loader {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  width: auto;
+  margin-right: 8px;
+}
+.audience-selector .moderation-status .ajax .loader .circle,
+.audience-selector .ccgroups-status .ajax .loader .circle {
+  display: inline-block;
+  height: 19px;
+  width: 19px;
+}
+.audience-selector .moderation-status.visible,
+.audience-selector .ccgroups-status.visible {
+  display: block;
+}
+.audience-selector .moderation-status.loading .ajax,
+.audience-selector .ccgroups-status.loading .ajax {
+  display: block;
+}
+.audience-selector .moderation-status.hasmod .status {
+  display: inline;
+}
+.audience-selector .ccgroups-status.hasccgroups .status {
+  display: inline;
+}
+.audience-selector .tabs {
+  margin-bottom: 15px;
+}
+.audience-selector .tabs a {
+  margin-bottom: 3px;
+}
+.audience-selector .pages {
+  background-color: #f2f4f6;
+  overflow: hidden;
+}
+.audience-selector .pages .contents {
+  display: none;
+  padding: 25px 30px;
+}
+.audience-selector .pages .contents.selected {
+  display: block;
+  border: 1px solid #dee2e6;
+  border-bottom: 0px none;
+}
+.audience-selector .pages .contents.no-items .roles,
+.audience-selector .pages .contents.no-items .audience-add-btn,
+.audience-selector .pages .contents.no-items .info {
+  display: none;
+}
+.audience-selector .pages .contents.contents-filterable .list {
+  columns: 6;
+  column-width: 220px;
+}
+.audience-selector .pages .contents.contents-filterable .list li {
+  display: none;
+}
+.audience-selector .pages .contents.contents-filterable .list li.active,
+.audience-selector .pages .contents.contents-filterable .list li.selected {
+  display: inline-block;
+}
+.audience-selector .pages .contents.contents-filterable .list li.more-items {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.audience-selector .pages .contents .audience-filter {
+  margin-bottom: 15px;
+  max-width: 400px;
+}
+.audience-selector .pages .contents li {
+  line-height: 1.8;
+}
+.audience-selector .pages .contents .items ul.list {
+  list-style: none;
+  padding: 0;
+}
+.audience-selector .pages .contents .items ul.list-type-course.list-gt10 {
+  columns: 3;
+  column-width: 230px;
+}
+.audience-selector .pages .contents .items ul.list-type-group.list-gt10 {
+  columns: 3;
+  column-width: 230px;
+}
+.audience-selector .pages .contents .items ul.group-items {
+  list-style: none;
+  padding-left: 18px;
+}
+.audience-selector .pages .contents .items .caret {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.audience-selector .pages .contents .items .caret::before {
+  content: "";
+  font-family: "FontAwesome";
+  font-size: 1.2rem;
+  margin-right: 6px;
+}
+.audience-selector .pages .contents .items .caret-down::before {
+  content: "";
+}
+.audience-selector .pages .contents .items ul.group-items {
+  display: none;
+}
+.audience-selector .pages .contents .items ul.active {
+  display: block;
+}
+.audience-selector .pages .contents .roles ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+}
+.audience-selector .pages .contents .roles ul.warn {
+  border: 1px solid red;
+  padding: 10px;
+}
+.audience-selector .pages .contents label {
+  margin: 0;
+}
+.audience-selector .pages .contents .info {
+  font-weight: 800;
+  text-transform: lowercase;
+}
+.audience-selector .pages .contents .info:first-letter {
+  text-transform: uppercase;
+}
+.audience-selector .pages .contents .buttons {
+  margin-top: 15px;
+  display: none;
+}
+.audience-selector .pages .contents .buttons.show {
+  display: inline-block;
+}
+.audience-selector .pages.loading .loader {
+  display: block;
+  border: 1px solid #dee2e6;
+  border-bottom: 0px none;
+}
+.audience-selector .pages.loading .contents.selected {
+  display: none;
+}
+.audience-selector .view-users {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 10px;
+  display: none;
+}
+.audience-selector.has-tags .view-users {
+  display: block;
+}
+#fitem_id_audiencesjson {
+  display: none;
+}
+#fitem_id_audiencesjson > div {
+  display: none;
+}
+#fitem_id_audiencesjson.has-danger {
+  display: block;
+  height: 22px;
+  overflow: hidden;
+}
+#fitem_id_audiencesjson.has-danger:before {
+  content: "You must select an audience.";
+  color: red;
+  width: 100%;
+  height: 22px;
+  margin-left: 15px;
+}
+body.path-local-announcements.modal-open {
+  overflow: hidden !important;
+}
+/* Remove after upgrading to Moodle 3.8 as this snippet is in core. Start snip */
+@media (min-width: 992px) {
+  .modal-lg,
+  .modal-xl {
+    max-width: 800px;
+  }
+}
+@media (min-width: 1200px) {
+  .modal-xl {
+    max-width: 1140px;
+  }
+}
+/* End snip */
+#page-local-announcements-view #region-main {
+  border: 0;
+  padding: 0;
+}
+#page-local-announcements-index {
+  /* Modals */
+}
+#page-local-announcements-index #region-main {
+  background-color: #f4f6f8;
+  overflow: visible;
+}
+#page-local-announcements-index .modal .userslist a {
+  display: inline-block;
+  margin-right: 10px;
+}
+.local_announcements .lann-header {
+  margin-bottom: 15px;
+  text-align: right;
+}
+.local_announcements .lann-header > * {
+  display: inline-block;
+  margin-left: 10px;
+}
+.local_announcements .lann-header .auditing-icon {
+  position: relative;
+  color: #000;
+  text-align: center;
+  width: 25px;
+  height: 25px;
+}
+.local_announcements .lann-header .auditing-icon.auditing-is-on {
+  background-color: rgba(204, 169, 44, 0.4);
+}
+.local_announcements .lann-header .auditing-icon .tip {
+  display: none;
+  position: absolute;
+  bottom: 36px;
+  font-size: 12px;
+  width: 187px;
+  margin-left: -81px;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  border-radius: 9px;
+  z-index: 1000;
+  padding: 6px 6px 10px;
+  line-height: 1.4;
+}
+.local_announcements .lann-header .auditing-icon .tip:after {
+  content: " ";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+.local_announcements .lann-header .auditing-icon:hover .tip {
+  display: block;
+}
+.local_announcements .lann-header .dropdown-menu {
+  text-align: right;
+}
+.local_announcements .lann-list .announcement {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #fff;
+  color: #000;
+  position: relative;
+  box-shadow: 2px 2px 2px 0px #e4e6e8;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+.local_announcements .lann-list .announcement.unavailable,
+.local_announcements .lann-list .announcement.modpending {
+  background-color: #f8dec4;
+}
+.local_announcements .lann-list .announcement.modrejected {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+.local_announcements .lann-list .announcement .actions {
+  opacity: 0;
+  float: right;
+  font-size: 13px;
+  transition: opacity 0.5s ease;
+}
+.local_announcements .lann-list .announcement .actions .inline-list li {
+  display: inline-block;
+  margin-left: 8px;
+}
+.local_announcements .lann-list .announcement .subject {
+  font-weight: 700;
+  font-size: 16px;
+  padding: 6px 11px;
+}
+.local_announcements .lann-list .announcement .meta {
+  clear: both;
+  font-size: 13px;
+  color: #000;
+}
+.local_announcements .lann-list .announcement .availability,
+.local_announcements .lann-list .announcement .moderationstatus {
+  font-style: italic;
+}
+.local_announcements .lann-list .announcement .message {
+  padding: 15px 0;
+}
+.local_announcements .lann-list .announcement .message p:last-of-type {
+  margin-bottom: 0;
+}
+.local_announcements .lann-list .announcement .userphoto {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  float: left;
+  margin-right: 10px;
+}
+.local_announcements .lann-list .announcement.removing {
+  background-color: #F8DEC4;
+}
+.local_announcements .lann-list .announcement .modcomment {
+  background: #fff3cd;
+  border: 1px solid #f5c6cb;
+  padding: 7px 18px 7px 10px;
+  display: inline-block;
+  border-radius: 5px;
+  font-size: 13px;
+}
+.local_announcements .lann-list .announcement .modcomment .userphoto img {
+  height: 30px;
+  width: 30px;
+}
+.local_announcements a.next {
+  display: none;
+}
+.local_announcements .loader {
+  width: 100%;
+  height: 94px;
+  padding: 22px;
+  margin-bottom: 10px;
+}
+.local_announcements.preloads-completed .lann-list .announcement .actions {
+  opacity: 1;
+}
+#page-local-announcements-preferences table.table.table-hover.preference-table {
+  width: auto;
+}
+.search-results .result-local_announcements .result-courseurl {
+  display: none;
+}

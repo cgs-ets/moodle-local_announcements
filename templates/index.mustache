@@ -1,0 +1,83 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+    @package   local_announcements
+    @copyright 2020 Michael Vangelovski, Canberra Grammar School <michael.vangelovski@cgs.act.edu.au>
+    @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+{{!
+    @template local_announcements/content
+
+    Announcements content template.
+}}
+
+<div class="local_announcements">
+    <div class="lann-header">
+        {{#viewastitle}}<strong>{{{viewastitle}}}</strong>{{/viewastitle}}
+        {{#canaudit}}
+            {{#auditingon}}
+                <a class="auditing-icon auditing-is-on pulse" href="{{config.wwwroot}}/local/announcements/index.php?audit=off">
+                    {{#str}}list:auditingonicon, local_announcements{{/str}}
+                    <span class="tip">{{#str}}list:auditingontitle, local_announcements{{/str}}</span>
+                </a>
+            {{/auditingon}}
+        {{/canaudit}}
+        {{#canpost}}
+        <a id="btn-newannouncement" class="btn btn-primary" href="{{config.wwwroot}}/local/announcements/post.php">{{# str }} list:addanewannouncement, local_announcements {{/ str }}</a>
+        {{/canpost}}
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="actions-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options</button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actions-dropdown">
+                {{#canaudit}}
+                    {{#auditingon}}
+                        <a id="btn-audit" class="dropdown-item option-audit" href="{{config.wwwroot}}/local/announcements/index.php?audit=off">{{# str }} list:auditingofficon, local_announcements {{/ str }} {{# str }} list:turnauditoff, local_announcements {{/ str }}</a>
+                    {{/auditingon}}
+                    {{^auditingon}}
+                        <a id="btn-audit" class="dropdown-item option-audit" href="{{config.wwwroot}}/local/announcements/index.php?audit=on">{{# str }} list:auditingonicon, local_announcements {{/ str }} {{# str }} list:turnauditon, local_announcements {{/ str }}</a>
+                    {{/auditingon}}
+                    {{#viewason}}
+                        <a id="btn-audit" class="dropdown-item option-exitviewas" href="{{config.wwwroot}}/local/announcements/index.php">{{# str }} list:exitviewas, local_announcements {{/ str }}</a>
+                    {{/viewason}}
+                    {{^viewason}}
+                        <a id="btn-audit" class="dropdown-item option-viewas" href="#">{{# str }} list:viewas, local_announcements {{/ str }}</a>
+                    {{/viewason}}
+                {{/canaudit}}
+                {{#canmoderate}}
+                    <a id="btn-moderation" class="dropdown-item option-moderate" href="{{config.wwwroot}}/local/announcements/moderation.php">{{# str }} list:moderation, local_announcements {{/ str }}</a>
+                {{/canmoderate}}
+                <a id="btn-preferences" class="dropdown-item option-preferences" href="{{config.wwwroot}}/local/announcements/preferences.php">{{# str }} list:preferences, local_announcements {{/ str }}</a>
+            </div>
+        </div>
+    </div>
+    <div class="lann-list">
+    {{#list}}
+        {{#announcements}}
+            {{>local_announcements/announcement}}
+        {{/announcements}}
+        {{^announcements.0}}{{#str}} list:noannouncements, local_announcements {{/str}}{{/announcements.0}}
+    {{/list}}
+    </div>
+    {{#list}}
+        {{#possiblemore}}
+            {{{nextpagelink}}}
+            <div class="page-load-status">
+                <div class="infinite-scroll-request loader">
+                    <div class="circle spin"></div>
+                </div>
+            </div>
+        {{/possiblemore}}
+    {{/list}}
+</div>

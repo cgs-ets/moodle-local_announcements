@@ -1,0 +1,411 @@
+.audience-selector {
+	position: relative;
+	.tags {
+		margin-bottom: 5px;
+		overflow: hidden;
+		.tags-list {
+    		float: left;
+		}
+		.box-group {
+			position: relative;
+			display: inline-block;
+			margin-right: 32px;
+			margin-bottom: 10px;
+			vertical-align: top;
+			&:last-child {
+				.box:last-child:after {
+					display: none;
+				}
+			}
+			.box {
+			    display: inline-block;
+			    background-color: #deeaff;
+			    padding: 9px 18px;
+			    width: 280px;
+	    		margin-bottom: -1px;
+			    position: relative;
+			    float: left;
+			    border: 1px dashed #000;
+			    &:last-child:after {
+				    content: "";
+				    height: 20px;
+				    width: 20px;
+				    position: absolute;
+				    right: -26px;
+				    z-index: 10;
+				    top: 10px;
+				    background-image: url(pix/i/union.png);
+	    			background-size: 100%;
+				    background-color: #deeaff;
+				}
+			    .subhead {
+				    font-size: 85%;
+				    display: block;
+				    line-height: 1;
+				    font-weight: 600;
+				    color: #000;
+
+				}
+				.audiences {
+					margin-bottom: 8px;
+				}
+				.remove-tag {
+					color: #66a6d0;
+					position: absolute;
+				    top: 4px;
+	    			right: 3px;
+				    line-height: 1;
+				    width: 20px;
+	    			height: 20px;
+	    			text-align: center;
+					.icon {
+	    				width: 13px;
+	    				height: 13px;
+					}
+				}
+			}
+		}
+		.box-group-intersection {
+			.box { 
+				margin-right: -1px;
+	    		.remove-tag {
+	    			display: none;
+	    		}
+				&:last-child {
+		    		.remove-tag {
+		    			display: block;
+		    		}
+				}
+				&:after {
+				    content: "";
+				    height: 20px;
+				    width: 20px;
+				    position: absolute;
+				    right: -10px;
+				    z-index: 10;
+				    top: 10px;
+					background-image: url(pix/i/intersection.png);
+	    			background-size: 100%;
+				}
+			}
+		}
+		.loader {
+		    width: 94px;
+    		height: 94px;
+    		padding: 22px;
+    		margin-bottom: 10px;
+		    &.show {
+				display: inline-block;
+		    }
+		}
+	}
+	.intersection-workspace {
+		margin-bottom: 5px;
+		overflow: hidden;
+		.intersection-tags-list {
+			display: inline;
+		}
+		.box {
+		    display: inline-block;
+		    background-color: #bdfcda;
+		    padding: 9px 18px;
+		    width: 280px;
+		    margin-right: -1px;
+    		margin-bottom: 10px;
+		    position: relative;
+		    float: left;
+		    border: 1px dashed #000;
+		    &:last-child {
+			    margin-right: 10px;
+			}
+			&:after {
+			    content: "";
+			    height: 20px;
+			    width: 20px;
+			    position: absolute;
+			    right: -10px;
+			    z-index: 10;
+			    top: 10px;
+			    background-image: url(pix/i/intersection.png);
+    			background-size: 100%;
+    			background-color: #bdfcda;
+			}
+			&:last-child:after {
+				display: none;
+			}
+		    .subhead {
+			    font-size: 85%;
+			    display: block;
+			    line-height: 1;
+			    font-weight: 600;
+			    color: #000;
+
+			}
+			.audiences {
+				margin-bottom: 8px;
+			}
+		}
+		.intersection-buttons {
+			float: left;
+			.btn {
+				display: none;
+				margin-bottom: 8px;
+			}
+		}
+		&.has-tags {
+			.intersection-buttons {
+				.intersection-cancel-btn {
+					display: block;
+				}
+			}
+			&.has-multiple-tags {
+				.intersection-buttons {
+					.intersection-finish-btn {
+						display: block;
+					}
+				}
+			}
+		}
+		.loader {
+		    width: 94px;
+    		height: 94px;
+    		padding: 22px;
+    		margin-bottom: 10px;
+		    &.show {
+				display: inline-block;
+		    }
+		}
+		&.warn {
+		    border: 1px solid red;
+		    padding: 10px 10px 0;
+		    display: inline-block;
+		}
+	}
+	.moderation-status, .ccgroups-status {
+		overflow: hidden;
+	    font-size: 13px;
+	    color: #777;
+	    font-style: italic;
+	    display: none;
+	    margin-bottom: 5px;
+	    .status {
+	    	display: none;
+	    }
+	    .description {
+	    	display: none;
+	    	&.active {
+	    		display: inline;
+	    	}
+	    }
+	    .ajax {
+	    	display: none;
+	    	.loader {
+				margin: 0;
+			    padding: 0;
+			    display: inline-block;
+			    width: auto;
+			    margin-right: 8px;
+			    .circle {
+			    	display: inline-block;
+				    height: 19px;
+				    width: 19px;
+			    }
+			}
+	    }
+	    &.visible {
+	    	display: block;
+	    }
+	    &.loading {
+	    	.ajax {
+		    	display: block;
+		    }
+	    }
+	}
+	.moderation-status.hasmod .status {
+	    display: inline;
+	}
+	.ccgroups-status.hasccgroups .status {
+    	display: inline;
+	}
+	.tabs {
+		margin-bottom: 15px;
+		a {
+		    margin-bottom: 3px;
+		}
+	}
+	.pages {
+	    background-color: #f2f4f6;
+    	overflow: hidden;
+		.contents {
+		    display: none;
+		    padding: 25px 30px;
+		    &.selected {
+		    	display: block;
+		    	border: 1px solid #dee2e6;
+    			border-bottom: 0px none;
+		    }
+		    &.no-items {
+		    	.roles, .audience-add-btn, .info {
+		    		display: none;
+		    	}
+		    }
+		    &.contents-filterable {
+		    	.list {
+		    		columns: 6;
+    				column-width: 220px;
+    				li {
+    					// initially hidden until search match
+    					display: none;
+    					&.active, &.selected {
+	    					display: inline-block;
+	    				}
+    				}
+			    	li.more-items {
+					    font-size: 13px;
+					    line-height: 1.4;
+					}
+				}
+		    }
+		    .audience-filter {
+		    	margin-bottom: 15px;
+		    	max-width: 400px;
+		    }
+		    li {
+    			line-height: 1.8;
+		    }
+		    .items {
+			    ul.list {
+		    		list-style: none;
+		    		padding: 0;
+		    	}
+		    	ul.list-type-course.list-gt10 {
+    				columns: 3;
+    				column-width: 230px;
+
+		    	}
+		    	ul.list-type-group.list-gt10 {
+    				columns: 3;
+    				column-width: 230px;
+
+		    	}
+		    	ul.group-items {
+		    		list-style: none;
+		    		padding-left: 18px;
+		    	}
+		    	.caret {
+					cursor: pointer;
+					-webkit-user-select: none;
+					-moz-user-select: none;
+					-ms-user-select: none;
+					user-select: none;
+				}
+				.caret::before {
+					content: "";
+					font-family: "FontAwesome";
+					font-size: 1.2rem;
+					margin-right: 6px;
+					//width: 10px;
+    				//display: inline-block;
+				}
+				.caret-down::before {
+					content: "";
+				}
+		    	ul.group-items {
+				  display: none;
+				}
+				ul.active {
+				  display: block;
+				}
+		    }
+		    .roles {
+		    	ul {
+	    			list-style: none;
+				    padding: 0;
+				    margin: 0;
+				    display: inline-block;
+				    &.warn {
+				    	border: 1px solid red;
+				    	padding: 10px;
+				    }
+	    		}
+		    }
+	    	label {
+	    		margin: 0;
+	    	}
+			.info {
+				font-weight: 800;
+				text-transform: lowercase;
+				&:first-letter {
+					text-transform: uppercase;
+				}
+		    }
+		    .buttons {
+		    	margin-top: 15px;
+			   	display: none;
+		    	&.show {
+		    		display: inline-block;
+		    	}
+		    }
+		}
+		&.loading {
+			.loader {
+				display: block;
+				border: 1px solid #dee2e6;
+    			border-bottom: 0px none;
+			}
+			.contents.selected {
+		    	display: none;
+		    }
+		}
+	}
+	.view-users {
+	    font-size: 13px;
+	    color: #777;
+	    //margin-bottom: 5px;
+	    //position: absolute;
+	    //right: 10px;
+	    //top: 0;
+	    margin-bottom: 10px;
+	    display: none;
+	}
+	&.has-tags {
+		.view-users {
+			display: block;
+		}
+	}
+}
+// The audiencesjson field is a text field hidden by css rather than a hidden field so that we can attach validation to it. 
+#fitem_id_audiencesjson {
+    display: none;
+}
+#fitem_id_audiencesjson>div{
+    display: none;
+}
+#fitem_id_audiencesjson.has-danger {
+    display: block;
+    height: 22px;
+    overflow: hidden;
+}
+#fitem_id_audiencesjson.has-danger:before {
+    content: "You must select an audience.";
+    color: red;
+    width: 100%;
+    height: 22px;
+    margin-left: 15px;
+}
+body.path-local-announcements.modal-open {
+    overflow: hidden !important;
+}
+
+/* Remove after upgrading to Moodle 3.8 as this snippet is in core. Start snip */
+@media (min-width: 992px) {
+	.modal-lg, .modal-xl {
+	    max-width: 800px;
+	}
+}
+@media (min-width: 1200px) {
+	.modal-xl {
+	    max-width: 1140px;
+	}
+}
+/* End snip */
