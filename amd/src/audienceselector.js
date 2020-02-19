@@ -794,7 +794,7 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
         var self = this;
         // Check moderation status.
         self.checkModerationStatus();
-        //self.checkCCGroups();
+        self.checkCCGroups();
 
         var tags = new Array();
         var audiencesJSON = $('input[name="audiencesjson"]');
@@ -857,9 +857,6 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
      */
     AudienceSelector.prototype.checkCCGroups = function () {
 
-        // Disable this feature for now.
-        return;
-
         var ccgroupsroot = $('.ccgroups-status');
         var ccgroupsstatus = $('.ccgroups-status .status');
         ccgroupsroot.removeClass('visible hasccgroups');
@@ -869,7 +866,8 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
             return;
         }
 
-        ccgroupsroot.addClass('visible loading');
+        // Hide this for from user for now. Leave in html for debugging.
+        //ccgroupsroot.addClass('visible loading');
         Ajax.call([{
             methodname: 'local_announcements_get_ccgroups_for_audiences',
             args: { audiencesjson: tagsjson },
