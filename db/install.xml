@@ -200,7 +200,7 @@
         <FIELD NAME="role" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="*" SEQUENCE="false"/>
         <FIELD NAME="forcesend" TYPE="char" LENGTH="1" NOTNULL="true" DEFAULT="*" SEQUENCE="false"/>
         <FIELD NAME="description" TYPE="char" LENGTH="500" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="ccgroupid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="ccgroupid" TYPE="char" LENGTH="200" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

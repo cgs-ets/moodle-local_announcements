@@ -121,7 +121,7 @@ Some users need to be CC'd into audiences they are not directly enrolled or invo
  - role → the audience roles this cc group applies to. E.g. Students. Default is "*" meaning apply to all.
  - forcesend → whether this privilege applies to immediate or digest announcements. Default is "*" meaning apply to all.
  - description → human readable description of the privilege.
- - ccgroupid → the id of the group to include in the announcement recipients.
+ - ccgroupid → the id of the group to include in the announcement recipients. Comma-separated for multiple.
 
 ### Capabilities
 -   local/announcements:post → Given to editing teachers, managers, and coursecreators by default in their courses.

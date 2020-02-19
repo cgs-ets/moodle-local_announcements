@@ -559,10 +559,6 @@ class announcement extends persistent {
         }
 
         $tags = json_decode($audiencesjson);
-        //if (!static::is_audiences_valid($tags)) {
-        //    return array();
-        //}
-
         $postusers = array();
         $postsusersaudiences = array();
         foreach ($tags as $tag) {
@@ -613,11 +609,15 @@ class announcement extends persistent {
                            AND (? LIKE code OR code = '*')";
                     $code = $providers[$audience->audienceprovider]::true_code($item->code);
                     $params = array($audience->audiencetype, $code);
-                    $ccgroups = $DB->get_records_sql($sql, $params);
-                    foreach ($ccgroups as $ccgroup) {
-                        // Use the mdl group provider to get the group users.
-                        $usernames = $mdlgroup::get_audience_usernames($ccgroup->ccgroupid, null, $mdlgroup::ROLES);
-                        $additionalusers = array_merge($additionalusers, $usernames);
+                    $ccgrouprows = $DB->get_records_sql($sql, $params);
+                    foreach ($ccgrouprows as $ccgrouprow) {
+                        // This column allows for multiple groups in csv.
+                        $groupids = explode(',', $ccgrouprow->ccgroupid);
+                        foreach ($groupids as $groupid) {
+                            // Use the mdl group provider to get the group users.
+                            $usernames = $mdlgroup::get_audience_usernames($groupid, null, $mdlgroup::ROLES);
+                            $additionalusers = array_merge($additionalusers, $usernames);
+                        }
                     }
                 }
             }
@@ -635,7 +635,7 @@ class announcement extends persistent {
     * @param array $tags. Audiences.
     * @return array. Matching CC groups and users.
     */
-    public static function get_audience_ccgroups($tags) {
+    public static function get_audience_ccgroup_descriptions($tags) {
         global $DB;
 
         $ccgroups = array();

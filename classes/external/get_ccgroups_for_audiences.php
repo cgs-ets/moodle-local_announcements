@@ -64,7 +64,7 @@ trait get_ccgroups_for_audiences {
         if (!announcement::is_audiences_valid($tags)) {
             return array();
         }
-        return announcement::get_audience_ccgroups($tags);
+        return announcement::get_audience_ccgroup_descriptions($tags);
     }
 
     /**

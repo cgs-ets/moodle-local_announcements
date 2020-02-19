@@ -48,7 +48,7 @@ function xmldb_local_announcements_upgrade($oldversion) {
         $role = new xmldb_field('role', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, '*', null, 'code');
         $forcesend = new xmldb_field('forcesend', XMLDB_TYPE_CHAR, '1', null, XMLDB_NOTNULL, '*', null, null, 'role');
         $description = new xmldb_field('description', XMLDB_TYPE_CHAR, '500', null, XMLDB_NOTNULL, null, null, null, 'forcesend');
-        $ccgroupid = new xmldb_field('ccgroupid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, 'description');
+        $ccgroupid = new xmldb_field('ccgroupid', XMLDB_TYPE_CHAR, '200', null, XMLDB_NOTNULL, null, null, null, 'description');
         $primarykey = new xmldb_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
 
         $table = new xmldb_table('ann_audience_ccgroups');
