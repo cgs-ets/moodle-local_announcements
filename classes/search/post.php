@@ -51,6 +51,7 @@ class post extends \core_search\base {
         $sql = "SELECT DISTINCT p.* 
                 FROM {ann_posts} p
                 WHERE p.deleted = 0  
+                AND p.savecomplete = 1
                 AND (
                     (p.timestart <= ? AND p.timeend > ?) OR
                     (p.timestart <= ? AND p.timeend = 0) OR

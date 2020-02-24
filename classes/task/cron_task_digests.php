@@ -108,9 +108,6 @@ class cron_task_digests extends \core\task\scheduled_task {
         $this->log_start("Filling user posts cache", 1);
         $this->fill_userposts_cache();
         $this->log_finish("Done", 1);
-        $this->log_start("Filling user preferences cache", 1);
-        $this->fill_userpreferences_cache();
-        $this->log_finish("Done", 1);
         $this->log_finish("All caches filled");
         $this->log_start("Queueing user tasks.");
         $this->queue_user_tasks();
@@ -148,28 +145,6 @@ class cron_task_digests extends \core\task\scheduled_task {
                 $this->userposts[$userid][] = $postid;
             }
         }
-    }
-
-    /**
-     * Fill the cache of user digest preferences.
-     */
-    protected function fill_userpreferences_cache() {
-        /*global $DB;
-
-        if (empty($this->users)) {
-            return;
-        }
-        // Get the list of forum subscriptions for per-user per-forum maildigest settings.
-        list($in, $params) = $DB->get_in_or_equal(array_keys($this->users));
-        $digestspreferences = $DB->get_recordset_select(
-                'forum_digests', "userid $in", $params, '', 'id, userid, forum, maildigest');
-        foreach ($digestspreferences as $digestpreference) {
-            if (!isset($this->digestusers[$digestpreference->forum])) {
-                $this->digestusers[$digestpreference->forum] = [];
-            }
-            $this->digestusers[$digestpreference->forum][$digestpreference->userid] = $digestpreference->maildigest;
-        }
-        $digestspreferences->close();*/
     }
 
     /**

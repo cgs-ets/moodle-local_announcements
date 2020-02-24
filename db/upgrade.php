@@ -68,6 +68,15 @@ function xmldb_local_announcements_upgrade($oldversion) {
 
     }
 
+    if ($oldversion < 2020022500) {
+        $table = new xmldb_table('ann_posts');
+        $savecomplete = new xmldb_field('savecomplete', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, 0, null, 'timemodified');
+
+        if (!$dbman->field_exists($table, $savecomplete)) {
+            $dbman->add_field($table, $savecomplete);
+        }
+    }
+
     return true;
 
 }

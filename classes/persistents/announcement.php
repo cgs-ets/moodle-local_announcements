@@ -116,6 +116,10 @@ class announcement extends persistent {
                 'type' => PARAM_INT,
                 'default' => 0,
             ],
+            "savecomplete" => [
+                'type' => PARAM_BOOL,
+                'default' => 0,
+            ],
         ];
     }
 
@@ -824,6 +828,9 @@ class announcement extends persistent {
         // No moderation set initially. Moderation requirements processed below.
         $announcement->set('modrequired', ANN_MOD_REQUIRED_NO);
         $announcement->set('modstatus', ANN_MOD_STATUS_PENDING);
+        // Set savecomplete flag to false until all audiences and users are saved so 
+        // that the plugin does not attempt to mail the plugin until everything is saved.
+        $announcement->set('savecomplete', 0);
 
         // Update the persistent with the added details.
         $announcement->save();
@@ -861,6 +868,11 @@ class announcement extends persistent {
 
         // Save the audiences.
         static::save_audiences($id, $tags);
+
+        // Finally, set savecomplete to true, indicating that all aspects of the 
+        // announcement have been fully saved.
+        $announcement->set('savecomplete', 1);
+        $announcement->update();
 
         return $id;
     }
@@ -1363,6 +1375,7 @@ class announcement extends persistent {
         $sql = "SELECT p.*
         FROM {ann_posts} p
         WHERE p.mailed = :mailed
+        AND p.savecomplete = 1
         AND ((p.timestart <= :now1 AND p.timeend > :now2) OR
              (p.timestart <= :now3 AND p.timeend = 0) OR
              (p.timestart = 0  AND p.timeend > :now4) OR
@@ -1406,6 +1419,7 @@ class announcement extends persistent {
         $sql = "SELECT p.*
         FROM {ann_posts} p
         WHERE p.notified = :notified
+        AND p.savecomplete = 1
         AND ((p.timestart <= :now1 AND p.timeend > :now2) OR
              (p.timestart <= :now3 AND p.timeend = 0) OR
              (p.timestart = 0  AND p.timeend > :now4) OR
