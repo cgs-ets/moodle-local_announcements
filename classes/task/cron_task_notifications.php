@@ -176,11 +176,11 @@ class cron_task_notifications extends \core\task\scheduled_task {
 
             if (!empty($notificationposts)) {
                 $usercounts['notifications'] += count($notificationposts);
-                //$task = new \local_announcements\task\send_user_notifications();
-                //$task->set_userid($user->id);
-                //$task->set_custom_data($notificationposts);
-                //$task->set_component('local_announcements');
-                //\core\task\manager::queue_adhoc_task($task);
+                $task = new \local_announcements\task\send_user_notifications();
+                $task->set_userid($user->id);
+                $task->set_custom_data($notificationposts);
+                $task->set_component('local_announcements');
+                \core\task\manager::queue_adhoc_task($task);
                 $send = true;
             }
 
