@@ -90,11 +90,11 @@ class cron_task_notifications extends \core\task\scheduled_task {
             $this->log_finish("No unsent announcements found.", 1);
             return false;
         }
-        $this->log_finish("Done");
 
         foreach ($posts as $id => $post) {
             $this->posts[$id] = $post;
         }
+        $this->log_finish("Found the following announcements: " . implode(', ', array_keys($posts)));
 
         // Please note, this order is intentional.
         $this->log_start("Filling caches");
@@ -104,9 +104,6 @@ class cron_task_notifications extends \core\task\scheduled_task {
         $this->log_finish("Done", 1);
         $this->log_start("Filling user posts cache", 1);
         $this->fill_userposts_cache();
-        $this->log_finish("Done", 1);
-        $this->log_start("Filling user preferences cache", 1);
-        $this->fill_userpreferences_cache();
         $this->log_finish("Done", 1);
         $this->log_finish("All caches filled");
         $this->log_start("Queueing user tasks.");
@@ -148,28 +145,6 @@ class cron_task_notifications extends \core\task\scheduled_task {
     }
 
     /**
-     * Fill the cache of user digest preferences.
-     */
-    protected function fill_userpreferences_cache() {
-        /*global $DB;
-
-        if (empty($this->users)) {
-            return;
-        }
-        // Get the list of forum subscriptions for per-user per-forum maildigest settings.
-        list($in, $params) = $DB->get_in_or_equal(array_keys($this->users));
-        $digestspreferences = $DB->get_recordset_select(
-                'forum_digests', "userid $in", $params, '', 'id, userid, forum, maildigest');
-        foreach ($digestspreferences as $digestpreference) {
-            if (!isset($this->digestusers[$digestpreference->forum])) {
-                $this->digestusers[$digestpreference->forum] = [];
-            }
-            $this->digestusers[$digestpreference->forum][$digestpreference->userid] = $digestpreference->maildigest;
-        }
-        $digestspreferences->close();*/
-    }
-
-    /**
      * Queue the user tasks.
      */
     protected function queue_user_tasks() {
@@ -201,11 +176,11 @@ class cron_task_notifications extends \core\task\scheduled_task {
 
             if (!empty($notificationposts)) {
                 $usercounts['notifications'] += count($notificationposts);
-                $task = new \local_announcements\task\send_user_notifications();
-                $task->set_userid($user->id);
-                $task->set_custom_data($notificationposts);
-                $task->set_component('local_announcements');
-                \core\task\manager::queue_adhoc_task($task);
+                //$task = new \local_announcements\task\send_user_notifications();
+                //$task->set_userid($user->id);
+                //$task->set_custom_data($notificationposts);
+                //$task->set_component('local_announcements');
+                //\core\task\manager::queue_adhoc_task($task);
                 $send = true;
             }
 

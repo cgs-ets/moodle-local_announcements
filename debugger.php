@@ -57,11 +57,20 @@ $output = '';
 $output .= $OUTPUT->header();
 
 
+
+
+
+$t = announcement::get_unsent();
+echo "<pre>"; var_export($t); exit;
+
+
+/*
 echo "<pre>";
 $api = new local_announcements\external\api;
 $mod = $api->get_moderation_for_audiences('[{"type":"union","uid":1581982541563,"audiences":[{"audienceprovider":"mdlcourse","audiencetype":"community","audiencenamesingular":"Community","audiencenameplural":"Communities","selecteditems":[{"code":"Community","name":"CGS Community"}],"selectedroles":[{"code":"Students","name":"Participants"},{"code":"Mentors","name":"Parents"},{"code":"Staff","name":"Leaders"}]}]}]');
 var_export($mod);
 exit;
+*/
 
 /*
 echo "<pre>";
