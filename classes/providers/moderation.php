@@ -172,15 +172,12 @@ class moderation {
                 // Get the relevant announcement.
                 $announcement = new announcement($postid);
 
-                // If the announcement has been edited since this mod record, do not continue.
-                if ($announcement->get('timemodified') > $moderation->timecreated) {
-                    return false;
-                }
                 // Update record in ann_posts_moderation.
                 $moderation->actionedusername = $USER->username;
                 $moderation->status = ANN_MOD_STATUS_APPROVED;
                 $moderation->timemoderated = time();
                 $DB->update_record(static::TABLE_POSTS_MODERATION, $moderation);
+                
                 // Update announcement moderation details.
                 $announcement->set('modstatus', ANN_MOD_STATUS_APPROVED);
                 $announcement->update();
@@ -260,7 +257,6 @@ class moderation {
         // Save moderation to database.
         if ($modsettings['required']) {
             // Update announcement moderation details.
-            
             $announcement->set('modrequired', ANN_MOD_REQUIRED_YES);
             $announcement->set('modstatus', ANN_MOD_STATUS_PENDING);
 
