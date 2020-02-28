@@ -620,7 +620,9 @@ class announcement extends persistent {
                         foreach ($groupids as $groupid) {
                             // Use the mdl group provider to get the group users.
                             $usernames = $mdlgroup::get_audience_usernames($groupid, null, $mdlgroup::ROLES);
-                            $additionalusers = array_merge($additionalusers, $usernames);
+                            if (!empty($usernames)) {
+                                $additionalusers = array_merge($additionalusers, $usernames);
+                            }
                         }
                     }
                 }
