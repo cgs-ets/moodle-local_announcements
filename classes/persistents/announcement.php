@@ -873,8 +873,9 @@ class announcement extends persistent {
 
         // Finally, set savecomplete to true, indicating that all aspects of the 
         // announcement have been fully saved.
-        $announcement->set('savecomplete', 1);
-        $announcement->update();
+        // Update single field rather than using the persistent as the announcement
+        // data could have been altered for moderation requirements.
+        $DB->set_field('ann_posts', 'savecomplete', 1, array('id' => $id));
 
         return $id;
     }
