@@ -193,7 +193,7 @@ class announcement_exporter extends persistent_exporter {
         $authorurl = new \moodle_url('/user/profile.php', array('id' => $author->id));
         $authorphototokenised = $OUTPUT->user_picture($author, array('size' => 35, 'includetoken' => true));
 
-	    $readabletime = date('j M Y, H:ia', $this->data->timecreated);
+	    $readabletime = date('j M Y, H:ia', $this->data->timemodified);
 
 	    $formattedattachments = $this->export_attachments($output);
 
