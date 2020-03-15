@@ -120,6 +120,10 @@ class announcement extends persistent {
                 'type' => PARAM_BOOL,
                 'default' => 0,
             ],
+            "timeedited" => [
+                'type' => PARAM_INT,
+                'default' => 0,
+            ],
         ];
     }
 
@@ -817,6 +821,7 @@ class announcement extends persistent {
         }
 
         // Set/update the data.
+        $announcement->set('timeedited', time());
         $announcement->set('subject', $data->subject);
         $announcement->set('message', '');
         $announcement->set('messageformat', $data->messageformat);

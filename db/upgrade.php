@@ -77,6 +77,15 @@ function xmldb_local_announcements_upgrade($oldversion) {
         }
     }
 
+    if ($oldversion < 2020031600) {
+        $table = new xmldb_table('ann_posts');
+        $timeedited = new xmldb_field('timeedited', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0, null, 'timecreated');
+
+        if (!$dbman->field_exists($table, $timeedited)) {
+            $dbman->add_field($table, $timeedited);
+        }
+    }
+
     return true;
 
 }
