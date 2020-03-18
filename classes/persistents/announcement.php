@@ -1314,7 +1314,7 @@ class announcement extends persistent {
                         OR code LIKE '%mdlgroup%'
                        AND postid = ?";
             $params = array($postid);
-            $rs = $DB->get_records_sql($sql, $params);
+            $rs = $DB->get_recordset_sql($sql, $params);
             foreach ($rs as $r) {
                 $provider = $r->provider;
                 $code = $r->code;
