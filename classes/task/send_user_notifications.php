@@ -108,7 +108,7 @@ class send_user_notifications extends \core\task\adhoc_task {
             ]);
             $this->posts[] = $exporter->export($OUTPUT);
         }
-        $this->log("Announcement data exported and ready for sending: " . implode(',', array_column($announcements, 'id')), 1);
+        $this->log("Announcement data exported and ready for sending: " . implode(',', array_column($this->posts, 'id')), 1);
 
         if (empty($this->posts)) {
             // All posts have been removed since the task was queued.
