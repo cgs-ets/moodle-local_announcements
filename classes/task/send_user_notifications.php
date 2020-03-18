@@ -65,6 +65,7 @@ class send_user_notifications extends \core\task\adhoc_task {
         $this->log("Recipient is {$this->recipient->username} ({$this->recipient->id})", 1);
 
         $data = $this->get_custom_data();
+        $this->log("Custom data is " . json_encode($data), 1);
 
         $this->prepare_data((array) $data);
 
@@ -97,6 +98,7 @@ class send_user_notifications extends \core\task\adhoc_task {
         }
 
         $announcements = announcement::get_by_ids_and_username($postids, $this->recipient->username);
+        $this->log("Announcement data retrieved for: " . implode(',', array_keys($announcements)), 1);
         
         $context = \context_system::instance();
         foreach ($announcements as $announcement) {
@@ -106,6 +108,7 @@ class send_user_notifications extends \core\task\adhoc_task {
             ]);
             $this->posts[] = $exporter->export($OUTPUT);
         }
+        $this->log("Announcement data exported and ready for sending: " . implode(',', array_column($announcements, 'id')), 1);
 
         if (empty($this->posts)) {
             // All posts have been removed since the task was queued.
