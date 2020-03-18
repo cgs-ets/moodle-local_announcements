@@ -50,6 +50,7 @@ class send_user_notifications extends \core\task\adhoc_task {
      * Send out messages.
      */
     public function execute() {
+        $this->log_start("Sending notifications to " . $this->get_userid());
 
         // Raise the time limit.
         \core_php_time_limit::raise(120);
@@ -61,8 +62,7 @@ class send_user_notifications extends \core\task\adhoc_task {
 
         $this->recipient = \core_user::get_user($this->get_userid());
         $this->minimise_recipient_record();
-
-        $this->log_start("Sending notifications to {$this->recipient->username} ({$this->recipient->id})");
+        $this->log("Recipient is {$this->recipient->username} ({$this->recipient->id})", 1);
 
         $data = $this->get_custom_data();
 
