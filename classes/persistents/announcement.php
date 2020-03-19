@@ -779,7 +779,7 @@ class announcement extends persistent {
         // If audiences are empty, then the user is an additional cc.
         // Get all audiences.
         if (empty($audiences)) {
-            $audiences = static::get_posts_audiences($announcement->get('id'));
+            $audiences = static::get_posts_audiences($postid);
         }
 
         return $audiences;
