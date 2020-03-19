@@ -504,8 +504,7 @@ class announcement extends persistent {
             // Get the audiences that are relevant to this user.
             $audiences = static::get_posts_users_audiences($announcement->get('id'), $username);
         }
-
-        if 
+        
         $out = new \stdClass();
         $out->persistent = $announcement;
         $out->audiences = $audiences;
