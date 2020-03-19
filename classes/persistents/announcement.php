@@ -505,6 +505,7 @@ class announcement extends persistent {
             $audiences = static::get_posts_users_audiences($announcement->get('id'), $username);
         }
 
+        if 
         $out = new \stdClass();
         $out->persistent = $announcement;
         $out->audiences = $audiences;
@@ -774,6 +775,12 @@ class announcement extends persistent {
             if (!in_array($rec->code, array_column($audiences,'code'))) {
                 $audiences[] = $rec;
             }
+        }
+
+        // If audiences are empty, then the user is an additional cc.
+        // Get all audiences.
+        if (empty($audiences)) {
+            $audiences = static::get_posts_audiences($announcement->get('id'));
         }
 
         return $audiences;
