@@ -239,13 +239,18 @@ class moderation {
         // Deactivate any current moderations.
         static::deactivate_current_moderation($postid);
 
+        // Check whether the user is an "unmoderated announcer".
+        $usercontext = context_user::instance($USER->id);
+        if (has_capability('local/announcements:unmoderatedannouncer', $usercontext)) {
+            return;
+        }
+
         // Load the announcement persistent.
         $announcement = new announcement($postid);
 
         // If the announcement is a force send check whether user has cap to send them without mod.
         if ($announcement->get('forcesend')) {
-            $context = context_user::instance($USER->id);
-            if (has_capability('local/announcements:emergencyannouncer', $context)) {
+            if (has_capability('local/announcements:emergencyannouncer', $usercontext)) {
                 // No moderation needed.
                 return;
             }
@@ -315,9 +320,17 @@ class moderation {
     public static function get_moderation_for_audiences($tags) {
         global $USER;
 
+        // Default.
+        $moderation = array('required' => false, 'modpriority' => -999);
+
+        // Check whether the user is an "unmoderated announcer".
+        $usercontext = context_user::instance($USER->id);
+        if (has_capability('local/announcements:unmoderatedannouncer', $usercontext)) {
+            return $moderation;
+        }
+
         // Keep track of moderation requirements as we process audiences.
         $modmatches = array();
-
         foreach ($tags as $tag) {
             $condition = $tag->type;
             // Keep track of intersections separately.
@@ -386,7 +399,6 @@ class moderation {
         });
 
         // Determine highest priority.
-        $moderation = array('required' => false, 'modpriority' => -999);
         foreach ($modmatches as $mod) {
             if ($mod['modpriority'] >= $moderation['modpriority']) {
                 $moderation = $mod;

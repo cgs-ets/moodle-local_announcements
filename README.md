@@ -128,6 +128,7 @@ Some users need to be CC'd into audiences they are not directly enrolled or invo
 -   local/announcements:administer → Checked in various functions across the system to allow admin users to do basically anything.
 -   local/announcements:auditor → Allows users to view all announcements in the system
 -   local/announcements:emergencyannouncer → Allows users to send immediate (forcesend) announcements without moderation.
+-   local/announcements:unmoderatedannouncer → Allows users to post announcements without moderation.
 
 ### Database Diagram
 ![Database Diagram](/screenshots/local_announcements_database_diagram.png?raw=true)

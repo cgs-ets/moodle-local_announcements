@@ -85,6 +85,7 @@ $string['announcements:post'] = 'Post announcements';
 $string['announcements:administer'] = 'Administer announcements';
 $string['announcements:auditor'] = 'Audit announcements';
 $string['announcements:emergencyannouncer'] = 'Send immediate announcements without moderation.';
+$string['announcements:unmoderatedannouncer'] = 'Send announcements without moderation.';
 
 $string['postform:yournewpost'] = 'Your new announcement';
 $string['postform:subject'] = 'Subject';
