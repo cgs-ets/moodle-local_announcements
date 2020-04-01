@@ -1325,9 +1325,6 @@ class announcement extends persistent {
                 $provider = $r->provider;
                 $code = $r->code;
 
-                $courseid = -1;
-                $coursecontext = false;
-
                 if ($provider == 'combination' && strpos($r->code, 'mdlcourse') === true) {
                     $provider = 'mdlcourse';
                     $code = $combination::true_code($r->code);
@@ -1344,9 +1341,11 @@ class announcement extends persistent {
                     $courseid = $DB->get_field('groups', 'courseid', array('id' => $code));
                 }
 
-                $coursecontext = context_course::instance($courseid);
-                if ($coursecontext && can_view_all_in_context($coursecontext)) {
-                    return true;
+                if ( ! empty($courseid)) {
+                    $coursecontext = context_course::instance($courseid);
+                    if ($coursecontext && can_view_all_in_context($coursecontext)) {
+                        return true;
+                    }
                 }
             }
         }
