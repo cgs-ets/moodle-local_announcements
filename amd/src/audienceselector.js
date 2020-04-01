@@ -56,9 +56,6 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
         self.rootel = rootel;
         self.component = 'local_announcements';
 
-        // Versioned name to force refetch templates after updates and prevent them being pulled from browser cache. 
-        self.ver = self.component + '_2019102301';
-
         // Global vars.
         self.selectedtabcode = '';
         self.intersectionjson = '';
@@ -229,7 +226,7 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
                 if (response.grouped) {
                     var template = 'local_announcements/audience_list_tree';
                 }
-                Templates.render(template, response, self.ver) 
+                Templates.render(template, response) 
                     .then(function(html) {
                         if (response.audiencelist.length || response.audiencelistgrouped.length) {
                             items.html(html);
@@ -280,7 +277,7 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
                 done: function(response) {
                     var count = Object.keys(response['userslist']).length;
                     //self.modals.VIEWUSERS.setTitle('Audience Users');
-                    Templates.render(self.templates.VIEWUSERS, response, self.ver)
+                    Templates.render(self.templates.VIEWUSERS, response)
                         .done(function(html) {
                             html = '<p><strong>The following ' + count + ' user(s) will receive this announcement</strong></p>' + html;
                             self.modals.VIEWUSERS.setBody(html);
@@ -653,7 +650,7 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
         var loader = self.rootel.find('.tags .loader');
         loader.addClass('show');
         // Render the tag from a template
-        Templates.render('local_announcements/audience_tag', tag, self.ver)
+        Templates.render('local_announcements/audience_tag', tag)
             .then(function(html) {
                 self.rootel.find('.tags-list').append(html);
                 loader.removeClass('show');
@@ -672,7 +669,7 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
         var loader = self.rootel.find('.intersection-workspace .loader');
         loader.addClass('show');
         // Render the tag from a template
-        Templates.render('local_announcements/intersection_tag', tag, self.ver)
+        Templates.render('local_announcements/intersection_tag', tag)
             .then(function(html) {
                 self.rootel.find('.intersection-tags-list').append(html);
                 self.rootel.find('.intersection-workspace').addClass('has-tags');
@@ -933,7 +930,7 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
      */
     AudienceSelector.prototype.loadTemplate = function (templatekey) {
         var self = this;
-        return Templates.render(self.templates[templatekey], {}, self.ver);
+        return Templates.render(self.templates[templatekey], {});
     }
 
 

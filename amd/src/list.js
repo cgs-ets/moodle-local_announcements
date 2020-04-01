@@ -66,9 +66,6 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
         self.templates = {
             VIEWUSERS: 'local_announcements/announcement_users_list',
         };
-
-        //versioned name to force refetch templates after updates and prevent them being pulled from browser cache. 
-        self.ver = 'local_announcements_2019072200';
     }
 
 
@@ -162,7 +159,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
                 done: function(response) {
                     var count = Object.keys(response['userslist']).length;
                     self.modals.VIEWUSERS.setTitle('Audience Recipients (' + count + ')');
-                    Templates.render(self.templates.VIEWUSERS, response, self.ver)
+                    Templates.render(self.templates.VIEWUSERS, response)
                         .done(function(html) {
                             self.modals.VIEWUSERS.setBody(html);
                         })
@@ -245,7 +242,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
      */
     List.prototype.loadTemplate = function (templatekey) {
         var self = this;
-        return Templates.render(self.templates[templatekey], {}, self.ver);
+        return Templates.render(self.templates[templatekey], {});
     }
 
     return {

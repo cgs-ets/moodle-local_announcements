@@ -56,9 +56,6 @@ define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/moda
     function Post(rootel) {
         var self = this;
         self.rootel = rootel;
-
-        //versioned name to force refetch templates after updates and prevent them being pulled from browser cache. 
-        self.ver = 'local_announcements_2019072200';
     }
 
     /**
@@ -132,39 +129,6 @@ define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/moda
         }
         
     };
-
-    /**
-     * Helper used to preload a modal
-     *
-     * @method loadModal
-     * @param {string} modalkey The property of the global modals variable
-     * @param {string} title The title of the modal
-     * @param {string} title The button text of the modal
-     * @return {object} jQuery promise
-     */
-    /*Post.prototype.loadModal = function (modalkey, title, buttontext) {
-        var self = this;
-        return ModalFactory.create({type: ModalFactory.types.SAVE_CANCEL}).then(function(modal) {
-            modal.setTitle(title);
-            modal.setSaveButtonText(buttontext);
-            self.modals[modalkey] = modal;
-            // Preload backgrop.
-            modal.getBackdrop();
-        });
-    }*/
-
-    /**
-     * Helper used to preload a template
-     *
-     * @method loadTemplate
-     * @param {string} templatekey The property of the global templates variable
-     * @return {object} jQuery promise
-     */
-    /*Post.prototype.loadTemplate = function (templatekey) {
-        var self = this;
-        return Templates.render(self.templates[templatekey], {}, self.ver);
-    }*/
-
 
     return {
         init: init

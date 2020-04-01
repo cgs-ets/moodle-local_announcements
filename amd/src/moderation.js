@@ -70,9 +70,6 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates', 'core
         };
 
         self.ispagesingle = $('body').hasClass('moderation-single');
-
-        //versioned name to force refetch templates after updates and prevent them being pulled from browser cache. 
-        self.ver = 'local_announcements_2019072200';
     }
 
     /**
@@ -179,7 +176,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates', 'core
         var id = announcement.data('id');
 
         if (self.modals.REJECT) {
-            Templates.render(self.templates.REJECT, data, self.ver).done(function(html){ 
+            Templates.render(self.templates.REJECT, data).done(function(html){ 
                 self.modals.REJECT.setBody(html);
                 var rejectcomment = $('[name="reject-comment"]');
                 self.modals.REJECT.getRoot().on(ModalEvents.save, function(e) {
@@ -240,7 +237,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates', 'core
                         moderators: altmodlist,
                     };
                     // Render the template with the list of moderators.
-                    Templates.render(self.templates.DEFER, data, self.ver).done(function(html) { 
+                    Templates.render(self.templates.DEFER, data).done(function(html) { 
                         self.modals.DEFER.setBody(html);
                         var defermoderator = $('[name="defer-moderator"]');
                         var defermoderatorval = defermoderator.children("option:selected").val();
@@ -304,7 +301,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates', 'core
                 methodname: 'local_announcements_get_announcement_users',
                 args: { id: id },
                 done: function(response) {
-                    Templates.render(self.templates.VIEWUSERS, response, self.ver)
+                    Templates.render(self.templates.VIEWUSERS, response)
                         .done(function(html) {
                             self.modals.VIEWUSERS.setBody(html);
                         })
@@ -352,7 +349,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates', 'core
      */
     Moderation.prototype.loadTemplate = function (templatekey) {
         var self = this;
-        return Templates.render(self.templates[templatekey], {}, self.ver);
+        return Templates.render(self.templates[templatekey], {});
     }
 
 
