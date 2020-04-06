@@ -51,6 +51,7 @@ $PAGE->requires->css(new moodle_url($CFG->wwwroot . '/local/announcements/styles
 
 // Check user is logged in.
 require_login();
+require_capability('moodle/site:config', $context, $USER->id); 
 
 // Build page output
 $output = '';
