@@ -731,13 +731,13 @@ body.path-local-announcements.modal-open {
   display: block;
 }
 .local_announcements .lann-list .announcement .message {
-  padding: 15px 15px;
+  padding: 10px 15px;
 }
 .local_announcements .lann-list .announcement .message p:last-of-type {
   margin-bottom: 0;
 }
 .local_announcements .lann-list .announcement .attachments {
-  margin: 10px 15px;
+  margin: 0px 15px 10px;
 }
 .local_announcements .lann-list .announcement.removing {
   background-color: #F8DEC4;
