@@ -94,7 +94,7 @@
 			.note {
 				font-style: italic;
 			    font-size: 13px;
-			    padding: 10px 15px;
+			    padding: 6px 15px 0;
 			}
 			.header {
 			    position: relative;
@@ -102,22 +102,38 @@
 			    border-bottom: 1px solid #e4e6e8;
 			    padding: 10px 15px;
 			}
+			.subject {
+				font-weight: 700;
+				font-size: 16px;
+    			clear: both;
+    			margin-bottom: 3px;
+			}
 			.userphoto {
 				position: relative;
 				border-radius: 50%;
 				overflow: hidden;
 				float: left;
 				margin-right: 10px;
+				width: 25px;
+				height: 25px;
+				border: 1px solid #aaa;
+				img {
+    				display: block;
+    				width: 100%;
+    				height: 100%;
+				}
 			}
 			.author {
 			    float: left;
-			    padding-top: 6px;
-			    font-weight: 600;
+			    font-size: 14px;
+			    line-height: 25px;
+			}
+			.leftwrap {
+			    float: left;
+			    margin-right: 10px;
 			}
 			.rightwrap {
-			    position: absolute;
-			    right: 15px;
-			    top: 10px;
+				float: right;
 			}
 			.meta {
 			    font-size: 13px;
@@ -126,6 +142,7 @@
 			    text-align: right;
     			display: inline-block;
     			float: left;
+    			position: relative;
 			}
 			.actions {
 				opacity: 0;
@@ -147,7 +164,6 @@
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
-				float: right;
 				padding-right: 1px;
 
 			    .tip {
@@ -186,14 +202,8 @@
 				}
 
 			}
-			.subject {
-				font-weight: 700;
-				font-size: 16px;
-				padding: 6px 15px;
-    			clear: both;
-			}
 			.message {
-			    padding: 0 15px 10px;
+			    padding: 10px 15px;
 			    p:last-of-type {
 			    	margin-bottom: 0;
 			    }
@@ -213,7 +223,7 @@
 				border-radius: 5px;
 				font-size: 13px;
 				margin: 0px 15px 10px;
-				.userphoto img {
+				.userphoto {
 				    height: 30px;
 				    width: 30px;
 				}

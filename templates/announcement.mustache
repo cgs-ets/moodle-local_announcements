@@ -26,8 +26,11 @@
 
 <div data-id="{{id}}" class="announcement{{^isavailable}} unavailable{{/isavailable}}{{#ismodpending}} modpending{{/ismodpending}}{{#ismodrejected}} modrejected{{/ismodrejected}}">
     <div class="header">
-        <div class="userphoto"><a href="{{authorurl}}" title="{{authorfullname}} profile"><img src="{{authorphoto}}" alt="{{authorfullname}}" title="{{authorfullname}}" /></a></div>
-        <div class="author">{{authorfullname}}</div>
+        <div class="leftwrap">
+            <div class="subject">{{subject}}</div>
+            <div class="userphoto"><a href="{{authorurl}}" title="{{authorfullname}} profile"><img src="{{authorphoto}}" alt="{{authorfullname}}" title="{{authorfullname}}" /></a></div>
+            <div class="author">{{authorfullname}}</div>
+        </div>
         <div class="rightwrap">
             <div class="meta">
                 <div class="time">🕑 {{readabletime}}</div>
@@ -73,7 +76,6 @@
     {{#ismodpending}}<div class="note moderationstatus">{{#str}} list:announcementmodpending, local_announcements, {{#modinfo}}{{moduserfullname}}{{/modinfo}} {{/str}}</div>{{/ismodpending}}
     {{#ismodrejected}}<div class="note moderationstatus">{{#str}} list:announcementmodrejected, local_announcements, {{#modinfo}}{{actioneduserfullname}}{{/modinfo}} {{/str}}</div>{{/ismodrejected}}
 
-    <div class="subject">{{subject}}</div>
     <div class="message">{{{message}}}</div>
     {{#formattedattachments.0}}
         <div class="attachments">
