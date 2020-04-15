@@ -33,13 +33,13 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
     /**
      * Initializes the list component.
      */
-    function init() {
+    function init(rootselector) {
         Log.debug('local_announcements/list: initializing');
 
-        var rootel = $('.local_announcements').first();
+        var rootel = $(rootselector).first();
 
         if (!rootel.length) {
-            Log.error('local_announcements/list: .local_announcements element not found!');
+            Log.error('local_announcements/list: ' + rootselector + ' element not found!');
             return;
         }
 

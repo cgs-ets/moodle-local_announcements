@@ -602,51 +602,37 @@ body.path-local-announcements.modal-open {
 }
 .local_announcements .lann-list .announcement {
   margin-bottom: 20px;
-  padding: 15px;
+  box-shadow: 2px 2px 2px 0px #e4e6e8;
   background-color: #fff;
   color: #000;
   position: relative;
-  box-shadow: 2px 2px 2px 0px #e4e6e8;
   border: 1px solid #ddd;
-  overflow: hidden;
 }
 .local_announcements .lann-list .announcement.unavailable,
 .local_announcements .lann-list .announcement.modpending {
   background-color: #f8dec4;
 }
+.local_announcements .lann-list .announcement.unavailable .header,
+.local_announcements .lann-list .announcement.modpending .header {
+  border-bottom: 1px solid #bcbcbc;
+}
 .local_announcements .lann-list .announcement.modrejected {
   background-color: #f8d7da;
   border-color: #f5c6cb;
 }
-.local_announcements .lann-list .announcement .actions {
-  opacity: 0;
-  float: right;
-  font-size: 13px;
-  transition: opacity 0.5s ease;
+.local_announcements .lann-list .announcement.modrejected .header {
+  border-bottom: 1px solid #bcbcbc;
 }
-.local_announcements .lann-list .announcement .actions .inline-list li {
-  display: inline-block;
-  margin-left: 8px;
-}
-.local_announcements .lann-list .announcement .subject {
-  font-weight: 700;
-  font-size: 16px;
-  padding: 6px 11px;
-}
-.local_announcements .lann-list .announcement .meta {
-  clear: both;
-  font-size: 13px;
-  color: #000;
-}
-.local_announcements .lann-list .announcement .availability,
-.local_announcements .lann-list .announcement .moderationstatus {
+.local_announcements .lann-list .announcement .note {
   font-style: italic;
+  font-size: 13px;
+  padding: 10px 15px;
 }
-.local_announcements .lann-list .announcement .message {
-  padding: 15px 0;
-}
-.local_announcements .lann-list .announcement .message p:last-of-type {
-  margin-bottom: 0;
+.local_announcements .lann-list .announcement .header {
+  position: relative;
+  width: 100%;
+  border-bottom: 1px solid #e4e6e8;
+  padding: 10px 15px;
 }
 .local_announcements .lann-list .announcement .userphoto {
   position: relative;
@@ -654,6 +640,94 @@ body.path-local-announcements.modal-open {
   overflow: hidden;
   float: left;
   margin-right: 10px;
+}
+.local_announcements .lann-list .announcement .author {
+  float: left;
+  padding-top: 6px;
+  font-weight: 600;
+}
+.local_announcements .lann-list .announcement .rightwrap {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+}
+.local_announcements .lann-list .announcement .meta {
+  font-size: 13px;
+  color: #000;
+  font-style: italic;
+  text-align: right;
+  display: inline-block;
+  float: left;
+}
+.local_announcements .lann-list .announcement .actions {
+  opacity: 0;
+  float: left;
+  font-size: 13px;
+  transition: opacity 0.5s ease;
+  display: inline-block;
+  margin-left: 10px;
+}
+.local_announcements .lann-list .announcement .actions .inline-list li {
+  display: inline-block;
+  margin-left: 8px;
+}
+.local_announcements .lann-list .announcement .clear {
+  clear: both;
+}
+.local_announcements .lann-list .announcement .audiences {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  float: right;
+  padding-right: 1px;
+}
+.local_announcements .lann-list .announcement .audiences .tip {
+  display: none;
+  position: absolute;
+  bottom: 23px;
+  font-size: 12px;
+  width: auto;
+  max-width: 200px;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  border-radius: 9px;
+  z-index: 1000;
+  padding: 6px 6px 10px;
+  line-height: 1.4;
+  white-space: normal;
+  text-align: left;
+}
+.local_announcements .lann-list .announcement .audiences .tip a {
+  color: #fff;
+}
+.local_announcements .lann-list .announcement .audiences .tip:after {
+  content: " ";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+.local_announcements .lann-list .announcement .audiences:hover .tip {
+  display: block;
+}
+.local_announcements .lann-list .announcement .subject {
+  font-weight: 700;
+  font-size: 16px;
+  padding: 6px 15px;
+  clear: both;
+}
+.local_announcements .lann-list .announcement .message {
+  padding: 0 15px 10px;
+}
+.local_announcements .lann-list .announcement .message p:last-of-type {
+  margin-bottom: 0;
+}
+.local_announcements .lann-list .announcement .attachments {
+  margin: 10px 15px;
 }
 .local_announcements .lann-list .announcement.removing {
   background-color: #F8DEC4;
@@ -665,6 +739,7 @@ body.path-local-announcements.modal-open {
   display: inline-block;
   border-radius: 5px;
   font-size: 13px;
+  margin: 0px 15px 10px;
 }
 .local_announcements .lann-list .announcement .modcomment .userphoto img {
   height: 30px;

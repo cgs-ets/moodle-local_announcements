@@ -162,7 +162,7 @@ $data = array(
 $output .= $OUTPUT->render_from_template('local_announcements/index', $data);
 
 // Add amd scripts.
-$PAGE->requires->js_call_amd('local_announcements/list', 'init');
+$PAGE->requires->js_call_amd('local_announcements/list', 'init', array('rootselector' => '.local_announcements'));
 
 // Final outputs.
 $output .= $OUTPUT->footer();
