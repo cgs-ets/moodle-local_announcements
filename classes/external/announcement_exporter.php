@@ -233,6 +233,7 @@ class announcement_exporter extends persistent_exporter {
     	
     	// Replace images in short message with a word.
     	$shortmessage = preg_replace("/<img[^>]+\>/i", "(image) ", $shortmessage);
+    	$islong = ($shortmessage != $this->data->message);
 
 		// Rewrite pluginfile urls.
 	    $shortmessage = file_rewrite_pluginfile_urls($shortmessage,'pluginfile.php',$this->related['context']->id, 'local_announcements','announcement',$this->data->id);
@@ -254,7 +255,7 @@ class announcement_exporter extends persistent_exporter {
 	    $modinfo = moderation::get_mod_info($this->data->id);
 
 	    // Append view more link to short message.
-		$viewlink = '<p><a class="view-more-link btn btn-secondary" href="' . $viewurl . '">' . get_string('list:viewmore', 'local_announcements') . '</a></p>';
+		$viewlink = '<p><a class="view-full-link btn btn-secondary" href="' . $viewurl . '">' . get_string('list:viewmore', 'local_announcements') . '</a></p>';
 		if ($islong || $ismodpending || $ismodrejected) {
 			$shortmessage .= $viewlink;
 		}

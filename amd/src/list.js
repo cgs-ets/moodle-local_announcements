@@ -96,6 +96,13 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
             self.viewAs();
         });
 
+        // Handle view full message link.
+        self.rootel.on('click', '.view-full-link', function(e) {
+            e.preventDefault();
+            var button = $(this);
+            self.getFullMessage(button);
+        });
+
         // Preload the modals and templates.
         var preloads = [];
         preloads.push(self.loadModal('DELETE', 'Delete Announcement', 'Delete', ModalFactory.types.SAVE_CANCEL));
@@ -208,6 +215,33 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
             });
             self.modals.DELETE.show();
         }
+    };
+
+    /**
+     * Load the full message of a truncated announcement.
+     *
+     * @method
+     */
+    List.prototype.getFullMessage = function (button) {
+        var self = this;
+
+        var announcement = button.closest('.announcement');
+        var id = announcement.data('id');
+
+        announcement.addClass('fetching-full');
+        Ajax.call([{
+            methodname: 'local_announcements_get_full_message',
+            args: { id: id },
+            done: function(response) {
+                announcement.removeClass('fetching-full');
+                console.log(response);
+            },
+            fail: function(reason) {
+                announcement.removeClass('fetching-full');
+                Log.error('local_announcements/list: unable to get full message.');
+                Log.debug(reason);
+            }
+        }]);
     };
 
     /**

@@ -89,7 +89,7 @@ $data = array(
 $output .= $OUTPUT->render_from_template('local_announcements/view', $data);
 
 // Add scripts.
-$PAGE->requires->js_call_amd('local_announcements/list', 'init');
+$PAGE->requires->js_call_amd('local_announcements/list', 'init', array('rootselector' => '.local_announcements'));
 
 // Final outputs.
 $output .= $OUTPUT->footer();
