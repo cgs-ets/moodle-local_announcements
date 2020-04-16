@@ -445,9 +445,10 @@ class announcement extends persistent {
      * @param array $postids.
      * @param int $username.
      * @param bool $getall. Whether to get all audiences regardless of author.
+     * @param bool $strictavailability. Whether to exclude pending and rejected posts.
      * @return array.
      */
-    public static function get_by_ids_and_username($postids, $username, $getall = false) {
+    public static function get_by_ids_and_username($postids, $username, $getall = false, $strictavailability = true) {
         global $DB;
 
         // Load user object.
@@ -466,7 +467,7 @@ class announcement extends persistent {
                 WHERE p.id $idsql";
 
         // Add standard post availability clauses.
-        list ($availsql, $availparams) = static::append_standard_availability_clauses($user);
+        list ($availsql, $availparams) = static::append_standard_availability_clauses($user, $strictavailability);
         $sql .= $availsql;
         $params = array_merge($params, $availparams);
 

@@ -48,11 +48,7 @@ $PAGE->set_title($SITE->fullname . ': ' . $title);
 require_login();
 
 // get the announcement and customise page props.
-$getall = false;
-if (is_user_auditor()) {
-	$getall = true;
-}
-$announcements = announcement::get_by_ids_and_username([$postid], $USER->username, $getall);
+$announcements = announcement::get_by_ids_and_username([$postid], $USER->username, is_user_auditor(), (!is_user_auditor()));
 $announcement = array_pop($announcements);
 
 $PAGE->navbar->add($title, new moodle_url('/local/announcements/'));

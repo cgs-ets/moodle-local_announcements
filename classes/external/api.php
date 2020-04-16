@@ -43,6 +43,7 @@ class api extends external_api {
     use get_audience_items;
     use delete_announcement;
     use get_announcement_users;
+    use get_full_message;
     use get_alternate_moderators;
     use mod_reject;
     use mod_approve;

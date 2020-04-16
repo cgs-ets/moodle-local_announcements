@@ -55,14 +55,20 @@ require_capability('moodle/site:config', $context, $USER->id);
 
 // Build page output
 $output = '';
-$output .= $OUTPUT->header();
+//$output .= $OUTPUT->header();
+
+
+echo "<pre>";
+$api = new local_announcements\external\api;
+$out = $api->get_full_message(10);
+var_export($out);
+exit;
 
 
 
 
-
-$t = announcement::get_unsent();
-echo "<pre>"; var_export($t); exit;
+//$t = announcement::get_unsent();
+//echo "<pre>"; var_export($t); exit;
 
 
 /*

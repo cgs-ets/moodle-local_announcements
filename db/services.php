@@ -53,6 +53,15 @@ $functions = [
         'loginrequired' => true,
         'ajax'          => true,
     ],
+    'local_announcements_get_full_message' => [
+        'classname'     => 'local_announcements\external\api',
+        'methodname'    => 'get_full_message',
+        'classpath'     => '',
+        'description'   => 'Get\'s the full message for an announcement',
+        'type'          => 'read',
+        'loginrequired' => true,
+        'ajax'          => true,
+    ],
     'local_announcements_get_alternate_moderators' => [
         'classname'     => 'local_announcements\external\api',
         'methodname'    => 'get_alternate_moderators',

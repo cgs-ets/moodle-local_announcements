@@ -169,19 +169,14 @@
 }
 .local_announcements.lann-moderation .announcement {
   overflow: visible;
-}
-.local_announcements.lann-moderation .announcement .actions {
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  position: absolute;
-  right: 15px;
-  top: 10px;
-}
-.local_announcements.lann-moderation .announcement .actions > div {
-  float: left;
-}
-.local_announcements.lann-moderation .announcement .meta .author:before {
-  content: "👤";
-  display: inline-block;
-  padding-right: 6px;
+  /*.actions {
+			opacity: 0;
+			transition: opacity 0.5s ease;
+			position: absolute;
+		    right: 15px;
+		    top: 10px;
+		    &>div {
+		    	float: left;
+		    }
+		}*/
 }

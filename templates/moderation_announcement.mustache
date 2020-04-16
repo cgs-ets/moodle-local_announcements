@@ -25,41 +25,46 @@
 }}
 
 <div data-id="{{id}}" class="announcement{{^isavailable}} unavailable{{/isavailable}}">
-    {{#showactions}}
-    <div class="actions">
-        {{#modinfo}}
-            {{#isaltmoderator}}
-                <div class="userphoto"><img src="{{moduserphoto}}" alt="{{moduserfullname}}" title="{{moduserfullname}}" /></div>
-            {{/isaltmoderator}}
-        {{/modinfo}}
-        <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" id="actions-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actions-dropdown">
-                <a class="dropdown-item action-approve" href="#">Approve</a>
-                <a class="dropdown-item action-reject" href="#">Reject</a>
-                {{!<a class="dropdown-item action-defer" href="#">Reassign</a>}}
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item action-viewusers" href="#">Users</a>
-                <a class="dropdown-item action-edit" href="{{config.wwwroot}}/local/announcements/post.php?edit={{id}}">Edit</a>
-            </div>
-        </div>
-    </div>
-    {{/showactions}}
     <div class="header">
-        <div class="userphoto"><a href="{{authorurl}}" title="{{authorfullname}} profile"><img src="{{authorphoto}}" alt="{{authorfullname}}" title="{{authorfullname}}" /></a></div>
-        <div class="subject">{{subject}}</div>
-        <div class="meta">
-            {{^isavailable}}<div class="availability">{{#str}} list:announcementunavailable, local_announcements {{/str}}</div>{{/isavailable}}
+        <div class="leftwrap">
+            <div class="subject">{{subject}}</div>
+            <div class="userphoto"><a href="{{authorurl}}" title="{{authorfullname}} profile"><img src="{{authorphoto}}" alt="{{authorfullname}}" title="{{authorfullname}}" /></a></div>
             <div class="author">{{authorfullname}}</div>
-            <div class="time">🕑 {{readabletime}}</div>
-            <div class="audiences">📣
-                <ul class="audience-list comma-list">
-                {{#audiences}}
-                    <li class="{{conditiontype}}">{{#conditions}}<span>{{#url}}<a href="{{url}}">{{name}}</a>{{/url}}{{^url}}{{name}}{{/url}}</span>{{/conditions}}</li>
-                {{/audiences}}
-                </ul>
-            </div>
         </div>
+        <div class="rightwrap">
+            <div class="meta">
+                {{^isavailable}}<div class="availability">{{#str}} list:announcementunavailable, local_announcements {{/str}}</div>{{/isavailable}}
+                <div class="time">🕑 {{readabletime}}</div>
+                <div class="audiences">📣
+                    <ul class="audience-list comma-list">
+                    {{#audiences}}
+                        <li class="{{conditiontype}}">{{#conditions}}<span>{{#url}}<a href="{{url}}">{{name}}</a>{{/url}}{{^url}}{{name}}{{/url}}</span>{{/conditions}}</li>
+                    {{/audiences}}
+                    </ul>
+                </div>
+            </div>
+            {{#showactions}}
+            <div class="actions">
+                {{#modinfo}}
+                    {{#isaltmoderator}}
+                        <div class="userphoto"><img src="{{moduserphoto}}" alt="{{moduserfullname}}" title="{{moduserfullname}}" /></div>
+                    {{/isaltmoderator}}
+                {{/modinfo}}
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="actions-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actions-dropdown">
+                        <a class="dropdown-item action-approve" href="#">Approve</a>
+                        <a class="dropdown-item action-reject" href="#">Reject</a>
+                        {{!<a class="dropdown-item action-defer" href="#">Reassign</a>}}
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item action-viewusers" href="#">Recipients</a>
+                        <a class="dropdown-item action-edit" href="{{config.wwwroot}}/local/announcements/post.php?edit={{id}}">Edit</a>
+                    </div>
+                </div>
+            </div>
+            {{/showactions}}
+        </div>
+        <div class="clear"></div>
     </div>
     <div class="message">{{{message}}}</div>
     {{#formattedattachments.0}}

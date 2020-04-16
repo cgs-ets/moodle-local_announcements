@@ -142,7 +142,7 @@ class announcement_exporter extends persistent_exporter {
 	 * @return array Keys are the property names, values are their values.
 	 */
 	protected function get_other_values(renderer_base $output) {
-		global $USER, $DB, $OUTPUT;
+		global $USER, $DB, $OUTPUT, $PAGE;
 
         $iscreator = $this->data->authorusername == $USER->username ? 1 : 0;
 
@@ -189,7 +189,7 @@ class announcement_exporter extends persistent_exporter {
     	// Get the author profile details.
         $author = $DB->get_record('user', array('username'=>$this->data->authorusername));
         $authorphoto = new \moodle_url('/user/pix.php/'.$author->id.'/f2.jpg');
-        $authorfullname = fullname($author);//$author->firstname . ' ' . $author->lastname;
+        $authorfullname = fullname($author);
         $authorurl = new \moodle_url('/user/profile.php', array('id' => $author->id));
         $authorphototokenised = $OUTPUT->user_picture($author, array('size' => 35, 'includetoken' => true));
 
@@ -256,7 +256,7 @@ class announcement_exporter extends persistent_exporter {
 
 	    // Append view more link to short message.
 		$viewlink = '<p><a class="view-full-link btn btn-secondary" href="' . $viewurl . '">' . get_string('list:viewmore', 'local_announcements') . '</a></p>';
-		if ($islong || $ismodpending || $ismodrejected) {
+		if ($islong) {
 			$shortmessage .= $viewlink;
 		}
 

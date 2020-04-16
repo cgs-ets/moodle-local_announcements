@@ -234,7 +234,8 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
             args: { id: id },
             done: function(response) {
                 announcement.removeClass('fetching-full');
-                console.log(response);
+                announcement.addClass('full-message');
+                announcement.find('.message').html(response['fullmessage']);
             },
             fail: function(reason) {
                 announcement.removeClass('fetching-full');
