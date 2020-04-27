@@ -732,6 +732,7 @@ body.path-local-announcements.modal-open {
 }
 .local_announcements .lann-list .announcement .message {
   padding: 10px 15px;
+  overflow: hidden;
 }
 .local_announcements .lann-list .announcement .message p:last-of-type {
   margin-bottom: 0;
