@@ -198,7 +198,7 @@ class audience_mdlcourse extends \local_announcements\providers\audience_provide
             $catids = array_merge($catids, $childcatids);
             // Get the course idnumbers based on cat ids.
             list($insql, $inparams) = $DB->get_in_or_equal($catids);
-            $sql = "SELECT id, idnumber FROM {course} WHERE category $insql";
+            $sql = "SELECT idnumber FROM {course} WHERE category $insql";
             $courseidnumbers = array_keys($DB->get_records_sql($sql, $inparams));
         } else {
             $allcourses = get_courses();
