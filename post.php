@@ -141,6 +141,9 @@ if ($formdata = $mformpost->get_data()) {
     // See if remail has been set.
     $formdata->remail = isset($formdata->remail) ? $formdata->remail : 0;
 
+    // True to allow for special content such as clickview.
+    $formdata->messagetrust = 1; 
+
     // If edit is 0, this will create a new post.
     $result = announcement::save_from_data($edit, $formdata);
 
