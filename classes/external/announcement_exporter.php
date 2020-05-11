@@ -363,7 +363,8 @@ class announcement_exporter extends persistent_exporter {
         return [
             'component' => 'local_announcements',
             'filearea' => 'announcement',
-            'itemid' => $this->data->id
+            'itemid' => $this->data->id,
+            'options' => \local_announcements\forms\form_post::editor_options($this->data->id),
         ];
     }
 
