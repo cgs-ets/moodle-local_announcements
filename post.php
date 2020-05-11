@@ -58,7 +58,7 @@ $post = new stdClass();
 $post->subject       = '';
 $post->message       = '';
 $post->messageformat = editors_get_preferred_format();
-$post->messagetrust = 0;
+$post->messagetrust = true; // True to allow for special content such as clickview.
 $post->audiencesjson = '';
 
 if (!empty($edit)) { 
@@ -73,12 +73,11 @@ if (!empty($edit)) {
         $post->authorusername = $announcement->get('authorusername');
         $post->message        = $announcement->get('message');
         $post->messageformat  = editors_get_preferred_format();
-        $post->messagetrust   = 0;
+        $post->messagetrust   = true; // True to allow for special content such as clickview.
         $post->audiencesjson  = $announcement->get('audiencesjson');
         $post->timestart      = $announcement->get('timestart');
         $post->timeend        = $announcement->get('timeend');
         $post->mailed         = $announcement->get('mailed');
-        $post = trusttext_pre_edit($post, 'message', $context);
     } else {
         redirect($redirectdefault->out());
     }
@@ -138,10 +137,6 @@ if ($formdata = $mformpost->get_data()) {
     $formdata->itemid = $formdata->message['itemid'];
     $formdata->messageformat = $formdata->message['format'];
     $formdata->message = $formdata->message['text'];
-    $formdata->messagetrust = trusttext_trusted($context);
-
-    // Clean message text.
-    $formdata = trusttext_pre_edit($formdata, 'message', $context);
 
     // See if remail has been set.
     $formdata->remail = isset($formdata->remail) ? $formdata->remail : 0;
