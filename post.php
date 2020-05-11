@@ -58,7 +58,7 @@ $post = new stdClass();
 $post->subject       = '';
 $post->message       = '';
 $post->messageformat = editors_get_preferred_format();
-$post->messagetrust = true; // True to allow for special content such as clickview.
+$post->messagetrust = 1; // True to allow for special content such as clickview.
 $post->audiencesjson = '';
 
 if (!empty($edit)) { 
@@ -73,7 +73,7 @@ if (!empty($edit)) {
         $post->authorusername = $announcement->get('authorusername');
         $post->message        = $announcement->get('message');
         $post->messageformat  = editors_get_preferred_format();
-        $post->messagetrust   = true; // True to allow for special content such as clickview.
+        $post->messagetrust   = 1; // True to allow for special content such as clickview.
         $post->audiencesjson  = $announcement->get('audiencesjson');
         $post->timestart      = $announcement->get('timestart');
         $post->timeend        = $announcement->get('timeend');
