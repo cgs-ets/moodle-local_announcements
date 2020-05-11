@@ -217,7 +217,7 @@ class announcement_exporter extends persistent_exporter {
 
 	    $messagetokenized = file_rewrite_pluginfile_urls($this->data->message,'pluginfile.php',$this->related['context']->id,
 	        		'local_announcements','announcement',$this->data->id,['includetoken' => true]);
-	    $messageplain = trim(format_text_email($messagetokenized, FORMAT_PLAIN));
+	    $messageplain = trim(html_to_text(format_text_email($messagetokenized, FORMAT_PLAIN)));
 	    $attachmentstokenized = $this->export_attachmentstokenized($output);
 
     	$viewurl = new \moodle_url('/local/announcements/view.php', array('id' => $this->data->id));
