@@ -67,6 +67,7 @@ class form_post extends \moodleform {
             'maxfiles' => $config->maxeditorfiles,
             'maxbytes' => $maxbytes,
             'trusttext'=> true,
+            'noclean' => true,
             'return_types'=> FILE_INTERNAL | FILE_EXTERNAL,
             'subdirs' => 0
         );
