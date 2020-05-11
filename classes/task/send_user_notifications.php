@@ -154,7 +154,7 @@ class send_user_notifications extends \core\task\adhoc_task {
         $eventdata->userfrom            = $userfrom;
         $eventdata->userto              = $this->recipient;
         $eventdata->subject             = $postsubject;
-        $eventdata->fullmessage         = $post->messagetext;
+        $eventdata->fullmessage         = $post->messageplain;
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $fullmessagehtml                = $OUTPUT->render_from_template('local_announcements/message_notification_html', $data);
         $eventdata->fullmessagehtml     = $fullmessagehtml;

@@ -99,7 +99,7 @@ class announcement_exporter extends persistent_exporter {
                 'type' => PARAM_BOOL,
                 'default' => 0,
             ],
-	        'messagetext' => [
+	        'messageplain' => [
 	        	'type' => PARAM_RAW,
 	        ],
 	        'messagetokenized' => [
@@ -217,7 +217,7 @@ class announcement_exporter extends persistent_exporter {
 
 	    $messagetokenized = file_rewrite_pluginfile_urls($this->data->message,'pluginfile.php',$this->related['context']->id,
 	        		'local_announcements','announcement',$this->data->id,['includetoken' => true]);
-	    $messagetext = trim(format_text_email($messagetokenized, $this->data->messageformat));
+	    $messageplain = trim(format_text_email($messagetokenized, FORMAT_PLAIN));
 	    $attachmentstokenized = $this->export_attachmentstokenized($output);
 
     	$viewurl = new \moodle_url('/local/announcements/view.php', array('id' => $this->data->id));
@@ -272,7 +272,7 @@ class announcement_exporter extends persistent_exporter {
 	        'editurl' => $editurl,
 	        'isavailable' => $isavailable,
 	        'messagetokenized' => $messagetokenized,
-	        'messagetext' => $messagetext,
+	        'messageplain' => $messageplain,
 	        'attachmentstokenized' => $attachmentstokenized,
 	        'viewurl' => $viewurl,
 	        'shortmessage' => $shortmessage,

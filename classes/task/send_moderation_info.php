@@ -118,7 +118,7 @@ class send_moderation_info extends \core\task\adhoc_task {
         $message->name = 'moderationmail';
         $message->userfrom = $userfrom;
         $message->userto = $this->recipient;
-        $message->fullmessage = $post->messagetext;
+        $message->fullmessage = $post->messageplain;
         $message->fullmessageformat = FORMAT_PLAIN;
         $message->notification = 1;
         $message->smallmessage = '';
