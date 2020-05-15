@@ -224,15 +224,24 @@ class announcement_exporter extends persistent_exporter {
     	$viewurl = $viewurl->out();
 
     	$shortmessage = shorten_text($this->data->message, get_shortpost(), false, '...');
-    	$islong = ($shortmessage != $this->data->message);
 
-    	// Wrap images in a span.
-    	//$pattern = '/(<img([^>]*)>)/i';
-		//$replacement = '<span class="short-message-img">$1</span>';
-		//$shortmessage = preg_replace( $pattern, $replacement, $shortmessage );
-    	
-    	// Replace images in short message with a word.
-    	$shortmessage = preg_replace("/<img[^>]+\>/i", "(image) ", $shortmessage);
+    	// Replace images, videos and iframes in short message with a word.
+		$dom = new \DOMDocument;
+		@$dom->loadHTML($shortmessage);
+		foreach( $dom->getElementsByTagName("img") as $img ) {
+		    $text = $dom->createElement("p", "(image)");
+		    $img->parentNode->replaceChild($text, $img);
+		}
+		foreach( $dom->getElementsByTagName("video") as $video ) {
+		    $text = $dom->createElement("p", "(video)");
+		    $video->parentNode->replaceChild($text, $video);
+		}
+		foreach( $dom->getElementsByTagName("iframe") as $iframe ) {
+		    $text = $dom->createElement('p', "(iframe)");
+		    $iframe->parentNode->replaceChild($text, $iframe);
+		}
+		$shortmessage = $dom->saveHTML();
+
     	$islong = ($shortmessage != $this->data->message);
 
 		// Rewrite pluginfile urls.
