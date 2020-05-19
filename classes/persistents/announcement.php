@@ -124,6 +124,9 @@ class announcement extends persistent {
                 'type' => PARAM_INT,
                 'default' => 0,
             ],
+            "impersonate" => [
+                'type' => PARAM_RAW,
+            ],
         ];
     }
 
@@ -294,13 +297,14 @@ class announcement extends persistent {
 
         // Include announcements the user is allowed to see.
         $sql .= " 
-        AND ( p.authorusername = ? OR
-              p.id IN ( SELECT pu.postid
+        AND ( (p.authorusername = ? OR p.impersonate = ?) AND
+               p.id IN ( SELECT pu.postid
                          FROM {ann_posts_users} pu
                         WHERE pu.username = ? )
         )
         ";
 
+        $params[] = $user->username;
         $params[] = $user->username;
         $params[] = $user->username;
 
@@ -375,7 +379,7 @@ class announcement extends persistent {
 
         // Include announcements the user is author of, in audience.
         $sql .= "
-             AND (( p.authorusername = ?
+             AND (( (p.authorusername = ? OR p.impersonate = ?)
                     AND p.id IN (SELECT pac.postid
                                    FROM {ann_posts_audiences_cond} pac
                                   WHERE 0 = 1";
@@ -498,7 +502,7 @@ class announcement extends persistent {
      */
     public static function get_for_user_with_audiences($username, $postid, $getall = false) {
         $announcement = new static($postid);
-        if ($announcement->get('authorusername') == $username || $getall) {
+        if ($announcement->get('authorusername') == $username || $announcement->get('impersonate') == $username || $getall) {
             // Get all audiences.
             $audiences = static::get_posts_audiences($announcement->get('id'));
         } else {
@@ -822,9 +826,16 @@ class announcement extends persistent {
             if ($data->remail) {
                 $announcement->set('mailed', 0);
             }
+            // If the announcement is edited by the creator then update the impersonate field.
+            // If the impersonated user edits the announcement, do not change the impersonate field.
+            if ($announcement->get('authorusername') == $USER->username) {
+                $announcement->set('impersonate', $data->impersonate);
+            }
         } else {
             // New announcement, set author to current user.
             $announcement->set('authorusername', $USER->username);
+            // Set the impersonated user. When editing a different set of rules apply for this field.
+            $announcement->set('impersonate', $data->impersonate);
         }
 
         // Set/update the data.
@@ -1234,7 +1245,8 @@ class announcement extends persistent {
         }
 
         // Exclude posts that need moderation, unless strict is false - used for admin and auditor.
-        $sql .= " AND ( p.modrequired = 0 OR p.modstatus = " . ANN_MOD_STATUS_APPROVED . " OR p.authorusername = ?";
+        $sql .= " AND ( p.modrequired = 0 OR p.modstatus = " . ANN_MOD_STATUS_APPROVED . " OR p.authorusername = ? OR p.impersonate = ?";
+        $params[] = $user->username;
         $params[] = $user->username;
         if (!$strict) {
             $sql .= " OR 'admin' = ? ";
@@ -1249,11 +1261,12 @@ class announcement extends persistent {
             (p.timestart <= ? AND p.timeend = 0) OR
             (p.timestart = 0  AND p.timeend > ?) OR
             (p.timestart = 0  AND p.timeend = 0) OR 
-            (p.authorusername = ?)";
+            (p.authorusername = ? OR p.impersonate = ?)";
         $params[] = $now;
         $params[] = $now;
         $params[] = $now;
         $params[] = $now;
+        $params[] = $user->username;
         $params[] = $user->username;
 
         // If the user is admin or auditor include time-based unavailable announcements.
@@ -1287,8 +1300,8 @@ class announcement extends persistent {
             INNER JOIN {" . static::TABLE_POSTS_USERS . "} pu
                     ON p.id = pu.postid 
                  WHERE (pu.postid = ? AND pu.username = ?)
-                    OR (p.id = ? AND p.authorusername = ?)";
-        $params = array($postid, $USER->username, $postid, $USER->username);
+                    OR (p.id = ? AND (p.authorusername = ? OR p.impersonate = ?))";
+        $params = array($postid, $USER->username, $postid, $USER->username, $USER->username);
         if ($DB->record_exists_sql($sql, $params)) {
             return true;
         }
@@ -1465,8 +1478,13 @@ class announcement extends persistent {
     public static function is_author_or_admin($postid) {
         global $USER;
 
-        // Attempt to get the user's announcement.
+        // Attempt to get the author's announcement.
         if(announcement::get_record(['authorusername' => $USER->username, 'id' => $postid])) {
+            return true;
+        }
+
+        // An impersonated user has the same rights as the author.
+        if(announcement::get_record(['impersonate' => $USER->username, 'id' => $postid])) {
             return true;
         }
 

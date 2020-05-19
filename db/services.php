@@ -125,5 +125,17 @@ $functions = [
         'loginrequired' => true,
         'ajax'          => true,
     ],
+    'local_announcements_get_impersonate_users' => [
+        'classname'     => 'local_announcements\external\api',
+        'methodname'    => 'get_impersonate_users',
+        'classpath'     => '',
+        'description'   => 'Get\'s a list of users for impersonation',
+        'type'          => 'read',
+        'loginrequired' => true,
+        'ajax'          => true,
+    ],
+
+
+
     
 ];

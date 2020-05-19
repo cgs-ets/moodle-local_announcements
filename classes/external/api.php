@@ -50,5 +50,6 @@ class api extends external_api {
     use get_audienceselector_users;
     use get_moderation_for_audiences;
     use get_ccgroups_for_audiences;
+    use get_impersonate_users;
     
 }

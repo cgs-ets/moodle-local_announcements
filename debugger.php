@@ -60,7 +60,7 @@ $output = '';
 
 echo "<pre>";
 $api = new local_announcements\external\api;
-$out = $api->get_full_message(10);
+$out = $api->get_impersonate_users("te");
 var_export($out);
 exit;
 

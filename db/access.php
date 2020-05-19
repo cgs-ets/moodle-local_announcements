@@ -56,4 +56,9 @@ $capabilities = [
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array(), //no roles are be given this capability by default
     ],
+    'local/announcements:impersonate' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(), //no roles are be given this capability by default
+    ],
 ];

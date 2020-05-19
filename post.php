@@ -60,6 +60,7 @@ $post->message       = '';
 $post->messageformat = editors_get_preferred_format();
 $post->messagetrust = 1; // True to allow for special content such as clickview.
 $post->audiencesjson = '';
+$post->impersonate = '';
 
 if (!empty($edit)) { 
     //Load the announcement data into the form.
@@ -75,6 +76,7 @@ if (!empty($edit)) {
         $post->messageformat  = editors_get_preferred_format();
         $post->messagetrust   = 1; // True to allow for special content such as clickview.
         $post->audiencesjson  = $announcement->get('audiencesjson');
+        $post->impersonate    = $announcement->get('impersonate');
         $post->timestart      = $announcement->get('timestart');
         $post->timeend        = $announcement->get('timeend');
         $post->mailed         = $announcement->get('mailed');
@@ -117,6 +119,7 @@ $mformpost->set_data(
             'itemid' => $draftideditor
         ),
         'audiencesjson' => $post->audiencesjson,
+        'impersonate' => $post->impersonate,
         'forcesend' => !empty($post->forcesend),
     ) +
 
@@ -137,6 +140,9 @@ if ($formdata = $mformpost->get_data()) {
     $formdata->itemid = $formdata->message['itemid'];
     $formdata->messageformat = $formdata->message['format'];
     $formdata->message = $formdata->message['text'];
+
+    // See if impersonate has been set.
+    $formdata->impersonate = isset($formdata->impersonate) ? $formdata->impersonate : '';
 
     // See if remail has been set.
     $formdata->remail = isset($formdata->remail) ? $formdata->remail : 0;

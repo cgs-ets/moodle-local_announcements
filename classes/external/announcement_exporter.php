@@ -144,7 +144,11 @@ class announcement_exporter extends persistent_exporter {
 	protected function get_other_values(renderer_base $output) {
 		global $USER, $DB, $OUTPUT, $PAGE;
 
-        $iscreator = $this->data->authorusername == $USER->username ? 1 : 0;
+		// Author and impersonated user are both considered creator.
+		$iscreator = 0;
+		if ($this->data->authorusername == $USER->username || $this->data->impersonate == $USER->username) {
+			$iscreator = 1;
+		}
 
         // Give admins the same power as the creator.
         if (is_user_admin()) {
@@ -187,6 +191,10 @@ class announcement_exporter extends persistent_exporter {
         }
 
     	// Get the author profile details.
+    	// If the announcement was sent as someone else replace the author.
+    	if (!empty($this->data->impersonate)) {
+    		$this->data->authorusername = $this->data->impersonate;
+    	}
         $author = $DB->get_record('user', array('username'=>$this->data->authorusername));
         $authorphoto = new \moodle_url('/user/pix.php/'.$author->id.'/f2.jpg');
         $authorfullname = fullname($author);
@@ -227,7 +235,7 @@ class announcement_exporter extends persistent_exporter {
 
     	// Replace images, videos and iframes in short message with a word.
 		$dom = new \DOMDocument;
-		@$dom->loadHTML($shortmessage);
+		@$dom->loadHTML($shortmessage, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 		foreach( $dom->getElementsByTagName("img") as $img ) {
 		    $text = $dom->createElement("p", "(image)");
 		    $img->parentNode->replaceChild($text, $img);
@@ -240,8 +248,7 @@ class announcement_exporter extends persistent_exporter {
 		    $text = $dom->createElement('p', "(iframe)");
 		    $iframe->parentNode->replaceChild($text, $iframe);
 		}
-		$shortmessage = $dom->saveHTML();
-
+		$shortmessage = trim($dom->saveHTML());
     	$islong = ($shortmessage != $this->data->message);
 
 		// Rewrite pluginfile urls.

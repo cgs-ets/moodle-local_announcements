@@ -25,8 +25,8 @@
 /**
  * @module local_announcements/post
  */
-define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/modal_factory', 'core/modal_events', 'core/templates'], 
-    function($, AudienceSelector, Log, ModalFactory, ModalEvents, Templates) {    
+define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/modal_factory', 'core/modal_events', 'core/templates', 'core/form-autocomplete'], 
+    function($, AudienceSelector, Log, ModalFactory, ModalEvents, Templates, AutoComplete) {    
     'use strict';
 
     /**
@@ -84,6 +84,15 @@ define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/moda
             cancel = true;
         });
 
+        // Fix for bug: when editing an announcement that has an initial send as value, the click event 
+        // to remove the value does not work until the input is triggered in some way.
+        // Trigger a rerender of the selection list by clicking the drop down. The timeout
+        // is a hack because this fix won't work if the autocomplete field hasn't been loaded yet.
+        setTimeout(function(){ 
+            $('select[name="impersonate"]').parent().find('.form-autocomplete-downarrow').click();
+            $('select[name="impersonate"]').parent().find('input').blur();
+        }, 3000);
+        
     };
 
     /**

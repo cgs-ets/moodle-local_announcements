@@ -86,6 +86,15 @@ function xmldb_local_announcements_upgrade($oldversion) {
         }
     }
 
+    if ($oldversion < 2020051900) {
+        $table = new xmldb_table('ann_posts');
+        $impersonate = new xmldb_field('impersonate', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null, null, 'timeedited');
+
+        if (!$dbman->field_exists($table, $impersonate)) {
+            $dbman->add_field($table, $impersonate);
+        }
+    }
+
     return true;
 
 }

@@ -79,7 +79,7 @@ class form_post extends \moodleform {
      * @return void
      */
     function definition() {
-        global $CFG, $OUTPUT;
+        global $CFG, $OUTPUT, $USER;
 
         $mform =& $this->_form;
 
@@ -88,24 +88,24 @@ class form_post extends \moodleform {
 
         $mform->addElement('header', 'general', '');
 
-        // Subject
+        // Subject.
         $mform->addElement('text', 'subject', get_string('postform:subject', 'local_announcements'), 'size="48"');
         $mform->setType('subject', PARAM_TEXT);
         $mform->addRule('subject', get_string('required'), 'required', null, 'client');
         $mform->addRule('subject', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
-        // Message
+        // Message.
         $mform->addElement('editor', 'message', get_string('postform:message', 'local_announcements'), null, self::editor_options((empty($post->id) ? null : $post->id)));
         $mform->setType('message', PARAM_RAW);
         $mform->addRule('message', get_string('required'), 'required', null, 'client');
 
-        // Attachments
+        // Attachments.
         $mform->addElement('filemanager', 'attachments', get_string('postform:attachment', 'local_announcements'), null,
             self::attachment_options());
         $mform->addHelpButton('attachments', 'postform:attachment', 'local_announcements');
 
         /*----------------------
-         *   Audience selector
+         *   Audience selector.
          *----------------------*/
         $mform->addElement('header', 'selectaudience', get_string('audienceselector:heading', 'local_announcements'));
         $mform->addElement('html', '<p>'.get_string('audienceselector:info', 'local_announcements').'</p>');
@@ -120,23 +120,50 @@ class form_post extends \moodleform {
         $mform->addElement('html', $audienceselectorhtml);
         $mform->setExpanded('selectaudience');
 
-        // Display period
-        $mform->addElement('header', 'displayperiod', get_string('postform:displayperiod', 'local_announcements'));
+        /*----------------------
+         *   Display settings.
+         *----------------------*/
+        $mform->addElement('header', 'displaysettings', get_string('postform:displaysettings', 'local_announcements'));
+        // Impersonate.
+        $usercontext = \context_user::instance($USER->id);
+        if (has_capability('local/announcements:impersonate', $usercontext)) {
+            $options = array(
+                'multiple' => false,
+                'noselectionstring' => get_string('postform:impersonatenoselection', 'local_announcements'),
+                'placeholder' => get_string('postform:impersonateplaceholder', 'local_announcements'),
+                'ajax' => 'local_announcements/impersonatefield',
+                'valuehtmlcallback' => function($value) {
+                    global $DB, $OUTPUT;
+                    if ($user = $DB->get_record('user', ['username' => $value], '*', IGNORE_MISSING)) {
+                        $details = user_get_user_details($user);
+                        return '<span><img class="rounded-circle" height="18" src="' .
+                                $details['profileimageurlsmall'] .
+                                '" alt="" role="presentation"> <span>' .
+                                $details['fullname'] .
+                                '</span></span>';
+                    }
+                }
+            );
+            $mform->addElement('autocomplete', 'impersonate', get_string('postform:impersonate', 'local_announcements'), array(), $options);
+        }
+        // Display period.
         $mform->addElement('date_time_selector', 'timestart', get_string('postform:displaystart', 'local_announcements'));
-
         $mform->addElement('date_time_selector', 'timeend', get_string('postform:displayend', 'local_announcements'),
             array('optional' => true));
+        // Force send.
         $mform->addElement('checkbox', 'forcesend', get_string('postform:forcesend', 'local_announcements'), '<p style="color:red;">' . get_string('postform:forcesendnote', 'local_announcements') . '</p>');
-
-        // Resend digest option if already mailed
+        // Resend digest option if already mailed.
         if ($edit) {
             if ($post->mailed) {
                 $mform->addElement('checkbox', 'remail', get_string('postform:remail', 'local_announcements'), '<p style="color:red;">' . get_string('postform:remailnote', 'local_announcements') . '</p>');
                 $mform->hideIf('remail', 'forcesend', 'checked');
             }
         }
+        $mform->setExpanded('displaysettings');
 
-        // buttons
+        /*----------------------
+         *   Buttons.
+         *----------------------*/
         if ($edit) {
             $submitstring = get_string('savechanges');
         } else {
