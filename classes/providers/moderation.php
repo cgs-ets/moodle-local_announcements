@@ -241,7 +241,7 @@ class moderation {
 
         // Check whether the user is an "unmoderated announcer".
         $usercontext = context_user::instance($USER->id);
-        if (has_capability('local/announcements:unmoderatedannouncer', $usercontext)) {
+        if (has_capability('local/announcements:unmoderatedannouncer', $usercontext, null, false)) {
             return;
         }
 
@@ -250,7 +250,7 @@ class moderation {
 
         // If the announcement is a force send check whether user has cap to send them without mod.
         if ($announcement->get('forcesend')) {
-            if (has_capability('local/announcements:emergencyannouncer', $usercontext)) {
+            if (has_capability('local/announcements:emergencyannouncer', $usercontext, null, false)) {
                 // No moderation needed.
                 return;
             }
@@ -325,7 +325,7 @@ class moderation {
 
         // Check whether the user is an "unmoderated announcer".
         $usercontext = context_user::instance($USER->id);
-        if (has_capability('local/announcements:unmoderatedannouncer', $usercontext)) {
+        if (has_capability('local/announcements:unmoderatedannouncer', $usercontext, null, false)) {
             return $moderation;
         }
 

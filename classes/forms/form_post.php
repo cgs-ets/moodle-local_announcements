@@ -126,7 +126,7 @@ class form_post extends \moodleform {
         $mform->addElement('header', 'displaysettings', get_string('postform:displaysettings', 'local_announcements'));
         // Impersonate.
         $usercontext = \context_user::instance($USER->id);
-        if (has_capability('local/announcements:impersonate', $usercontext)) {
+        if (has_capability('local/announcements:impersonate', $usercontext, null, false)) {
             $options = array(
                 'multiple' => false,
                 'noselectionstring' => get_string('postform:impersonatenoselection', 'local_announcements'),
@@ -136,7 +136,7 @@ class form_post extends \moodleform {
                     global $DB, $OUTPUT;
                     if ($user = $DB->get_record('user', ['username' => $value], '*', IGNORE_MISSING)) {
                         $details = user_get_user_details($user);
-                        return '<span><img class="rounded-circle" height="18" src="' .
+                        return '<span class="impersonate-initialval"><img class="rounded-circle" height="18" src="' .
                                 $details['profileimageurlsmall'] .
                                 '" alt="" role="presentation"> <span>' .
                                 $details['fullname'] .
