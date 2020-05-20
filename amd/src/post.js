@@ -88,11 +88,16 @@ define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/moda
         // to remove the value does not work until the input is triggered in some way.
         // Trigger a rerender of the selection list by clicking the drop down. The timeout
         // is a hack because this fix won't work if the autocomplete field hasn't been loaded yet.
+        // A hacky downside to this is that it shifts the focus and user could be in the process of typing in another field.
+        // Only perform this check when editing an announcement and there is a selected value.
         setTimeout(function(){ 
-            $('select[name="impersonate"]').parent().find('.form-autocomplete-downarrow').click();
-            $('select[name="impersonate"]').parent().find('input').blur();
+            var imroot = self.rootel.find('select[name="impersonate"]').parent();
+            if ( self.rootel.find('input[name="edit"]').val() > 0 && imroot.find('[role="listitem"]').length > 0) {
+                imroot.find('.form-autocomplete-downarrow').click();
+                imroot.find('input').blur();
+            }
         }, 3000);
-        
+
     };
 
     /**
