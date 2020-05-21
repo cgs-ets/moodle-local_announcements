@@ -25,7 +25,6 @@ namespace local_announcements\external;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/announcements/lib.php');
 require_once($CFG->dirroot . '/local/announcements/locallib.php');
 use renderer_base;
 use core\external\exporter;

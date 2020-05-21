@@ -25,7 +25,6 @@
 
 // Include required files and classes.
 require_once(dirname(__FILE__) . '/../../config.php');
-require_once($CFG->dirroot . '/local/announcements/lib.php');
 require_once($CFG->dirroot . '/local/announcements/locallib.php');
 use local_announcements\persistents\announcement;
 use local_announcements\external\announcement_exporter;

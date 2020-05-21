@@ -26,7 +26,6 @@ namespace local_announcements\search;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/announcements/lib.php');
 require_once($CFG->dirroot . '/local/announcements/locallib.php');
 use local_announcements\persistents\announcement;
 

@@ -28,7 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 
 use local_announcements\persistents\announcement;
 use local_announcements\external\announcement_exporter;
-require_once($CFG->dirroot . '/local/announcements/lib.php');
 require_once($CFG->dirroot . '/local/announcements/locallib.php');
 
 /**

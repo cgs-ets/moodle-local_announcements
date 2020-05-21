@@ -25,7 +25,6 @@ namespace local_announcements\persistents;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/local/announcements/lib.php');
 require_once($CFG->dirroot . '/local/announcements/locallib.php');
 use \core\persistent;
 use local_announcements\providers\audience_loader;

@@ -26,7 +26,6 @@ define('NO_MOODLE_COOKIES', true);
 define('NO_DEBUG_DISPLAY', true);
 
 require_once('../../config.php');
-require_once('lib.php');
 require_once('locallib.php');
 use \local_announcements\providers\moderation;
 

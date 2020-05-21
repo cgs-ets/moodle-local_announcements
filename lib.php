@@ -24,10 +24,6 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Include required files */
 require_once($CFG->libdir.'/filelib.php');
-use \local_announcements\providers\audience_loader;
-use \local_announcements\persistents\announcement;
-use \local_announcements\providers\moderation;
-
 
 /// CONSTANTS ///////////////////////////////////////////////////////////
 define('ANN_MAILED_PENDING', 0);
