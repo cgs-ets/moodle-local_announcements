@@ -112,6 +112,9 @@ If union the post contains a union, moderation is required if moderation is requ
 ### Moderator Assistants
 Assistants to moderators can action items on behalf of the moderator. They also bypass moderation when sending an announcement that would ordinarily be moderated by the user they assist.
 
+### Impersonators
+An index of users that can post announcements on behalf of other users. The user that is being impersonated is used when determining moderation requirements. If the user being impersonated does not need moderation for a given audience and the actual author does, the post will bypass moderation as the impersonated user is used.
+
 ### CC Groups
 Some users need to be CC'd into audiences they are not directly enrolled or involved in. "CC groups" allows you to include a group of users to the list of ordinary recipients based on the audiences and conditions selected.
 
@@ -129,7 +132,6 @@ Some users need to be CC'd into audiences they are not directly enrolled or invo
 -   local/announcements:auditor → Allows users to view all announcements in the system
 -   local/announcements:emergencyannouncer → Allows users to send immediate (forcesend) announcements without moderation.
 -   local/announcements:unmoderatedannouncer → Allows users to post announcements without moderation.
--   local/announcements:impersonate → Allows users to post announcements as another user.
 
 ### Database Diagram
 ![Database Diagram](/screenshots/local_announcements_database_diagram.png?raw=true)

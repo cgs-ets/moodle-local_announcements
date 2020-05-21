@@ -26,6 +26,7 @@
 // Include required files and classes.
 require_once('../../config.php');
 require_once('lib.php');
+require_once('locallib.php');
 use local_announcements\persistents\announcement;
 use local_announcements\providers\audience_loader;
 use local_announcements\providers\moderation;

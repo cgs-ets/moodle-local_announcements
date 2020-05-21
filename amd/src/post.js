@@ -25,8 +25,8 @@
 /**
  * @module local_announcements/post
  */
-define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/modal_factory', 'core/modal_events', 'core/templates', 'core/form-autocomplete'], 
-    function($, AudienceSelector, Log, ModalFactory, ModalEvents, Templates, AutoComplete) {    
+define(['jquery', 'local_announcements/audienceselector', 'local_announcements/impersonateselector', 'core/log', 'core/modal_factory', 'core/modal_events', 'core/templates', 'core/form-autocomplete'], 
+    function($, AudienceSelector, ImpersonateSelector, Log, ModalFactory, ModalEvents, Templates, AutoComplete) {    
     'use strict';
 
     /**
@@ -69,6 +69,9 @@ define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/moda
         // Initialise audience selector.
         AudienceSelector.init();
 
+        // Initialise the impersonate selector.
+        ImpersonateSelector.init();
+
         // Handle submit. Adding a click event to the post button causes it to not work
         // so event is on form submit instead. 
         self.rootel.on('submit', 'form[data-form=lann-post]', function(e) {
@@ -84,19 +87,26 @@ define(['jquery', 'local_announcements/audienceselector', 'core/log', 'core/moda
             cancel = true;
         });
 
-        // Fix for bug: when editing an announcement that has an initial send as value, the click event 
-        // to remove the value does not work until the input is triggered in some way.
-        // Trigger a rerender of the selection list by clicking the drop down. The timeout
-        // is a hack because this fix won't work if the autocomplete field hasn't been loaded yet.
-        // A hacky downside to this is that it shifts the focus and user could be in the process of typing in another field.
-        // Only perform this check when editing an announcement and there is a selected value.
-        setTimeout(function(){ 
+        // Fix for bug: when editing an announcement that has an impersonate value, the autocomplete
+        // field does not initialise correctly. The click event to remove the value does not work 
+        // and the initial value is not set in the underlying select. To make the remove work, the input 
+        // must be triggered in some way causing the selected list to be rerendered. This fix 
+        // triggers a click event on the drop down causing a rerender of the autocompete field. A blur event
+        // on the input then hides the suggestions but also causes the initial selections to be deselected.
+        // The selection is reselected. The select to The timeout is added because the fix won't work if 
+        // the autocomplete field hasn't been initialised yet. A hacky downside to this is that it shifts the 
+        // field focus and the user could be in the process of typing in another field.
+        /*setTimeout(function(){ 
             var imroot = self.rootel.find('select[name="impersonate"]').parent();
+            // Only perform this check when editing an announcement and there is a selected value.
             if ( self.rootel.find('input[name="edit"]').val() > 0 && imroot.find('[role="listitem"]').length > 0) {
                 imroot.find('.form-autocomplete-downarrow').click();
                 imroot.find('input').blur();
+                var iminitialval = self.rootel.find('input[name="initialimpersonate"]').val();
+                self.rootel.find('select[name="impersonate"]').val(iminitialval);
             }
-        }, 3000);
+            
+        }, 3000);*/
 
     };
 

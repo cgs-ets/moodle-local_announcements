@@ -37,6 +37,7 @@ use local_announcements\providers\audience_loader;
 
 require_once($CFG->libdir.'/externallib.php');
 require_once($CFG->dirroot . '/local/announcements/lib.php');
+require_once($CFG->dirroot . '/local/announcements/locallib.php');
 
 /**
  * Trait implementing the external function local_announcements_get_audience_items.

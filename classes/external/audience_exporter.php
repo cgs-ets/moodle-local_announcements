@@ -30,6 +30,7 @@ use renderer_base;
 use local_announcements\providers\audience_loader;
 
 require_once($CFG->dirroot . '/local/announcements/lib.php');
+require_once($CFG->dirroot . '/local/announcements/locallib.php');
 
 /**
  * Exporter of a single period

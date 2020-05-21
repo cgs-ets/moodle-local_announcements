@@ -28,6 +28,12 @@
     <div class="header">
         <div class="leftwrap">
             <div class="subject">{{subject}}</div>
+            {{#impersonate}}{{#iscreator}}
+                <div class="impersonatedby">
+                    <div class="userphoto"><a href="{{impersonatedbyurl}}" title="{{impersonatedbyfullname}} profile"><img src="{{impersonatedbyphoto}}" alt="{{impersonatedbyfullname}}" title="{{impersonatedbyfullname}}" /></a></div>
+                    <span>Impersonated by {{impersonatedbyfullname}}</span>
+                </div>
+            {{/iscreator}}{{/impersonate}}
             <div class="userphoto"><a href="{{authorurl}}" title="{{authorfullname}} profile"><img src="{{authorphoto}}" alt="{{authorfullname}}" title="{{authorfullname}}" /></a></div>
             <div class="author">{{authorfullname}}</div>
         </div>

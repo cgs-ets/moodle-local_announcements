@@ -26,6 +26,7 @@ namespace local_announcements\providers;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/local/announcements/lib.php');
+require_once($CFG->dirroot . '/local/announcements/locallib.php');
 use local_announcements\persistents\announcement;
 use local_announcements\providers\privileges;
 use \context_user;
@@ -239,14 +240,21 @@ class moderation {
         // Deactivate any current moderations.
         static::deactivate_current_moderation($postid);
 
+        // Load the announcement persistent.
+        $announcement = new announcement($postid);
+
+        // The user that will be used to determine moderation.
+        $user = \core_user::get_user($USER->id);
+        var_export($user);
+        if (!empty($announcement->get('impersonate'))) {
+            $user = \core_user::get_user_by_username($announcement->get('impersonate'));
+        }
+
         // Check whether the user is an "unmoderated announcer".
-        $usercontext = context_user::instance($USER->id);
+        $usercontext = context_user::instance($user->id);
         if (has_capability('local/announcements:unmoderatedannouncer', $usercontext, null, false)) {
             return;
         }
-
-        // Load the announcement persistent.
-        $announcement = new announcement($postid);
 
         // If the announcement is a force send check whether user has cap to send them without mod.
         if ($announcement->get('forcesend')) {
@@ -280,7 +288,7 @@ class moderation {
             if ($modsettings['autoapprove']) {
                 // Auto approve the announcement.
                 $announcement->set('modstatus', ANN_MOD_STATUS_APPROVED);
-                $modrec->actionedusername = $USER->username;
+                $modrec->actionedusername = $user->username;
                 $modrec->status = ANN_MOD_STATUS_APPROVED;
                 $modrec->mailed = ANN_MOD_MAIL_SENT; // Mark as sent.
                 $modrec->comment = 'Auto approved.';

@@ -26,6 +26,7 @@ namespace local_announcements\external;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/local/announcements/lib.php');
+require_once($CFG->dirroot . '/local/announcements/locallib.php');
 use core\external\persistent_exporter;
 use renderer_base;
 use \local_announcements\persistents\announcement;
@@ -132,6 +133,18 @@ class announcement_exporter extends persistent_exporter {
 	        'modinfo' => [
 	        	'type' => PARAM_RAW,
 	        ],
+	        'impersonatedbyusername' => [
+	        	'type' => PARAM_RAW,
+	        ],
+	        'impersonatedbyphoto' => [
+	        	'type' => PARAM_RAW,
+	        ],
+	        'impersonatedbyfullname' => [
+	        	'type' => PARAM_RAW,
+	        ],
+	        'impersonatedbyurl' => [
+	        	'type' => PARAM_RAW,
+	        ],
 	    ];
 	}
 
@@ -192,8 +205,15 @@ class announcement_exporter extends persistent_exporter {
 
     	// Get the author profile details.
     	// If the announcement was sent as someone else replace the author.
+    	$impersonatedbyusername = $impersonatedbyphoto = $impersonatedbyfullname = $impersonatedbyurl = '';
     	if (!empty($this->data->impersonate)) {
+    		// Make the impersonated user the author.
+	        $impersonatedbyusername = $this->data->authorusername;
     		$this->data->authorusername = $this->data->impersonate;
+    		$impersonatedby = $DB->get_record('user', array('username'=>$impersonatedbyusername));
+    		$impersonatedbyphoto = new \moodle_url('/user/pix.php/'.$impersonatedby->id.'/f2.jpg');
+	        $impersonatedbyfullname = fullname($impersonatedby);
+	        $impersonatedbyurl = new \moodle_url('/user/profile.php', array('id' => $impersonatedby->id));
     	}
         $author = $DB->get_record('user', array('username'=>$this->data->authorusername));
         $authorphoto = new \moodle_url('/user/pix.php/'.$author->id.'/f2.jpg');
@@ -297,6 +317,10 @@ class announcement_exporter extends persistent_exporter {
 	        'ismodpending' => $ismodpending,
 	        'ismodrejected' => $ismodrejected,
 	        'modinfo' => $modinfo,
+	        'impersonatedbyusername' => $impersonatedbyusername,
+	        'impersonatedbyphoto' => $impersonatedbyphoto,
+	        'impersonatedbyfullname' => $impersonatedbyfullname,
+	        'impersonatedbyurl' => $impersonatedbyurl,
 	    ];
 	}
 

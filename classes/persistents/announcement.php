@@ -26,6 +26,7 @@ namespace local_announcements\persistents;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/local/announcements/lib.php');
+require_once($CFG->dirroot . '/local/announcements/locallib.php');
 use \core\persistent;
 use local_announcements\providers\audience_loader;
 use local_announcements\providers\moderation;
@@ -403,6 +404,7 @@ class announcement extends persistent {
         }
 
         $sql .= $combosql . ")";
+        $params[] = $user->username;
         $params[] = $user->username;
         $params = array_merge($params, $comboparams);
 
@@ -836,6 +838,18 @@ class announcement extends persistent {
             $announcement->set('authorusername', $USER->username);
             // Set the impersonated user. When editing a different set of rules apply for this field.
             $announcement->set('impersonate', $data->impersonate);
+        }
+
+        // An author can't impersonate themselves.
+        if ($announcement->get('authorusername') == $data->impersonate) {
+            $announcement->set('impersonate', '');
+        }
+
+        // Check that the author can actually impersonate the selected user.
+        if ($data->impersonate) {
+            if (!can_impersonate($announcement->get('authorusername'), $data->impersonate)) {
+                $announcement->set('impersonate', '');
+            }
         }
 
         // Set/update the data.

@@ -86,7 +86,6 @@ $string['announcements:administer'] = 'Administer announcements';
 $string['announcements:auditor'] = 'Audit announcements';
 $string['announcements:emergencyannouncer'] = 'Send immediate announcements without moderation.';
 $string['announcements:unmoderatedannouncer'] = 'Send announcements without moderation.';
-$string['announcements:impersonate'] = 'Send announcements as another user.';
 
 $string['postform:yournewpost'] = 'Your new announcement';
 $string['postform:subject'] = 'Subject';
@@ -112,6 +111,7 @@ $string['postform:postupdatesuccess'] = 'Your post was successfully updated.';
 $string['postform:impersonate'] = 'Send as';
 $string['postform:impersonatenoselection'] = 'No selection - this post will be sent from your own account.';
 $string['postform:impersonateplaceholder'] = 'Search by name';
+$string['postform:impersonateplaceholderdd'] = 'Select a user';
 
 $string['audienceselector:heading'] = 'Audience';
 $string['audienceselector:info'] = 'Target your announcement to a specific audience. Use the buttons below to browse audience types and select from a list of available options.';

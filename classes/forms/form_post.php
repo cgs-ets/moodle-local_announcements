@@ -79,7 +79,7 @@ class form_post extends \moodleform {
      * @return void
      */
     function definition() {
-        global $CFG, $OUTPUT, $USER;
+        global $CFG, $OUTPUT, $USER, $DB;
 
         $mform =& $this->_form;
 
@@ -125,26 +125,50 @@ class form_post extends \moodleform {
          *----------------------*/
         $mform->addElement('header', 'displaysettings', get_string('postform:displaysettings', 'local_announcements'));
         // Impersonate.
-        $usercontext = \context_user::instance($USER->id);
-        if (has_capability('local/announcements:impersonate', $usercontext, null, false)) {
-            $options = array(
-                'multiple' => false,
-                'noselectionstring' => get_string('postform:impersonatenoselection', 'local_announcements'),
-                'placeholder' => get_string('postform:impersonateplaceholder', 'local_announcements'),
-                'ajax' => 'local_announcements/impersonatefield',
-                'valuehtmlcallback' => function($value) {
-                    global $DB, $OUTPUT;
-                    if ($user = $DB->get_record('user', ['username' => $value], '*', IGNORE_MISSING)) {
-                        $details = user_get_user_details($user);
-                        return '<span class="impersonate-initialval"><img class="rounded-circle" height="18" src="' .
-                                $details['profileimageurlsmall'] .
-                                '" alt="" role="presentation"> <span>' .
-                                $details['fullname'] .
-                                '</span></span>';
+        if (is_user_admin() || $DB->record_exists('ann_impersonators', array('authorusername' => $USER->username))) {
+            $mform->addElement('hidden', 'impersonate');
+            $mform->setType('impersonate', PARAM_RAW);
+            // The type of field depends on level of impersonation allowed.
+            $wildcard = false;
+            $options = array();
+            if (is_user_admin() || $DB->record_exists('ann_impersonators', array('authorusername' => $USER->username, 'impersonateuser' => '*'))) {
+                $wildcard = true;
+            } else {
+                $records = $DB->get_records('ann_impersonators', array('authorusername' => $USER->username));
+                foreach ($records as $record) {
+                    if ($record->impersonateuser == '*') {
+                        continue;
                     }
+                    $user = \core_user::get_user_by_username($record->impersonateuser);
+                    $userphoto = new \moodle_url('/user/pix.php/'.$user->id.'/f2.jpg');
+                    $userurl = new \moodle_url('/user/profile.php', array('id' => $user->id));
+                    $options[] = array(
+                        'username' => $user->username,
+                        'fullname' => fullname($user),
+                        'photo' => $userphoto->out(false),
+                    );
                 }
-            );
-            $mform->addElement('autocomplete', 'impersonate', get_string('postform:impersonate', 'local_announcements'), array(), $options);
+            }
+            // Get existing impersonation.
+            $impersonate = null;
+            if ($post->impersonate) {
+                $user = \core_user::get_user_by_username($post->impersonate);
+                $userphoto = new \moodle_url('/user/pix.php/'.$user->id.'/f2.jpg');
+                $userurl = new \moodle_url('/user/profile.php', array('id' => $user->id));
+                $impersonate = array(
+                    'username' => $user->username,
+                    'fullname' => fullname($user),
+                    'photo' => $userphoto->out(false),
+                );
+            }
+
+            // Rendar a user select field.
+            $impersonatefield = $OUTPUT->render_from_template('local_announcements/impersonate_selector', array(
+                'impersonate' => $impersonate,
+                'wildcard' => $wildcard,
+                'users' => $options,
+            )); 
+            $mform->addElement('html', $impersonatefield);
         }
         // Display period.
         $mform->addElement('date_time_selector', 'timestart', get_string('postform:displaystart', 'local_announcements'));

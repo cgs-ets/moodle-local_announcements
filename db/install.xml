@@ -209,5 +209,19 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="ann_impersonators" COMMENT="An index of people that can send announcements on behalf of others.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="authorusername" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="impersonateuser" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="authorusername" UNIQUE="false" FIELDS="authorusername"/>
+        <INDEX NAME="impersonateuser" UNIQUE="false" FIELDS="impersonateuser"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

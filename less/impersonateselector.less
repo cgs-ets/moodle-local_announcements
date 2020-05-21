@@ -1,0 +1,35 @@
+.impersonate-selector {
+	.impersonate-tags {
+		margin-bottom: 8px;
+		overflow: hidden;
+	}
+	.impersonate-tag {
+		background: #deeaff;
+    	padding: 8px 12px;
+    	font-weight: 800;
+    	display: inline-block;
+    	cursor: pointer;
+	}
+	.impersonate-autocomplete {
+		max-width: 500px;
+    	background-color: #fff;
+	}
+	.impersonate-results {
+		display: none;
+		max-width: 500px;
+		padding: 3px 0;
+		border: 1px solid #ccc;
+    	border-top: 0 none;
+    	&.active {
+    		display: block;
+    	}
+	}
+	.impersonate-result {
+	    display: block;
+	    padding: 3px 11px;
+	    cursor: pointer;
+	    &:hover {
+		    background: #f2f2f2;
+		}
+	}
+}
