@@ -25,33 +25,6 @@ defined('MOODLE_INTERNAL') || die();
 /** Include required files */
 require_once($CFG->libdir.'/filelib.php');
 
-/// CONSTANTS ///////////////////////////////////////////////////////////
-define('ANN_MAILED_PENDING', 0);
-define('ANN_MAILED_SUCCESS', 1);
-define('ANN_MAILED_ERROR', 2);
-
-define('ANN_NOTIFIED_PENDING', 0);
-define('ANN_NOTIFIED_SUCCESS', 1);
-define('ANN_NOTIFIED_ERROR', 2);
-
-define('DEFAULT_ANN_PERPAGE', 50);
-define('DEFAULT_SHORTPOST', 300);
-
-// For [mdl_ann_posts].[modrequired].
-define('ANN_MOD_REQUIRED_NO', 0);
-define('ANN_MOD_REQUIRED_YES', 1);
-// For [ann_posts_moderation].[mailed].
-define('ANN_MOD_MAIL_PENDING', 0);
-define('ANN_MOD_MAIL_SENT', 1);
-// For [ann_posts_moderation].[status].
-define('ANN_MOD_STATUS_PENDING', 0);
-define('ANN_MOD_STATUS_APPROVED', 1);
-define('ANN_MOD_STATUS_REJECTED', 2);
-define('ANN_MOD_STATUS_DEFERRED', 3);
-define('ANN_MOD_STATUS_CODES', array('pending', 'approved', 'rejected', 'reassigned'));
-
-/// STANDARD FUNCTIONS ///////////////////////////////////////////////////////////
-
 /**
  * Serves the plugin attachments.
  *
