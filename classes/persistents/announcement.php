@@ -297,7 +297,7 @@ class announcement extends persistent {
 
         // Include announcements the user is allowed to see.
         $sql .= " 
-        AND ( (p.authorusername = ? OR p.impersonate = ?) AND
+        AND ( (p.authorusername = ? OR p.impersonate = ?) OR
                p.id IN ( SELECT pu.postid
                          FROM {ann_posts_users} pu
                         WHERE pu.username = ? )
