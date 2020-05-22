@@ -125,13 +125,14 @@ class form_post extends \moodleform {
          *----------------------*/
         $mform->addElement('header', 'displaysettings', get_string('postform:displaysettings', 'local_announcements'));
         // Impersonate.
-        if (is_user_admin() || $DB->record_exists('ann_impersonators', array('authorusername' => $USER->username))) {
+        if (can_impersonate()) {
             $mform->addElement('hidden', 'impersonate');
             $mform->setType('impersonate', PARAM_RAW);
             // The type of field depends on level of impersonation allowed.
             $wildcard = false;
             $options = array();
-            if (is_user_admin() || $DB->record_exists('ann_impersonators', array('authorusername' => $USER->username, 'impersonateuser' => '*'))) {
+            // Check if can impersonate any staff.
+            if (can_impersonate_any()) {
                 $wildcard = true;
             } else {
                 $records = $DB->get_records('ann_impersonators', array('authorusername' => $USER->username));

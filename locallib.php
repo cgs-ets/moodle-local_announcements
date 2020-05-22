@@ -264,7 +264,14 @@ function can_view_all_in_context($context) {
     return false;
 }
 
-function can_impersonate($author, $impersonate) {
+function can_impersonate() {
+    global $DB;
+    
+    return (is_user_admin() || $DB->record_exists('ann_impersonators', array('authorusername' => $USER->username)));
+}
+
+
+function can_impersonate_user($author, $impersonate) {
     global $DB;
     
     // Admins can impersonate.
@@ -281,6 +288,17 @@ function can_impersonate($author, $impersonate) {
     
     return (!empty($exists));
 }
+
+function can_impersonate_any() {
+    global $DB;
+    
+    return (is_user_admin() || 
+        $DB->record_exists('ann_impersonators', array(
+            'authorusername' => $USER->username, 
+            'impersonateuser' => '*'))
+    );
+}
+
 
 function pr() {
     $args = func_get_args();
