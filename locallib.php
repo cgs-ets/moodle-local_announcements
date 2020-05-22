@@ -267,6 +267,11 @@ function can_view_all_in_context($context) {
 function can_impersonate($author, $impersonate) {
     global $DB;
     
+    // Admins can impersonate.
+    if (is_user_admin()) {
+        return true;
+    }
+
     $sql = "SELECT *
             FROM {ann_impersonators}
             WHERE authorusername = ?
