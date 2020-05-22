@@ -29,6 +29,7 @@ require_once($CFG->dirroot . '/local/announcements/locallib.php');
 use local_announcements\persistents\announcement;
 use local_announcements\providers\privileges;
 use \context_user;
+use \context_system;
 use \core_user;
 
 /**
@@ -242,28 +243,36 @@ class moderation {
         // Load the announcement persistent.
         $announcement = new announcement($postid);
 
-        // The user that will be used to determine moderation.
-        $user = \core_user::get_user($USER->id);
-        var_export($user);
-        if (!empty($announcement->get('impersonate'))) {
-            $user = \core_user::get_user_by_username($announcement->get('impersonate'));
-        }
-
-        // Check whether the user is an "unmoderated announcer".
-        $usercontext = context_user::instance($user->id);
-        if (has_capability('local/announcements:unmoderatedannouncer', $usercontext, null, false)) {
-            return;
-        }
-
         // If the announcement is a force send check whether user has cap to send them without mod.
         if ($announcement->get('forcesend')) {
-            if (has_capability('local/announcements:emergencyannouncer', $usercontext, null, false)) {
-                // No moderation needed.
+            if (is_user_emergency_announcer($USER)) {
+                // The author has the capability. No moderation needed.
                 return;
             }
         }
 
-        // Determine moderation for the selected audiences.
+        // Check moderation for the impersonated user first.
+        // Skip moderation if either the author or the user does not require moderation.
+        // If both require moderation then go with the author's moderation requirements.
+        if (!empty($announcement->get('impersonate'))) {
+            // Load the impersonated user.
+            $impersonateuser = \core_user::get_user_by_username($announcement->get('impersonate'));
+
+            // Check the forcesend capability.
+            if ($announcement->get('forcesend')) {
+                if (is_user_emergency_announcer($impersonateuser)) {
+                    return;
+                }
+            }
+
+            // Check whether the impersonated user requires moderation.
+            $impersonatemodsettings = static::get_moderation_for_audiences($tags, $impersonateuser);
+            if ( ! $impersonatemodsettings['required']) {
+                return;
+            }
+        }
+
+        // Determine whether the author requires moderation for the selected audiences.
         $modsettings = static::get_moderation_for_audiences($tags);
 
         // Save moderation to database.
@@ -321,17 +330,21 @@ class moderation {
      * of the specified audiences. If a check matches multiple rows where modrequired
      * is true, modprioirty is used to determine who should moderate the post.
      *
+     * @param object $user. The user record.
      * @param array $tags. The selected audiences.
      * @return void.
      */
-    public static function get_moderation_for_audiences($tags) {
+    public static function get_moderation_for_audiences($tags, $user = null) {
         global $USER;
 
+        if (empty($user)) {
+            $user = $USER;
+        }
         // Default.
         $moderation = array('required' => false, 'modpriority' => -999);
 
         // Check whether the user is an "unmoderated announcer".
-        $usercontext = context_user::instance($USER->id);
+        $usercontext = context_user::instance($user->id);
         if (has_capability('local/announcements:unmoderatedannouncer', $usercontext, null, false)) {
             return $moderation;
         }
@@ -349,7 +362,7 @@ class moderation {
                     $roles = array_column($audience->selectedroles, 'code');
                 }
                 foreach ($audience->selecteditems as $item) {
-                    $mods = static::is_mod_required_for_audience($type, $item->code, $roles, $condition);
+                    $mods = static::is_mod_required_for_audience($type, $item->code, $roles, $condition, $user);
                     foreach ($mods as $mod) {
                         if ($condition == 'intersection') {
                             if ($mod['required']) {
@@ -416,11 +429,10 @@ class moderation {
         if ($moderation['required']) {
             $moderation['autoapprove'] = false;
             $assistants = static::get_moderator_assistants($moderation['modusername']);
-            if ($moderation['modusername'] == $USER->username || array_key_exists($USER->username, $assistants)) {
+            if ($moderation['modusername'] == $user->username || array_key_exists($user->username, $assistants)) {
                  $moderation['autoapprove'] = true;
             }
         }
-
 
         return $moderation;
     }
@@ -433,10 +445,15 @@ class moderation {
     * @param array $code. The selected audience code.
     * @param array $roles. The selected audience roles.
     * @param string $condition. The audience condition.
+    * @param object $user. The user record.
     * @return array. Index 0 is always the main moderation check, additional indexes any threshold based checks.
     */
-    public static function is_mod_required_for_audience($type, $code, $roles = array(), $condition = "*") {
+    public static function is_mod_required_for_audience($type, $code, $roles = array(), $condition = "*", $user = null) {
         global $USER;
+
+        if (empty($user)) {
+            $user = $USER;
+        }
 
         // Default, mod not required.
         $mods = array();
@@ -454,7 +471,7 @@ class moderation {
         );
 
         // Announcement admins always bypass moderation.
-        if (is_user_admin()) { 
+        if (is_user_admin($user)) {
             return $mods;
         }
 
@@ -508,6 +525,16 @@ class moderation {
         }
 
         return $mods;
+    }
+
+    /**
+     * Check whether user is an emergency announcer.
+     *
+     * @param string $user. User record
+     * @return array|bool.
+     */
+    public static function is_user_emergency_announcer($user) {
+        return has_capability('local/announcements:emergencyannouncer', context_system::instance(), $user, false);
     }
 
     /**

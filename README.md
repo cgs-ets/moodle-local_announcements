@@ -113,7 +113,7 @@ If union the post contains a union, moderation is required if moderation is requ
 Assistants to moderators can action items on behalf of the moderator. They also bypass moderation when sending an announcement that would ordinarily be moderated by the user they assist.
 
 ### Impersonators
-An index of users that can post announcements on behalf of other users. The user that is being impersonated is used when determining moderation requirements. If the user being impersonated does not need moderation for a given audience and the actual author does, the post will bypass moderation as the impersonated user is used.
+The `ann_impersonators` table is used to control impersonation capabilities. It contains an index of users that can post announcements on behalf of other users. A wildcard "\" character in the `impersonateuser` field enables the author to search and impersonate any "staff" member. Announcement admins automatically have this ability. This relies on a `CampusRole` custom profile field. Moderation is bypassed if either the author OR the user that is being impersonated does not require moderation. If both users require moderation based on the selected audiences, the author's moderation requirements is used. Users can edit and delete the announcements that they have been impersonated in, however they cannot change the impersonated user to another user. 
 
 ### CC Groups
 Some users need to be CC'd into audiences they are not directly enrolled or involved in. "CC groups" allows you to include a group of users to the list of ordinary recipients based on the audiences and conditions selected.

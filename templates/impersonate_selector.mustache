@@ -23,14 +23,14 @@
 
     View for the impersonate autocomplete field.
 }}
-<div class="impersonate-selector row form-group"{{#wildcard}} data-wildcard="true"{{/wildcard}}{{#impersonate}} data-photo="{{impersonate.photo}}" data-fullname="{{impersonate.fullname}}"{{/impersonate}} {{#users}}data-hasresults="true"{{/users}}>
+<div class="impersonate-selector row form-group"{{#wildcard}} data-wildcard="true"{{/wildcard}}{{#users}} data-hasresults="true"{{/users}}>
     <div class="col-md-3">
         <label class="col-form-label d-inline " for="impersonate-autocomplete">
             {{#str}}postform:impersonate, local_announcements{{/str}}
         </label>
     </div>
     <div class="col-md-9">
-        <div class="impersonate-tags"></div>
+        <div class="impersonate-selection"></div>
         <input type="text" name="impersonate-autocomplete" class="form-control impersonate-autocomplete" {{#wildcard}}placeholder="{{#str}}postform:impersonateplaceholder, local_announcements{{/str}}"{{/wildcard}} {{^wildcard}}placeholder="{{#str}}postform:impersonateplaceholderdd, local_announcements{{/str}}" readonly{{/wildcard}} aria-expanded="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-autocomplete="list">
         <div class="impersonate-results">
             {{>local_announcements/impersonate_selector_results}}

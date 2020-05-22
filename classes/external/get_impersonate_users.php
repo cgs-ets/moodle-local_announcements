@@ -71,7 +71,7 @@ trait get_impersonate_users {
             $users[] = array(
                 'username' => $user->username,
                 'fullname' => fullname($user),
-                'photo' => $userphoto->out(false),
+                'photourl' => $userphoto->out(false),
             );
         }
         return $users;
@@ -88,7 +88,7 @@ trait get_impersonate_users {
                 array(
                     'username' => new external_value(PARAM_RAW, 'The user\'s username'),
                     'fullname' => new external_value(PARAM_RAW, 'The user\'s full name'),
-                    'photo' => new external_value(PARAM_RAW, 'The user\'s photo src'),
+                    'photourl' => new external_value(PARAM_RAW, 'The user\'s photo src'),
                 )
             )
         );

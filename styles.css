@@ -537,7 +537,7 @@ body.path-local-announcements.modal-open {
   }
 }
 /* End snip */
-.impersonate-selector .impersonate-tags {
+.impersonate-selector .impersonate-selection {
   margin-bottom: 8px;
   overflow: hidden;
 }

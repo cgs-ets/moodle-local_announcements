@@ -145,7 +145,7 @@ class form_post extends \moodleform {
                     $options[] = array(
                         'username' => $user->username,
                         'fullname' => fullname($user),
-                        'photo' => $userphoto->out(false),
+                        'photourl' => $userphoto->out(false),
                     );
                 }
             }
@@ -158,7 +158,7 @@ class form_post extends \moodleform {
                 $impersonate = array(
                     'username' => $user->username,
                     'fullname' => fullname($user),
-                    'photo' => $userphoto->out(false),
+                    'photourl' => $userphoto->out(false),
                 );
             }
 
@@ -168,6 +168,12 @@ class form_post extends \moodleform {
                 'wildcard' => $wildcard,
                 'users' => $options,
             )); 
+
+            // If impersonating a user, convert the username to a json obj.
+            if ($impersonate) {
+                $post->impersonate = json_encode($impersonate);
+            }
+
             $mform->addElement('html', $impersonatefield);
         }
         // Display period.

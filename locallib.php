@@ -196,12 +196,19 @@ function is_user_auditor() {
 
 /**
  * A custom convenience function to check whether user is admin.
- *
+ * @param object $user. The user record.
  * @return bool
  */
-function is_user_admin() {
+function is_user_admin($user = null) {
     global $USER;
-    return has_capability('local/announcements:administer', context_user::instance($USER->id), null, false);
+
+    if (empty($user)) {
+        $user = $USER;
+    }
+
+    $hascap = has_capability('local/announcements:administer', context_user::instance($user->id), $user, false);
+
+    return $hascap;
 }
 
 /**
@@ -259,10 +266,15 @@ function can_view_all_in_context($context) {
 
 function can_impersonate($author, $impersonate) {
     global $DB;
-    return $DB->record_exists('ann_impersonators', array(
-        'authorusername' => $author,
-        'impersonateuser' => $impersonate,
-    ));
+    
+    $sql = "SELECT *
+            FROM {ann_impersonators}
+            WHERE authorusername = ?
+            AND ( impersonateuser = '*' OR 
+                  impersonateuser = ? );";
+    $exists = $DB->get_record_sql($sql, array($author, $impersonate));
+    
+    return (!empty($exists));
 }
 
 function pr() {

@@ -140,9 +140,14 @@ define(['jquery', 'core/log', 'core/ajax', 'core/templates', 'core/str'], functi
         self.unfocus();
 
         var input = $('input[name="impersonate"]');
-        input.val(tag.data('username'));
-        self.rootel.data('photo', tag.find('img').attr('src'));
-        self.rootel.data('fullname', tag.find('span').text());
+
+        // Encode to json and add tag to hidden input.
+        var obj = {
+            username: tag.data('username'),
+            photourl: tag.find('img').attr('src'),
+            fullname: tag.find('span').text()
+        };
+        input.val(JSON.stringify(obj));
 
         self.render();
     };
@@ -157,8 +162,6 @@ define(['jquery', 'core/log', 'core/ajax', 'core/templates', 'core/str'], functi
 
         var input = $('input[name="impersonate"]');
         input.val('');
-        self.rootel.data('photo', '');
-        self.rootel.data('photo', '');
 
         self.render();
     };
@@ -174,22 +177,23 @@ define(['jquery', 'core/log', 'core/ajax', 'core/templates', 'core/str'], functi
 
         if (input.val() == '') {
             // Remove tag.
-            self.rootel.find('.impersonate-tags').html(self.strings.noselectionstr);
+            self.rootel.find('.impersonate-selection').html(self.strings.noselectionstr);
             return;
         }
 
-        // Render the tag from a template.
-        var tag = {
-            username: input.val(),
-            photo: self.rootel.data('photo'),
-            fullname: self.rootel.data('fullname'),
-        };
-        Templates.render('local_announcements/impersonate_selector_tag', tag)
-            .then(function(html) {
-                self.rootel.find('.impersonate-tags').html(html);
-            }).fail(function(reason) {
-                Log.error(reason);
-            });
+        var json = input.val();
+        if(json) {
+            var tag = JSON.parse(json);
+
+            console.log(tag);
+            // Render the tag from a template.
+            Templates.render('local_announcements/impersonate_selector_tag', tag)
+                .then(function(html) {
+                    self.rootel.find('.impersonate-selection').html(html);
+                }).fail(function(reason) {
+                    Log.error(reason);
+                });
+        }
     };
 
     /**
