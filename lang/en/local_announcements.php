@@ -30,6 +30,8 @@ $string['crontask_notifications'] = 'Announcement notifications task';
 $string['audiencesettings:heading'] = 'Audience Settings';
 $string['audiencesettings:savesuccess'] = 'Audience settings have been saved.';
 $string['moderation:heading'] = 'Moderation';
+$string['impersonatorsettings:heading'] = 'Impersonator Settings';
+$string['impersonatorsettings:savesuccess'] = 'Impersonator settings have been saved.';
 
 $string['list:addanewannouncement'] = 'Add a new announcement';
 $string['list:moderation'] = 'Moderation';

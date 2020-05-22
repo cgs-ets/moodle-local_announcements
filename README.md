@@ -59,7 +59,7 @@ The current audience providers are:
  - audience_combination.php - handles targeting of announcements to arbitrary combinations of audiences from other audience providers.
 
 ### Audience Types
-The "ann_audience_types" table is used to define the ways user's can be targeted by announcements via the front end. Each row in the table directly corresponds to a tab in the audience selection interface. 
+The `ann_audience_types` table is used to define the ways user's can be targeted by announcements via the front end. Each row in the table directly corresponds to a tab in the audience selection interface. 
 
 - type → the key used for the audience type
 - namesingluar → the name of the audience type
@@ -67,7 +67,7 @@ The "ann_audience_types" table is used to define the ways user's can be targeted
 - provider → which audience provider handles the logic for this audience type
 - active → whether the audience type is enabled
 - filterable → whether to show a search field that is used to filter audience items. If true, the audience items are hidden by default and revealed by typing.
-- grouped → whether to group the audience items. The value of audience items must be in the following format <grouping><delimiter><item>, e.g. Senior School:Staff. The "groupdelimiter" column is used to define the delimiter, e.g. ":".
+- grouped → whether to group the audience items. The value of audience items must be in the following format <grouping><delimiter><item>, e.g. Senior School:Staff. The `groupdelimiter` column is used to define the delimiter, e.g. `:`.
 - uisort → tabs are sorted and displayed horizontally according to this value.
 - roletypes → a comma separated list of the role types that can be targeted for this audience type. Audience providers handle different roles in different ways, but most cater Students, Mentors, and Staff. The roles that an audience provider caters to is specified in the constant <provider>::ROLES. Aliases can be defined with square brackets, e.g. Mentors[Parents]. Students generally means that you will target users enrolled as students in the selected audiences. Mentors generally means you will target users that are mentors of users that are enrolled as students in the selected audiences. Staff generally means you will target users enrolled as teachers (editing and non-editing), managers, and course creators. 
 - scope → Used to narrow the audience items to a specific scope. This limits what audience items are displayed in the audience selector for a given audience type. Each audience provider uses this field in it's own way. Used to limit audience items to certain course categories for a mdlcourse based audience type. Used to specify the profile field for a mdlprofile based audience type.
@@ -79,10 +79,10 @@ The "ann_audience_types" table is used to define the ways user's can be targeted
 - excludecodes → comma separated list of codes (of audience items, e.g. course idnumber) to exclude from the set.
 
 ### Privileges
-Privileges determine whether a user can post to an audience, and whether their post requires moderation or not. The "ann_privileges" table contains the configuration for privileges. Each row defines a specific check for a given audience type etc.
+Privileges determine whether a user can post to an audience, and whether their post requires moderation or not. The `ann_privileges` table contains the configuration for privileges. Each row defines a specific check for a given audience type etc.
 
 #### Determining whether a user can post to the selected audience:
-When an announcement is posted, the system retrieves the privilege checks that must be performed based on the audiences that were targeted. It then executes the checks one at a time, ordered by "checkorder", until a check evaluates to true. For example, if an announcement is targeting a course, the system will check whether the user as the "local/announcements:post" capability within that course. If the check returns true, the system will save the announcement and set up moderation based on the moderation columns. If the check returns false, the system will move to the next check. If all checks are false, the announcement is not stored. Note, this should never happen as audiences are not displayed to the user on the front end unless they have privileges to post to that audience (the checks are performed as the audiences are retrieved for the UI).
+When an announcement is posted, the system retrieves the privilege checks that must be performed based on the audiences that were targeted. It then executes the checks one at a time, ordered by `checkorder`, until a check evaluates to true. For example, if an announcement is targeting a course, the system will check whether the user as the "local/announcements:post" capability within that course. If the check returns true, the system will save the announcement and set up moderation based on the moderation columns. If the check returns false, the system will move to the next check. If all checks are false, the announcement is not stored. Note, this should never happen as audiences are not displayed to the user on the front end unless they have privileges to post to that audience (the checks are performed as the audiences are retrieved for the UI).
 
 #### Determining whether moderation is required:
 The same privilege checks are used to determine moderation. The checks are executed in order of "checkorder" until a row that matches the audience, roles selected, condition of the announcement is found. Only the first matching check is used to determine whether moderation is required for the given audience.
