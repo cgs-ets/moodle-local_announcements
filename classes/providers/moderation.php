@@ -245,7 +245,7 @@ class moderation {
 
         // If the announcement is a force send check whether user has cap to send them without mod.
         if ($announcement->get('forcesend')) {
-            if (is_user_emergency_announcer($USER)) {
+            if (static::is_user_emergency_announcer($USER)) {
                 // The author has the capability. No moderation needed.
                 return;
             }
@@ -260,7 +260,7 @@ class moderation {
 
             // Check the forcesend capability.
             if ($announcement->get('forcesend')) {
-                if (is_user_emergency_announcer($impersonateuser)) {
+                if (static::is_user_emergency_announcer($impersonateuser)) {
                     return;
                 }
             }
