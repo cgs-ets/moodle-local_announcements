@@ -142,9 +142,12 @@ if ($formdata = $mformpost->get_data()) {
     $formdata->message = $formdata->message['text'];
 
     // See if impersonate has been set, and extract just the userid.
-    $impersonate = isset($formdata->impersonate) ? $formdata->impersonate : '';
-    $impersonate = json_decode($impersonate);
-    $formdata->impersonate = $impersonate->username;
+    if ( ! empty($formdata->impersonate)) {
+        $impersonate = json_decode($formdata->impersonate);
+        $formdata->impersonate = $impersonate->username;
+    } else {
+        $formdata->impersonate = '';
+    }
 
     // See if remail has been set.
     $formdata->remail = isset($formdata->remail) ? $formdata->remail : 0;
