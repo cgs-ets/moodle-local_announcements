@@ -108,12 +108,19 @@ trait get_impersonate_users {
                 INNER JOIN {user_info_data} d ON d.userid = u.id
                 INNER JOIN {user_info_field} f ON d.fieldid = f.id
                 WHERE f.shortname = 'CampusRoles'
-                AND LOWER(d.data) LIKE ?
-                AND (LOWER(u.firstname) LIKE ? OR LOWER(u.lastname) LIKE ?)";
+                AND LOWER(d.data) LIKE ? 
+                AND (
+                    LOWER(u.firstname) LIKE ? OR 
+                    LOWER(u.lastname) LIKE ? OR
+                    ? LIKE CONCAT('%',LOWER(u.firstname),'%') OR
+                    ? LIKE CONCAT('%',LOWER(u.lastname),'%')
+                )";
         $params = array(
             '%staff%',
             '%'.$DB->sql_like_escape(strtolower($query)).'%',
             '%'.$DB->sql_like_escape(strtolower($query)).'%',
+            strtolower($query),
+            strtolower($query),
         );
 
         return $DB->get_records_sql($sql, $params, 0, 15);
