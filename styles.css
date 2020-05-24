@@ -704,7 +704,7 @@ body.path-local-announcements.modal-open {
   margin-right: 10px;
   width: 25px;
   height: 25px;
-  border: 1px solid #aaa;
+  border: 0 none;
 }
 .local_announcements .lann-list .announcement .userphoto img {
   display: block;
