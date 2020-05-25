@@ -251,10 +251,12 @@ class announcement_exporter extends persistent_exporter {
     	$viewurl = $viewurl->out();
 
     	$shortmessage = shorten_text($this->data->message, get_shortpost(), false, '...');
+    	$islong = ($shortmessage != $this->data->message);
 
     	// Replace images, videos and iframes in short message with a word.
 		$dom = new \DOMDocument;
 		@$dom->loadHTML(mb_convert_encoding($shortmessage, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+		$shortmessagebeforetrims = trim($dom->saveHTML());
 		foreach( $dom->getElementsByTagName("img") as $img ) {
 		    $text = $dom->createElement("p", "(image)");
 		    $img->parentNode->replaceChild($text, $img);
@@ -268,7 +270,7 @@ class announcement_exporter extends persistent_exporter {
 		    $iframe->parentNode->replaceChild($text, $iframe);
 		}
 		$shortmessage = trim($dom->saveHTML());
-    	$islong = ($shortmessage != $this->data->message);
+    	$islong = ($islong || $shortmessage != $shortmessagebeforetrims);
 
 		// Rewrite pluginfile urls.
 	    $shortmessage = file_rewrite_pluginfile_urls($shortmessage,'pluginfile.php',$this->related['context']->id, 'local_announcements','announcement',$this->data->id);
