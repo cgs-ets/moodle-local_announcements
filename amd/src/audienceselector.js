@@ -830,15 +830,13 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
             methodname: 'local_announcements_get_moderation_for_audiences',
             args: { audiencesjson: tagsjson },
             done: function(mod) {
-                setTimeout(function() {
-                    if (mod.required) {
-                        moderationstatus.html(mod.status + ' <a class="rule-toggle" href="#">More</a>');
-                        moderationdesc.html(mod.description);
-                        moderationroot.removeClass('loading').addClass('hasmod');                    
-                    } else {
-                        moderationroot.removeClass('loading').removeClass('visible')
-                    }
-                }, 1000);
+                if (mod.required) {
+                    moderationstatus.html(mod.status + ' <a class="rule-toggle" href="#">More</a>');
+                    moderationdesc.html(mod.description);
+                    moderationroot.removeClass('loading').addClass('hasmod');                    
+                } else {
+                    moderationroot.removeClass('loading').removeClass('visible')
+                }
             },
             fail: function(reason) {
                 moderationroot.removeClass('visible loading');

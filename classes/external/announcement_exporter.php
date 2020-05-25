@@ -254,7 +254,7 @@ class announcement_exporter extends persistent_exporter {
 
     	// Replace images, videos and iframes in short message with a word.
 		$dom = new \DOMDocument;
-		@$dom->loadHTML($shortmessage, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+		@$dom->loadHTML(mb_convert_encoding($shortmessage, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 		foreach( $dom->getElementsByTagName("img") as $img ) {
 		    $text = $dom->createElement("p", "(image)");
 		    $img->parentNode->replaceChild($text, $img);
