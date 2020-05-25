@@ -296,7 +296,7 @@ class moderation {
             if ($modsettings['autoapprove']) {
                 // Auto approve the announcement.
                 $announcement->set('modstatus', ANN_MOD_STATUS_APPROVED);
-                $modrec->actionedusername = $user->username;
+                $modrec->actionedusername = $USER->username;
                 $modrec->status = ANN_MOD_STATUS_APPROVED;
                 $modrec->mailed = ANN_MOD_MAIL_SENT; // Mark as sent.
                 $modrec->comment = 'Auto approved.';
