@@ -264,18 +264,26 @@ function can_view_all_in_context($context) {
     return false;
 }
 
-function can_impersonate() {
-    global $DB;
+function can_impersonate($user = null) {
+    global $DB, $USER;
+
+    if (empty($user)) {
+        $user = $USER;
+    }
     
-    return (is_user_admin() || $DB->record_exists('ann_impersonators', array('authorusername' => $USER->username)));
+    return (is_user_admin($user) || $DB->record_exists('ann_impersonators', array('authorusername' => $user->username)));
 }
 
 
-function can_impersonate_user($author, $impersonate) {
+function can_impersonate_user($user = null, $impersonate) {
     global $DB;
+
+    if (empty($user)) {
+        $user = $USER;
+    }
     
     // Admins can impersonate.
-    if (is_user_admin()) {
+    if (is_user_admin($user)) {
         return true;
     }
 
@@ -284,17 +292,21 @@ function can_impersonate_user($author, $impersonate) {
             WHERE authorusername = ?
             AND ( impersonateuser = '*' OR 
                   impersonateuser = ? );";
-    $exists = $DB->get_record_sql($sql, array($author, $impersonate));
+    $exists = $DB->get_record_sql($sql, array($user, $impersonate));
     
     return (!empty($exists));
 }
 
-function can_impersonate_any() {
-    global $DB;
+function can_impersonate_any($user = null) {
+    global $DB, $USER;
+
+    if (empty($user)) {
+        $user = $USER;
+    }
     
-    return (is_user_admin() || 
+    return (is_user_admin($user) || 
         $DB->record_exists('ann_impersonators', array(
-            'authorusername' => $USER->username, 
+            'authorusername' => $user->username, 
             'impersonateuser' => '*'))
     );
 }
