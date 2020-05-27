@@ -292,7 +292,7 @@ function can_impersonate_user($user = null, $impersonate) {
             WHERE authorusername = ?
             AND ( impersonateuser = '*' OR 
                   impersonateuser = ? );";
-    $exists = $DB->get_record_sql($sql, array($user, $impersonate));
+    $exists = $DB->get_record_sql($sql, array($user->username, $impersonate));
     
     return (!empty($exists));
 }

@@ -846,7 +846,8 @@ class announcement extends persistent {
 
         // Check that the author can actually impersonate the selected user.
         if ($data->impersonate) {
-            if (!can_impersonate_user($announcement->get('authorusername'), $data->impersonate)) {
+            $impersonator = core_user::get_user_by_username($announcement->get('authorusername'));
+            if (!can_impersonate_user($impersonator, $data->impersonate)) {
                 $announcement->set('impersonate', '');
             }
         }
