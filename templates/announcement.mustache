@@ -39,21 +39,25 @@
         </div>
         <div class="rightwrap">
             <div class="meta">
-                <div class="time">🕑 {{readabletime}}</div>
-                <div class="audiences">📣
-                    <ul class="audience-list comma-list">
-                    {{#audiences}}
-                        <li class="{{conditiontype}}">{{#conditions}}<span>{{#url}}<a href="{{url}}">{{name}}</a>{{/url}}{{^url}}{{name}}{{/url}}</span>{{/conditions}}</li>
-                    {{/audiences}}
-                    </ul>
+                <div class="time">{{readabletime}}</div>
+                <div class="audiences">
+                    <i class="fa fa-bullhorn" aria-hidden="true"></i>
                     <div class="tip">
                         <span class="comma-list">
                             {{#audiences}}
                                 {{#conditions}}<span>{{#url}}<a href="{{url}}">{{name}}</a>{{/url}}{{^url}}{{name}}{{/url}}</span>{{/conditions}}
                             {{/audiences}}
-                        </ul>
+                        </span>
                     </div>
                 </div>
+                {{#deliverystatus}}
+                    <div class="delivery {{deliverystatus}}">
+                        {{{deliveryicon}}}
+                        <div class="tip">
+                            <span>{{deliverymessage}}</span>
+                        </div>
+                    </div>
+                {{/deliverystatus}}
             </div>
             {{#iscreator}}
                 <div class="actions">

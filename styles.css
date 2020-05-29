@@ -747,14 +747,15 @@ body.path-local-announcements.modal-open {
 .local_announcements .lann-list .announcement .clear {
   clear: both;
 }
-.local_announcements .lann-list .announcement .audiences {
-  max-width: 150px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-right: 1px;
+.local_announcements .lann-list .announcement .audiences,
+.local_announcements .lann-list .announcement .delivery {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  text-align: center;
 }
-.local_announcements .lann-list .announcement .audiences .tip {
+.local_announcements .lann-list .announcement .audiences .tip,
+.local_announcements .lann-list .announcement .delivery .tip {
   display: none;
   position: absolute;
   bottom: 23px;
@@ -763,28 +764,43 @@ body.path-local-announcements.modal-open {
   max-width: 200px;
   background-color: rgba(0, 0, 0, 0.9);
   color: #fff;
-  border-radius: 9px;
+  border-radius: 5px;
   z-index: 1000;
   padding: 6px 6px 10px;
   line-height: 1.4;
   white-space: normal;
-  text-align: left;
+  text-align: center;
+  right: -5px;
+  min-width: 125px;
 }
-.local_announcements .lann-list .announcement .audiences .tip a {
+.local_announcements .lann-list .announcement .audiences .tip a,
+.local_announcements .lann-list .announcement .delivery .tip a {
   color: #fff;
 }
-.local_announcements .lann-list .announcement .audiences .tip:after {
+.local_announcements .lann-list .announcement .audiences .tip:after,
+.local_announcements .lann-list .announcement .delivery .tip:after {
   content: " ";
   position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
+  bottom: -10px;
+  left: 100%;
+  margin-left: -20px;
+  margin-top: 0;
   border-width: 5px;
   border-style: solid;
   border-color: black transparent transparent transparent;
+  top: auto;
 }
-.local_announcements .lann-list .announcement .audiences:hover .tip {
+.local_announcements .lann-list .announcement .audiences:hover .tip,
+.local_announcements .lann-list .announcement .delivery:hover .tip {
   display: block;
+}
+.local_announcements .lann-list .announcement .delivery.forcepending i,
+.local_announcements .lann-list .announcement .delivery.digestpending i {
+  color: orange;
+}
+.local_announcements .lann-list .announcement .delivery.forcemailed i,
+.local_announcements .lann-list .announcement .delivery.digestmailed i {
+  color: green;
 }
 .local_announcements .lann-list .announcement .message {
   padding: 10px 15px;

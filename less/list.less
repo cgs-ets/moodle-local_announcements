@@ -184,40 +184,42 @@
 			.clear {
 				clear: both;
 			}
-			.audiences {
-				max-width: 150px;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				padding-right: 1px;
-
+			.audiences, .delivery {
+				position: relative;
+				display: inline-block;
+			    width: 20px;
+			    text-align: center;
 			    .tip {
 				    display: none;
 				    position: absolute;
 				    bottom: 23px;
 				    font-size: 12px;
 				    width: auto;
-    				max-width: 200px;
-				    background-color: rgba(0,0,0,0.9);
+				    max-width: 200px;
+				    background-color: rgba(0, 0, 0, 0.9);
 				    color: #fff;
-				    border-radius: 9px;
+				    border-radius: 5px;
 				    z-index: 1000;
 				    padding: 6px 6px 10px;
 				    line-height: 1.4;
 				    white-space: normal;
-   					text-align: left;
+				    text-align: center;
+				    right: -5px;
+				    min-width: 125px;
    					a {
    						color: #fff;
    					}
 				    &:after {
 					    content: " ";
 					    position: absolute;
-					    top: 100%;
-					    left: 50%;
-					    margin-left: -5px;
+					    bottom: -10px;
+					    left: 100%;
+					    margin-left: -20px;
+					    margin-top: 0;
 					    border-width: 5px;
 					    border-style: solid;
 					    border-color: black transparent transparent transparent;
+					    top: auto;
 					}
 				}
 				&:hover {
@@ -225,7 +227,16 @@
 				    	display: block;
 					}
 				}
-
+			}
+			.delivery.forcepending, .delivery.digestpending {
+				i {
+					color: orange;
+				}
+			}
+			.delivery.forcemailed, .delivery.digestmailed {
+				i {
+					color: green;
+				}
 			}
 			.message {
 			    padding: 10px 15px;

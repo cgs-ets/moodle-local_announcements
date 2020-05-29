@@ -144,6 +144,15 @@ class announcement_exporter extends persistent_exporter {
 	        'impersonatedbyurl' => [
 	        	'type' => PARAM_RAW,
 	        ],
+	        'deliverystatus' => [
+	        	'type' => PARAM_RAW,
+	        ],
+	        'deliveryicon' => [
+	        	'type' => PARAM_RAW,
+	        ],
+	        'deliverymessage' => [
+	        	'type' => PARAM_RAW,
+	        ],
 	    ];
 	}
 
@@ -297,6 +306,28 @@ class announcement_exporter extends persistent_exporter {
 			$shortmessage .= $viewlink;
 		}
 
+		// Deliver status
+		$deliverystatus = '';
+		$deliveryicon = '';
+		$deliverymessage = '';
+		if ( $this->data->forcesend && (!$this->data->mailed) ) {
+			$deliverystatus = 'forcepending';
+			$deliveryicon = '<i class="fa fa-circle-o" aria-hidden="true"></i>';
+			$deliverymessage = get_string('list:deliveryforcepending', 'local_announcements');
+		} elseif ( $this->data->forcesend && $this->data->mailed ) {
+			$deliverystatus = 'forcemailed';
+			$deliveryicon = '<i class="fa fa-check-circle-o" aria-hidden="true"></i>';
+			$deliverymessage = get_string('list:deliveryforcemailed', 'local_announcements');
+		} elseif ( (!$this->data->forcesend) && (!$this->data->mailed) ) {
+			$deliverystatus = 'digestpending';
+			$deliveryicon = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
+			$deliverymessage = get_string('list:deliverydigestpending', 'local_announcements');
+		} elseif ( (!$this->data->forcesend) && $this->data->mailed ) {
+			$deliverystatus = 'digestmailed';
+			$deliveryicon = '<i class="fa fa-check-circle" aria-hidden="true"></i>';
+			$deliverymessage = get_string('list:deliverydigestmailed', 'local_announcements');
+		}
+
 	    return [
 	        'audiences' => $audiencesgrouped,
 	        'authorphoto' => $authorphoto,
@@ -322,6 +353,9 @@ class announcement_exporter extends persistent_exporter {
 	        'impersonatedbyphoto' => $impersonatedbyphoto,
 	        'impersonatedbyfullname' => $impersonatedbyfullname,
 	        'impersonatedbyurl' => $impersonatedbyurl,
+	        'deliverystatus' => $deliverystatus,
+	        'deliveryicon' => $deliveryicon,
+	        'deliverymessage' => $deliverymessage,
 	    ];
 	}
 
