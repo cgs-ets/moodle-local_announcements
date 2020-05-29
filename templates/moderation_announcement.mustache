@@ -34,14 +34,22 @@
         <div class="rightwrap">
             <div class="meta">
                 {{^isavailable}}<div class="availability">{{#str}} list:announcementunavailable, local_announcements {{/str}}</div>{{/isavailable}}
-                <div class="time">🕑 {{readabletime}}</div>
-                <div class="audiences">📣
+                <div class="time">{{readabletime}}</div>
+                <div class="full-audiences">
                     <ul class="audience-list comma-list">
                     {{#audiences}}
                         <li class="{{conditiontype}}">{{#conditions}}<span>{{#url}}<a href="{{url}}">{{name}}</a>{{/url}}{{^url}}{{name}}{{/url}}</span>{{/conditions}}</li>
                     {{/audiences}}
                     </ul>
                 </div>
+                {{#deliverystatus}}
+                    <div class="delivery {{deliverystatus}}">
+                        {{{deliveryicon}}}
+                        <div class="tip">
+                            <span>{{deliverymessage}}</span>
+                        </div>
+                    </div>
+                {{/deliverystatus}}
             </div>
             {{#showactions}}
             <div class="actions">

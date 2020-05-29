@@ -50,14 +50,16 @@
                         </span>
                     </div>
                 </div>
-                {{#deliverystatus}}
-                    <div class="delivery {{deliverystatus}}">
-                        {{{deliveryicon}}}
-                        <div class="tip">
-                            <span>{{deliverymessage}}</span>
+                {{#iscreator}}
+                    {{#deliverystatus}}
+                        <div class="delivery {{deliverystatus}}">
+                            {{{deliveryicon}}}
+                            <div class="tip">
+                                <span>{{deliverymessage}}</span>
+                            </div>
                         </div>
-                    </div>
-                {{/deliverystatus}}
+                    {{/deliverystatus}}
+                {{/iscreator}}
             </div>
             {{#iscreator}}
                 <div class="actions">
