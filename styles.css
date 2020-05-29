@@ -726,7 +726,7 @@ body.path-local-announcements.modal-open {
 .local_announcements .lann-list .announcement .meta {
   font-size: 13px;
   color: #000;
-  font-style: italic;
+  font-style: normal;
   text-align: right;
   display: inline-block;
   float: left;
