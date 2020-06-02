@@ -93,6 +93,12 @@
   -o-animation: spin 0.6s linear 0s infinite;
   animation: spin 0.6s linear 0s infinite;
 }
+.spin-1s {
+  -webkit-animation: spin 1s linear 0s infinite;
+  -moz-animation: spin 1s linear 0s infinite;
+  -o-animation: spin 1s linear 0s infinite;
+  animation: spin 1s linear 0s infinite;
+}
 @-webkit-keyframes spin {
   from {
     -webkit-transform: rotate(0deg);
@@ -799,12 +805,35 @@ body.path-local-announcements.modal-open {
   color: #282828;
 }
 .local_announcements .lann-list .announcement .delivery.forcepending i,
-.local_announcements .lann-list .announcement .delivery.digestpending i {
+.local_announcements .lann-list .announcement .delivery.forcesending i,
+.local_announcements .lann-list .announcement .delivery.digestpending i,
+.local_announcements .lann-list .announcement .delivery.digestsending i {
   color: orange;
 }
 .local_announcements .lann-list .announcement .delivery.forcemailed i,
 .local_announcements .lann-list .announcement .delivery.digestmailed i {
   color: green;
+}
+.local_announcements .lann-list .announcement .delivery.forcesending i {
+  -webkit-animation: spin 1s linear 0s infinite;
+  -moz-animation: spin 1s linear 0s infinite;
+  -o-animation: spin 1s linear 0s infinite;
+  animation: spin 1s linear 0s infinite;
+}
+.local_announcements .lann-list .announcement .delivery.forcesending i :after {
+  content: "";
+  background: white;
+  height: 2px;
+  width: 3px;
+  display: block;
+  position: absolute;
+  top: 7px;
+}
+.local_announcements .lann-list .announcement .delivery.digestsending i {
+  -webkit-animation: spin 1s linear 0s infinite;
+  -moz-animation: spin 1s linear 0s infinite;
+  -o-animation: spin 1s linear 0s infinite;
+  animation: spin 1s linear 0s infinite;
 }
 .local_announcements .lann-list .announcement .message {
   padding: 10px 15px;

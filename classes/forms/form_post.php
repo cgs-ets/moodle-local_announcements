@@ -185,7 +185,7 @@ class form_post extends \moodleform {
         $mform->addElement('checkbox', 'forcesend', get_string('postform:forcesend', 'local_announcements'), '<p style="color:red;">' . get_string('postform:forcesendnote', 'local_announcements') . '</p>');
         // Resend digest option if already mailed.
         if ($edit) {
-            if ($post->mailed) {
+            if ($post->mailed || ($post->forcesend && $post->notified)) {
                 $mform->addElement('checkbox', 'remail', get_string('postform:remail', 'local_announcements'), '<p style="color:red;">' . get_string('postform:remailnote', 'local_announcements') . '</p>');
                 $mform->hideIf('remail', 'forcesend', 'checked');
             }

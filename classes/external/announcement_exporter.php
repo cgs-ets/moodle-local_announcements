@@ -310,22 +310,37 @@ class announcement_exporter extends persistent_exporter {
 		$deliverystatus = '';
 		$deliveryicon = '';
 		$deliverymessage = '';
-		if ( $this->data->forcesend && (!$this->data->mailed) ) {
+		if ( $this->data->forcesend && (!$this->data->notified) ) {
 			$deliverystatus = 'forcepending';
 			$deliveryicon = '<i class="fa fa-circle-o" aria-hidden="true"></i>';
 			$deliverymessage = get_string('list:deliveryforcepending', 'local_announcements');
-		} elseif ( $this->data->forcesend && $this->data->mailed ) {
-			$deliverystatus = 'forcemailed';
-			$deliveryicon = '<i class="fa fa-check-circle-o" aria-hidden="true"></i>';
-			$deliverymessage = get_string('list:deliveryforcemailed', 'local_announcements');
+		} elseif ( $this->data->forcesend && $this->data->notified ) {
+			// Check if cron is still processing.
+			if (announcement::is_sending($this->data->id)) {
+				$deliverystatus = 'forcesending';
+				$deliveryicon = '<i class="fa fa-circle-o" aria-hidden="true"></i>';
+				$deliverymessage = get_string('list:deliveryforcesending', 'local_announcements');
+			} else {
+				$deliverystatus = 'forcemailed';
+				$deliveryicon = '<i class="fa fa-check-circle-o" aria-hidden="true"></i>';
+				$deliverymessage = get_string('list:deliveryforcemailed', 'local_announcements');
+			}
 		} elseif ( (!$this->data->forcesend) && (!$this->data->mailed) ) {
 			$deliverystatus = 'digestpending';
 			$deliveryicon = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
 			$deliverymessage = get_string('list:deliverydigestpending', 'local_announcements');
 		} elseif ( (!$this->data->forcesend) && $this->data->mailed ) {
-			$deliverystatus = 'digestmailed';
-			$deliveryicon = '<i class="fa fa-check-circle" aria-hidden="true"></i>';
-			$deliverymessage = get_string('list:deliverydigestmailed', 'local_announcements');
+			// Check if cron is still processing.
+			if (announcement::is_mailing($this->data->id)) {
+				$deliverystatus = 'digestsending';
+				$deliveryicon = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
+				$deliverymessage = get_string('list:deliverydigestsending', 'local_announcements');
+			} else {
+				$deliverystatus = 'digestmailed';
+				$deliveryicon = '<i class="fa fa-check-circle" aria-hidden="true"></i>';
+				$deliverymessage = get_string('list:deliverydigestmailed', 'local_announcements');
+			}
+			
 		}
 
 	    return [

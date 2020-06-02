@@ -1401,7 +1401,7 @@ class announcement extends persistent {
     }
 
     /**
-     * Returns a list of available unmailed posts.
+     * Returns a list of available unmailed posts. Do not include posts that are set to forcesend.
      *
      * @param int $now. time to check availability.
      * @return array
@@ -1422,6 +1422,7 @@ class announcement extends persistent {
              (p.timestart = 0  AND p.timeend > :now4) OR
              (p.timestart = 0  AND p.timeend = 0))
         AND p.deleted = 0
+        AND p.forcesend = 0
         AND (p.modrequired = 0 OR p.modstatus = :modstatus)
         ORDER BY p.timemodified ASC";
 
@@ -1488,6 +1489,57 @@ class announcement extends persistent {
         return $posts;
     }
 
+    /**
+     * Attempts to detemine if notifications for a specific post are still queued via cron.
+     *
+     * @param int $postid.
+     * @return bool
+     */
+    public static function is_sending($postid) {
+        global $DB;
+
+        $sql = "SELECT *
+                  FROM {task_adhoc} t
+                 WHERE component = 'local_announcements'
+                   AND classname = '\\local_announcements\\task\\send_user_notifications'
+                   AND (customdata = ? OR
+                        customdata LIKE ? OR
+                        customdata LIKE ?) ";
+
+        $params = array(
+            '[' . $postid .']',
+            '%,' . $postid .'%',
+            '%' . $postid . ',%',
+        );
+
+        return $DB->record_exists_sql($sql, $params);
+    }
+
+    /**
+     * Attempts to detemine if digests containing a specific post are still queued via cron.
+     *
+     * @param int $postid.
+     * @return bool
+     */
+    public static function is_mailing($postid) {
+        global $DB;
+
+        $sql = "SELECT *
+                  FROM {task_adhoc} t
+                 WHERE component = 'local_announcements'
+                   AND classname = '\\local_announcements\\task\\send_user_digests'
+                   AND (customdata = ? OR
+                        customdata LIKE ? OR
+                        customdata LIKE ?) ";
+
+        $params = array(
+            '[' . $postid .']',
+            '%,' . $postid .'%',
+            '%' . $postid . ',%',
+        );
+
+        return $DB->record_exists_sql($sql, $params);
+    }
 
     public static function is_author_or_admin($postid) {
         global $USER;

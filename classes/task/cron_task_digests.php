@@ -96,7 +96,6 @@ class cron_task_digests extends \core\task\scheduled_task {
         foreach ($posts as $id => $post) {
             $this->posts[$id] = new \stdClass();
             $this->posts[$id]->id = $post->get('id');
-            $this->posts[$id]->forcesend = $post->get('forcesend');
         }
 
         // Please note, this order is intentional.
@@ -157,7 +156,6 @@ class cron_task_digests extends \core\task\scheduled_task {
         $sitetimezone = \core_date::get_server_timezone();
         $counts = array(
             'digests' => 0,
-            'forcesends' => 0,
             'users' => 0,
             'ignored' => 0,
         );
@@ -220,10 +218,6 @@ class cron_task_digests extends \core\task\scheduled_task {
         $digestposts = [];
         foreach ($this->userposts[$user->id] as $postid) {
             $post = $this->posts[$postid];
-            // Do not include forcesend posts in digests as they are emailed immediately.
-            if( ! $post->forcesend ) {
-                $digestposts[] = $postid;
-            }
         }
         return $digestposts;
     }
