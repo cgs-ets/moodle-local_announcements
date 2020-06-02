@@ -80,6 +80,8 @@ if (!empty($edit)) {
         $post->timestart      = $announcement->get('timestart');
         $post->timeend        = $announcement->get('timeend');
         $post->mailed         = $announcement->get('mailed');
+        $post->forcesend      = $announcement->get('forcesend');
+        $post->notified       = $announcement->get('notified');
     } else {
         redirect($redirectdefault->out());
     }
@@ -120,7 +122,7 @@ $mformpost->set_data(
         ),
         'audiencesjson' => $post->audiencesjson,
         'impersonate' => $post->impersonate,
-        'forcesend' => !empty($post->forcesend),
+        //'forcesend' => !empty($post->forcesend),
     ) +
 
     array('edit' => $edit) +
