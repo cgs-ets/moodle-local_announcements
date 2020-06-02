@@ -217,7 +217,7 @@ class cron_task_digests extends \core\task\scheduled_task {
     protected function fetch_posts_for_user($user) {
         $digestposts = [];
         foreach ($this->userposts[$user->id] as $postid) {
-            $post = $this->posts[$postid];
+            $digestposts[] = $postid;
         }
         return $digestposts;
     }
