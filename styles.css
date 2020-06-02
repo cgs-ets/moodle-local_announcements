@@ -794,6 +794,10 @@ body.path-local-announcements.modal-open {
 .local_announcements .lann-list .announcement .delivery:hover .tip {
   display: block;
 }
+.local_announcements .lann-list .announcement .audiences i {
+  font-size: 12px;
+  color: #282828;
+}
 .local_announcements .lann-list .announcement .delivery.forcepending i,
 .local_announcements .lann-list .announcement .delivery.digestpending i {
   color: orange;
