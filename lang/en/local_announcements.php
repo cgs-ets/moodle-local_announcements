@@ -52,9 +52,9 @@ $string['list:auditingonicon'] = '<i class="fa fa-eye fa-fw" aria-hidden="true">
 $string['list:auditingofficon'] = '<i class="fa fa-eye-slash fa-fw" aria-hidden="true"></i>';
 $string['list:auditingontitle'] = 'You are currently in audit mode which means you see all announcements. Click to view announcements targeted specifically to you.';
 $string['list:auditingofftitle'] = 'You are currently viewing announcements targeted specifically to you. Click to turn auditing mode on.';
-$string['list:deliveryforcepending'] = 'Scheduled for immediately delivery';
+$string['list:deliveryforcepending'] = 'Scheduled for immediate delivery';
 $string['list:deliveryforcesending'] = 'Sending in-progress';
-$string['list:deliveryforcemailed'] = 'Delivered via immediaite delivery';
+$string['list:deliveryforcemailed'] = 'Delivered via immediate delivery';
 $string['list:deliverydigestpending'] = 'Scheduled for delivery via the Daily Digest';
 $string['list:deliverydigestsending'] = 'Sending in-progress via the Daily Digest';
 $string['list:deliverydigestmailed'] = 'Delivered via the Daily Digest';
