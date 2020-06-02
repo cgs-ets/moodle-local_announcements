@@ -820,7 +820,7 @@ body.path-local-announcements.modal-open {
   -o-animation: spin 1s linear 0s infinite;
   animation: spin 1s linear 0s infinite;
 }
-.local_announcements .lann-list .announcement .delivery.forcesending i :after {
+.local_announcements .lann-list .announcement .delivery.forcesending i:after {
   content: "";
   background: white;
   height: 2px;
