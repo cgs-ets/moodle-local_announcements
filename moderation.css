@@ -175,14 +175,10 @@
 }
 .local_announcements.lann-moderation .announcement {
   overflow: visible;
-  /*.actions {
-			opacity: 0;
-			transition: opacity 0.5s ease;
-			position: absolute;
-		    right: 15px;
-		    top: 10px;
-		    &>div {
-		    	float: left;
-		    }
-		}*/
+}
+.local_announcements.lann-moderation .announcement .actions .userphoto {
+  margin-top: 4px;
+}
+.local_announcements.lann-moderation .announcement .actions .dropdown {
+  float: left;
 }
