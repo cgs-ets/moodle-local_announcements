@@ -113,6 +113,15 @@ function xmldb_local_announcements_upgrade($oldversion) {
         }
     }
 
+    if ($oldversion < 2020052101) {
+        $table = new xmldb_table('ann_impersonators');
+        $source = new xmldb_field('source', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null, null, 'impersonateuser');
+
+        if (!$dbman->field_exists($table, $source)) {
+            $dbman->add_field($table, $source);
+        }
+    }
+
     return true;
 
 }

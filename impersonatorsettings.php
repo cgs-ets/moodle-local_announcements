@@ -77,6 +77,7 @@ if ($data = $form->get_data()) {
         $newimpersonators[] = array(
             'authorusername' => trim($arr[0]),
             'impersonateuser' => trim($arr[1]),
+            'source' => 'settingspage',
         );
     }
 
