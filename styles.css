@@ -465,6 +465,11 @@
 .audience-selector .pages .contents .items ul.active {
   display: block;
 }
+.audience-selector .pages .contents .items .user-item img {
+  border-radius: 50%;
+  max-width: 27px;
+  max-height: 27px;
+}
 .audience-selector .pages .contents .roles ul {
   list-style: none;
   padding: 0;

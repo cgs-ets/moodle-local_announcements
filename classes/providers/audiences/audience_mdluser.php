@@ -86,11 +86,12 @@ class audience_mdluser extends \local_announcements\providers\audience_provider 
                     continue;
                 }
             }
-
+            $photourl = new \moodle_url('/user/pix.php/'.$user->id.'/f2.jpg');
             $audiences[] = [
                 'id' => $user->id,
                 'code' => $user->username,
                 'name' => $user->firstname . ' ' . $user->lastname . ' (' . $user->username . ')',
+                'icon' => '<img src="' . $photourl . '" />',
             ];
         }
 
