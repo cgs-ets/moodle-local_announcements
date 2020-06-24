@@ -159,7 +159,8 @@ class audience_mdlcourse extends \local_announcements\providers\audience_provide
             }
         }
 
-        return '';
+        // Return course by default.
+        return 'course';
 
     }
 
