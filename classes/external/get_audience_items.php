@@ -104,7 +104,7 @@ trait get_audience_items {
                             'id' => new external_value(PARAM_RAW, 'Audience ID number'),
                             'code' => new external_value(PARAM_RAW, 'Audience code'),
                             'name' => new external_value(PARAM_RAW, 'Audience name'),
-                            'icon' => new external_value(PARAM_RAW, 'Optional icon or photo to use for item'),
+                            'icon' => new external_value(PARAM_RAW, 'Optional icon or photo to use for item', VALUE_OPTIONAL),
                         )
                     )
                 ),
