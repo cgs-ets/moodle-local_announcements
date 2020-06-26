@@ -24,21 +24,21 @@
  */
 
 // Include required files and classes.
-require_once('../../config.php');
-require_once('locallib.php');
-use \local_announcements\forms\form_impersonatorsettings;
+require_once('../../../config.php');
+require_once('../locallib.php');
+use \local_announcements\forms\form_settings_impersonators;
 
 // Set context.
 $context = context_system::instance();
 
 // Set up page parameters.
-$impersonatorsettingsurl = new moodle_url('/local/announcements/impersonatorsettings.php');
+$settingsurl = new moodle_url('/local/announcements/settings/impersonators.php');
 $PAGE->set_context($context);
-$PAGE->set_url($impersonatorsettingsurl->out());
-$title = get_string('impersonatorsettings:heading', 'local_announcements');
+$PAGE->set_url($settingsurl->out());
+$title = get_string('settings_impersonators:heading', 'local_announcements');
 $PAGE->set_heading($title);
 $PAGE->set_title($SITE->fullname . ': ' . $title);
-$PAGE->navbar->add($title, $impersonatorsettingsurl);
+$PAGE->navbar->add($title, $settingsurl);
 
 // Ensure user is logged in.
 require_login();
@@ -46,11 +46,8 @@ require_capability('moodle/site:config', $context, $USER->id);
 
 $redirectdefault = new moodle_url('/local/announcements/index.php');
 
-// Load the post form with the data.
-$repeatno = $DB->count_records('ann_audience_types');
-$form = new form_impersonatorsettings('impersonatorsettings.php', array(
-    'repeatno' => $repeatno,
-));
+// Load the form.
+$form = new form_settings_impersonators('impersonators.php');
 
 // Get the impersonator records and load them into the textarea.
 $table = 'ann_impersonators';
@@ -98,7 +95,7 @@ if ($data = $form->get_data()) {
         $DB->delete_records($table, array('id' => $delete));
     }
 
-    $message = get_string("impersonatorsettings:savesuccess", "local_announcements");
+    $message = get_string("settings_impersonators:savesuccess", "local_announcements");
     redirect(
         $redirectdefault->out(),
         '<p>'.$message.'</p>',

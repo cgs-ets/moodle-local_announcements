@@ -186,6 +186,9 @@ class announcement extends persistent {
     public static function get_all_by_audience($provider = '', $type = '', $code, $page = 0, $perpage = 0) {
         global $DB, $USER;
 
+
+        //echo "<pre>";
+
         // Determine paging. 
         $from = 0;
         if (!$perpage) {

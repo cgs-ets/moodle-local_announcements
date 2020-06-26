@@ -26,7 +26,7 @@ namespace local_announcements\forms;
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
-class form_impersonatorsettings extends \moodleform {
+class form_settings_privileges extends \moodleform {
 
     /**
      * Form definition
@@ -38,10 +38,12 @@ class form_impersonatorsettings extends \moodleform {
 
         $form =& $this->_form;
 
+        $form->addElement('html', '<div class="form-group row fitem"><div class="col-md-3">Table columns</div><div class="col-md-9 form-inline felement"><strong>audiencetype, code, role, condition, forcesend, description, checktype, checkvalue, checkorder, modrequired, modthreshold, modusername, modpriority, active</strong></div></div>');
+
         $type = 'textarea'; 
-        $name = 'impersonators';
-        $label = 'impersonators'; 
-        $options = 'wrap="virtual" rows="20" cols="100"';
+        $name = 'privileges';
+        $label = 'table rows (csv)'; 
+        $options = 'rows="20" cols="100" style="white-space: pre;overflow-wrap: normal;overflow-x: scroll;line-height: 30px;"';
         $form->addElement($type, $name, ucfirst($label), $options);
 
         $this->add_action_buttons(false);
