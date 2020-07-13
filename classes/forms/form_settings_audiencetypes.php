@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 use \local_announcements\providers\audience_loader;
 
-class form_audiencesettings extends \moodleform {
+class form_settings_audiencetypes extends \moodleform {
 
     /**
      * Form definition

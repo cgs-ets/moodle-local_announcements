@@ -24,15 +24,15 @@
  */
 
 // Include required files and classes.
-require_once('../../config.php');
-require_once('locallib.php');
-use \local_announcements\forms\form_audiencesettings;
+require_once('../../../config.php');
+require_once('../locallib.php');
+use \local_announcements\forms\form_settings_audiencetypes;
 
 // Set context.
 $context = context_system::instance();
 
 // Set up page parameters.
-$audiencesettingsurl = new moodle_url('/local/announcements/audiencesettings.php');
+$audiencesettingsurl = new moodle_url('/local/announcements/settings/audiencetypes.php');
 $PAGE->set_context($context);
 $PAGE->set_url($audiencesettingsurl->out());
 $title = get_string('audiencesettings:heading', 'local_announcements');
@@ -48,7 +48,7 @@ $redirectdefault = new moodle_url('/local/announcements/index.php');
 
 // Load the post form with the data.
 $repeatno = $DB->count_records('ann_audience_types');
-$form = new form_audiencesettings('audiencesettings.php', array(
+$form = new form_settings_audiencetypes('audiencetypes.php', array(
     'repeatno' => $repeatno,
 ));
 
