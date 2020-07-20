@@ -26,6 +26,7 @@ namespace local_announcements\external;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/local/announcements/locallib.php');
+require_once($CFG->dirroot . '/user/profile/lib.php');
 use core\external\persistent_exporter;
 use renderer_base;
 use \local_announcements\persistents\announcement;
@@ -78,6 +79,9 @@ class announcement_exporter extends persistent_exporter {
 	        	'type' => PARAM_RAW,
 	        ],
 	        'authorfullname' => [
+	        	'type' => PARAM_RAW,
+	        ],
+	        'authorjobpositions' => [
 	        	'type' => PARAM_RAW,
 	        ],
 	        'authorurl' => [
@@ -224,8 +228,13 @@ class announcement_exporter extends persistent_exporter {
 	        $impersonatedbyurl = new \moodle_url('/user/profile.php', array('id' => $impersonatedby->id));
     	}
         $author = $DB->get_record('user', array('username'=>$this->data->authorusername));
+        profile_load_data($author);
         $authorphoto = new \moodle_url('/user/pix.php/'.$author->id.'/f2.jpg');
         $authorfullname = fullname($author);
+        $authorjobpositions = '';
+		if (isset($author->profile_field_JobPositions)) {
+			$authorjobpositions = $author->profile_field_JobPositions;
+		}
         $authorurl = new \moodle_url('/user/profile.php', array('id' => $author->id));
         $authorphototokenised = $OUTPUT->user_picture($author, array('size' => 35, 'includetoken' => true));
 
@@ -348,6 +357,7 @@ class announcement_exporter extends persistent_exporter {
 	        'authorphoto' => $authorphoto,
 	        'authorphototokenised' => $authorphototokenised,
 	        'authorfullname' => $authorfullname,
+	        'authorjobpositions' => $authorjobpositions,
 	        'authorurl' => $authorurl->out(false),
 	        'readabletime' => $readabletime,
 	        'formattedattachments' => $formattedattachments,

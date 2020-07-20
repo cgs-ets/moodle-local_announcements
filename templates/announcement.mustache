@@ -35,7 +35,14 @@
                 </div>
             {{/iscreator}}{{/impersonate}}
             <div class="userphoto"><a href="{{authorurl}}" title="{{authorfullname}} profile"><img src="{{authorphoto}}" alt="{{authorfullname}}" title="{{authorfullname}}" /></a></div>
-            <div class="author">{{authorfullname}}</div>
+            <div class="author">
+                {{authorfullname}}
+                {{#authorjobpositions}}
+                    <div class="jobpositions">
+                        {{authorjobpositions}}
+                    </div>
+                {{/authorjobpositions}}
+            </div>
         </div>
         <div class="rightwrap">
             <div class="meta">

@@ -727,6 +727,10 @@ body.path-local-announcements.modal-open {
   font-size: 14px;
   line-height: 25px;
 }
+.local_announcements .lann-list .announcement .author .jobpositions {
+  font-size: 12px;
+  line-height: 12px;
+}
 .local_announcements .lann-list .announcement .leftwrap {
   float: left;
   margin-right: 10px;
