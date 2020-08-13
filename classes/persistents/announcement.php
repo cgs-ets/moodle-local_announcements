@@ -878,6 +878,9 @@ class announcement extends persistent {
         $announcement->save();
         $id = $announcement->get('id');
 
+        // Strip HTML comments from message text to prevent things like IE conditional comments from causing issues.
+        $data->message = preg_replace('/<!--(.|\s)*?-->/', '', $data->message);
+
         // Store message files to a permanent file area.
         $context = \context_system::instance();
         $message = file_save_draft_area_files(
