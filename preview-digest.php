@@ -94,6 +94,7 @@ $sql = "SELECT an.id,
             'digestheaderimage' => $config->digestheaderimage,
             'digestfooterimage' => $config->digestfooterimage,
             'digestfooterimageurl' => $config->digestfooterimageurl,
+            'digestfootercredits' => $config->digestfootercredits,
         ];
 
         //echo "<pre>";

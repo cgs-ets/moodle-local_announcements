@@ -46,6 +46,7 @@ Michael Vangelovski<br/>
  - digestfooterimageurl → URL for digest footer image link
  - forcesendheaderimage → Header image URL for immediate (forcesend) announcements
  - showposterallinctx → True/False whether a poster can view all within contexts they can post, even when not specifically targeted.
+ - digestfootercredits → Additional HTML placed at the bottom of the digest.
 
 ### Audience Providers
 Audience providers handle the logic for targeting audiences. Audience providers extend the audience_provider base class and implement a set of required functions that are required by the broader system to interact with audience.

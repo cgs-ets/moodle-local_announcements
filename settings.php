@@ -120,7 +120,15 @@ if ($hassiteconfig) {
     $setting = new admin_setting_configtext($name, $title, $description, $default);
     $settings->add($setting);
 
-    // Digest header image
+    // Digest footer credits
+    $name = 'local_announcements/digestfootercredits';
+    $title = get_string('config:digestfootercredits', 'local_announcements');
+    $description = get_string('config:digestfootercreditsdesc', 'local_announcements');
+    $default = '';
+    $setting = new admin_setting_configtext($name, $title, $description, $default);
+    $settings->add($setting);
+
+    // Force send header image
     $name = 'local_announcements/forcesendheaderimage';
     $title = get_string('config:forcesendheaderimage', 'local_announcements');
     $description = get_string('config:forcesendheaderimagedesc', 'local_announcements');

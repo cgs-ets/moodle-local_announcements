@@ -169,6 +169,7 @@ class send_user_digests extends \core\task\adhoc_task {
             'digestheaderimage' => $config->digestheaderimage,
             'digestfooterimage' => $config->digestfooterimage,
             'digestfooterimageurl' => $config->digestfooterimageurl,
+            'digestfootercredits' => $config->digestfootercredits,
         ];
         
         if ($this->allowhtml) {
