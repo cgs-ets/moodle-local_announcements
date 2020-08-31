@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Admin settings page for privileges
+ * Admin settings page for ccgroups
  *
  * @package   local_announcements
  * @copyright 2020 Michael Vangelovski <michael.vangelovski@hotmail.com>
@@ -26,16 +26,16 @@
 // Include required files and classes.
 require_once('../../../config.php');
 require_once('../locallib.php');
-use \local_announcements\forms\form_settings_privileges;
+use \local_announcements\forms\form_settings_ccgroups;
 
 // Set context.
 $context = context_system::instance();
 
 // Set up page parameters.
-$settingsurl = new moodle_url('/local/announcements/settings/privileges.php');
+$settingsurl = new moodle_url('/local/announcements/settings/ccgroups.php');
 $PAGE->set_context($context);
 $PAGE->set_url($settingsurl->out());
-$title = get_string('settings_privileges:heading', 'local_announcements');
+$title = get_string('settings_ccgroups:heading', 'local_announcements');
 $PAGE->set_heading($title);
 $PAGE->set_title($SITE->fullname . ': ' . $title);
 $PAGE->navbar->add($title, $settingsurl);
@@ -47,77 +47,67 @@ require_capability('moodle/site:config', $context, $USER->id);
 $redirectdefault = new moodle_url('/local/announcements/index.php');
 
 // Load the form.
-$form = new form_settings_privileges('privileges.php');
+$form = new form_settings_ccgroups('ccgroups.php');
 
-// Get the records and load them into the textarea.
-$table = 'ann_privileges';
+// Get the ccgroup records and load them into the textarea.
+$table = 'ann_audience_ccgroups';
 $records = array_values($DB->get_records($table));
-$privileges = array();
-$privilegescsv = '';
+$ccgroups = array();
+$ccgroupscsv = '';
 foreach ($records as $record) {
     // Remove new lines from descriptions
     $record->description = str_replace(PHP_EOL, '', $record->description);
     $id = $record->id;
     unset($record->id);
-    $privilegeshash = sha1(implode('__', (array) $record));
-    $privileges[$privilegeshash] = $id;
-    $privilegescsv .= implode(',', (array) $record) . '&#13;&#10;';
+    $ccgroupshash = sha1(implode('__', (array) $record));
+    $ccgroups[$ccgroupshash] = $id;
+    $ccgroupscsv .= implode('|', (array) $record) . '&#13;&#10;';
 }
-$form->set_data(array('privileges' => $privilegescsv));
+$form->set_data(array('ccgroups' => $ccgroupscsv));
 
 // Form submitted.
 if ($data = $form->get_data()) {
     // Save the data.
-    $lines = preg_split('/\r\n|[\r\n]/', $data->privileges);
-    $newprivileges = array();
+    $lines = preg_split('/\r\n|[\r\n]/', strtolower($data->ccgroups));
+    $newccgroups = array();
     foreach ($lines as $line) {
-        $arr = explode(',', $line);
-        if (count($arr) < 14) {
+        $arr = explode('|', $line);
+        if (count($arr) < 6) {
             //Missing a field.
             continue;
         }
-        // Remove new lines from descriptions
-        $newprivileges[] = array(
+        $newccgroups[] = array(
             'audiencetype' => trim($arr[0]),
             'code' => trim($arr[1]),
             'role' => trim($arr[2]),
-            'condition' => trim($arr[3]),
-            'forcesend' => trim($arr[4]),
-            'description' => str_replace(PHP_EOL, '', trim($arr[5])),
-            'checktype' => trim($arr[6]),
-            'checkvalue' => trim($arr[7]),
-            'checkorder' => trim($arr[8]),
-            'modrequired' => trim($arr[9]),
-            'modthreshold' => trim($arr[10]),
-            'modusername' => trim($arr[11]),
-            'modpriority' => trim($arr[12]),
-            'active' => trim($arr[13]),
+            'forcesend' => trim($arr[3]),
+            'description' => trim($arr[4]),
+            'ccgroupid' => trim($arr[5]),
         );
     }
 
     // Sync records.
-    foreach ($newprivileges as $new) {
+    foreach ($newccgroups as $new) {
         $hash = sha1(implode('__', $new));
 
         // Unset if record already exists.
-        if (isset($privileges[$hash])) {
-            unset($privileges[$hash]);
+        if (isset($ccgroups[$hash])) {
+            unset($ccgroups[$hash]);
             continue;
         }
 
         // Add new if record doesn't exist yet. Use execute due to reserved keywords...
-        $sql = 'INSERT INTO {' . $table . '} (`audiencetype`,`code`,`role`,`condition`,`forcesend`,`description`,`checktype`,
-            `checkvalue`,`checkorder`,`modrequired`,`modthreshold`,`modusername`,`modpriority`,`active`) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+        $sql = 'INSERT INTO {' . $table . '} (`audiencetype`,`code`,`role`,`forcesend`,`description`,`ccgroupid`) 
+            VALUES (?,?,?,?,?,?)';
         $DB->execute($sql, $new);
     }
 
     // Delete left overs.
-    foreach ($privileges as $delete) {
+    foreach ($ccgroups as $delete) {
         $DB->delete_records($table, array('id' => $delete));
     }
 
-    $message = get_string("settings_privileges:savesuccess", "local_announcements");
+    $message = get_string("settings_ccgroups:savesuccess", "local_announcements");
     redirect(
         $redirectdefault->out(),
         '<p>'.$message.'</p>',

@@ -128,9 +128,16 @@ Some users need to be CC'd into audiences they are not directly enrolled or invo
  - ccgroupid → the id of the group to include in the announcement recipients. Comma-separated for multiple.
 
 ### Capabilities
--   local/announcements:post → Given to editing teachers, managers, and coursecreators by default in their courses.
--   local/announcements:administer → Checked in various functions across the system to allow admin users to do basically anything.
--   local/announcements:auditor → Allows users to view all announcements in the system
--   local/announcements:emergencyannouncer → Allows users to send immediate (forcesend) announcements without moderation.
--   local/announcements:unmoderatedannouncer → Allows users to post announcements without moderation.
+- local/announcements:post → Given to editing teachers, managers, and coursecreators by default in their courses.
+- local/announcements:administer → Checked in various functions across the system to allow admin users to do basically anything.
+- local/announcements:auditor → Allows users to view all announcements in the system
+- local/announcements:emergencyannouncer → Allows users to send immediate (forcesend) announcements without moderation.
+- local/announcements:unmoderatedannouncer → Allows users to post announcements without moderation.
 
+### Settings pages
+Besides the global settings, administrators have access to a number of custom settings pages.
+- /local/announcements/settings/audiencetypes.php
+- /local/announcements/settings/ccgroups.php
+- /local/announcements/settings/impersonators.php
+- /local/announcements/settings/moderatorassistants.php
+- /local/announcements/settings/privileges.php

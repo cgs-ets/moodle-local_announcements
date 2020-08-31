@@ -35,6 +35,8 @@ $string['settings_impersonators:heading'] = 'Impersonator Settings';
 $string['settings_impersonators:savesuccess'] = 'Impersonator settings have been saved.';
 $string['settings_privileges:heading'] = 'Privileges Settings';
 $string['settings_privileges:savesuccess'] = 'Privilege settings have been saved.';
+$string['settings_ccgroups:heading'] = 'CC Group Settings';
+$string['settings_ccgroups:savesuccess'] = 'CC group settings have been saved.';
 $string['settings_moderatorassistants:heading'] = 'Moderator Assistant Settings';
 $string['settings_moderatorassistants:savesuccess'] = 'Moderator Assistant settings have been saved.';
 
