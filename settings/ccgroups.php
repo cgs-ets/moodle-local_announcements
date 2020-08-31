@@ -97,8 +97,8 @@ if ($data = $form->get_data()) {
         }
 
         // Add new if record doesn't exist yet. Use execute due to reserved keywords...
-        $sql = 'INSERT INTO {' . $table . '} (`audiencetype`,`code`,`role`,`forcesend`,`description`,`ccgroupid`) 
-            VALUES (?,?,?,?,?,?)';
+        $sql = "INSERT INTO {" . $table . "} (audiencetype,code,role,forcesend,description,ccgroupid) 
+                     VALUES (?,?,?,?,?,?)";
         $DB->execute($sql, $new);
     }
 

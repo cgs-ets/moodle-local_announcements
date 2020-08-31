@@ -106,9 +106,7 @@ if ($data = $form->get_data()) {
         }
 
         // Add new if record doesn't exist yet. Use execute due to reserved keywords...
-        $sql = 'INSERT INTO {' . $table . '} (`audiencetype`,`code`,`role`,`condition`,`forcesend`,`description`,`checktype`,
-            `checkvalue`,`checkorder`,`modrequired`,`modthreshold`,`modusername`,`modpriority`,`active`) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+        $sql = "INSERT INTO {" . $table . "} (audiencetype,code,role,condition,forcesend,description,checktype,checkvalue,checkorder,modrequired,modthreshold,modusername,modpriority,active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         $DB->execute($sql, $new);
     }
 
