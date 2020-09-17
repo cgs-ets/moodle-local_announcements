@@ -47,6 +47,11 @@ class post extends \core_search\base {
     public function get_document_recordset($modifiedfrom = 0, \context $context = null) {
         global $DB;
 
+        // Only index for site context.
+        if (isset($context) && $context->contextlevel != \CONTEXT_SYSTEM ) {
+            return null;
+        }
+
         $params = [];
         $sql = "SELECT DISTINCT p.* 
                 FROM {ann_posts} p
