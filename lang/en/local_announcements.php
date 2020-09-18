@@ -97,6 +97,9 @@ $string['config:shortpost'] = 'Short post length';
 $string['config:shortpostdesc'] = 'Number of characters to truncate message when not in full view.';
 $string['config:showposterallinctx'] = 'Show poster all in a course context';
 $string['config:showposterallinctxdesc'] =  'If this is enabled, user\'s with "local/announcements:post" capability in a course context, for example teachers and managers, will see all latest announcements in that course, regardless of whether they are included in the audience list.';
+$string['config:cronsendnum'] = 'Cron send number';
+$string['config:cronsendnumdesc'] = 'Number of notifications to process in a single cron task.';
+
 
 $string['announcements:post'] = 'Post announcements';
 $string['announcements:administer'] = 'Administer announcements';

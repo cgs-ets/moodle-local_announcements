@@ -50,39 +50,35 @@ class send_user_notifications extends \core\task\adhoc_task {
      * Send out messages.
      */
     public function execute() {
-        $this->log_start("Sending notifications to " . $this->get_userid());
 
         // Raise the time limit.
         \core_php_time_limit::raise(120);
 
-        //for testing purposes:
-        //$this->set_id(342);
-        //$this->set_userid(2);
-        //$this->set_custom_data_as_string('[7,8]');
+        $data = (array) $this->get_custom_data();
+        $this->log("Processing the following notifications: " . json_encode($data), 1);
 
-        $this->recipient = \core_user::get_user($this->get_userid());
-        $this->minimise_recipient_record();
-        $this->log("Recipient is {$this->recipient->username} ({$this->recipient->id})", 1);
-
-        $data = $this->get_custom_data();
-        $this->log("Custom data is " . json_encode($data), 1);
-
-        $this->prepare_data((array) $data);
 
         $errorcount = 0;
-        $sentcount = 0;
-        foreach ($this->posts as $post) {
-            if ($this->send_post($post)) {
-                $this->log("Announcement {$post->id} sent", 1);
-                $sentcount++;
-            } else {
-                $this->log("Failed to send announcement {$post->id}", 1);
-                $errorcount++;
+        $sentcount = 0;   
+        foreach ($data as $userid => $postids) {
+            $this->recipient = \core_user::get_user($userid);
+            $this->minimise_recipient_record();
+            $this->log("Recipient is {$this->recipient->username} ({$this->recipient->id})", 1);
+
+            $posts = $this->prepare_data($postids);
+
+            foreach ($posts as $post) {
+                if ($this->send_post($post)) {
+                    $this->log("Announcement {$post->id} sent", 1);
+                    $sentcount++;
+                } else {
+                    $this->log("Failed to send announcement {$post->id}", 1);
+                    $errorcount++;
+                }
             }
         }
-        
 
-        $this->log_finish("Sent {$sentcount} messages with {$errorcount} failures");
+        $this->log_finish("Sent {$sentcount} messages in batch with {$errorcount} failures");
     }
 
     /**
@@ -97,6 +93,8 @@ class send_user_notifications extends \core\task\adhoc_task {
             return;
         }
 
+        $posts = array();
+
         $announcements = announcement::get_by_ids_and_username($postids, $this->recipient->username);
         $this->log("Announcement data retrieved for: " . implode(',', array_keys($announcements)), 1);
         
@@ -106,14 +104,16 @@ class send_user_notifications extends \core\task\adhoc_task {
                 'context' => $context,
                 'audiences' => $announcement->audiences,
             ]);
-            $this->posts[] = $exporter->export($OUTPUT);
+            $posts[] = $exporter->export($OUTPUT);
         }
-        $this->log("Announcement data exported and ready for sending: " . implode(',', array_column($this->posts, 'id')), 1);
+        $this->log("Announcement data exported and ready for sending: " . implode(',', array_column($posts, 'id')), 1);
 
-        if (empty($this->posts)) {
+        if (empty($posts)) {
             // All posts have been removed since the task was queued.
             return;
         }
+
+        return $posts;
     }
 
     /**

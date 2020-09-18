@@ -157,46 +157,67 @@ class cron_task_notifications extends \core\task\scheduled_task {
         $sitetimezone = \core_date::get_server_timezone();
         $counts = [
             'notifications' => 0,
+            'notifications' => 0,
             'forcesends' => 0,
             'users' => 0,
             'ignored' => 0,
         ];
-        $this->log("Processing " . count($this->users) . " users", 1);
-        foreach ($this->users as $user) {
-            $usercounts = [
-                'notifications' => 0,
-            ];
 
+        $pertask = isset($config->cronsendnum) ? $config->cronsendnum : '1';
+        $numusers = count($this->users);
+        $this->log("Processing " . $numusers . " users, in lots of " . $pertask, 1);
+
+        $i = 1;
+        $ui = 1;
+        $batch = array();
+        $batchcounts = array(
+            'notifications' => 0,
+        );
+        foreach ($this->users as $user) {
+
+            $usercounts = array('notifications' => 0);
             $send = false;
-            // Setup this user so that the capabilities are cached, and environment matches receiving user.
-            if (CLI_SCRIPT) {
-                cron_setup_user($user);
-            }
 
             $notificationposts = $this->fetch_posts_for_user($user);
-
             if (!empty($notificationposts)) {
-                $usercounts['notifications'] += count($notificationposts);
-                $task = new \local_announcements\task\send_user_notifications();
-                $task->set_userid($user->id);
-                $task->set_custom_data($notificationposts);
-                $task->set_component('local_announcements');
-                \core\task\manager::queue_adhoc_task($task);
-                $send = true;
-            }
-
-            if ($send) {
                 $counts['users']++;
-                $counts['notifications'] += $usercounts['notifications'];
+                $counts['notifications'] += count($notificationposts);
+                $batchcounts['notifications'] += count($notificationposts);
+
+                // Add the user posts to the batch.
+                $batch[$user->id] = $notificationposts;
             } else {
                 $counts['ignored']++;
             }
 
-            $this->log(sprintf("Queued %d notifications for %s",
-                    $usercounts['notifications'],
-                    $user->id
+            $this->log(sprintf("Found %d notifications for %s",
+                count($notificationposts),
+                $user->username
+            ), 2);
+
+            // If we have reached the per task limit, or have processed all users, create the next adhoc batch.
+            if ( $i == $pertask || $ui == $numusers) {
+
+                $task = new \local_announcements\task\send_user_notifications();
+                $task->set_custom_data($batch);
+                $task->set_component('local_announcements');
+                \core\task\manager::queue_adhoc_task($task);
+
+                $this->log(sprintf("Queued %d notifications for %d users in batch",
+                    $batchcounts['notifications'],
+                    $i,
                 ), 2);
+
+                // Reset batch.
+                $i = 1;
+                $batch = array();
+                $batchcounts['notifications'] = 0;
+            }
+
+            $i++;
+            $ui++;
         }
+
         $this->log(
             sprintf(
                 "Queued %d notifications. " .

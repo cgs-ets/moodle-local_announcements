@@ -143,5 +143,14 @@ if ($hassiteconfig) {
     $setting = new admin_setting_configcheckbox($name, $title, $description, 0);
     $settings->add($setting);
 
+    // Number of notifications to batch process in a single go.
+    $name = 'local_announcements/cronsendnum';
+    $title = get_string('config:cronsendnum', 'local_announcements');
+    $description = get_string('config:cronsendnumdesc', 'local_announcements');
+    $default = 10;
+    $type = PARAM_INT;
+    $setting = new admin_setting_configtext($name, $title, $description, $default, $type);
+    $settings->add($setting);
+
 }
 
