@@ -170,9 +170,7 @@ class cron_task_notifications extends \core\task\scheduled_task {
         $i = 1;
         $ui = 1;
         $batch = array();
-        $batchcounts = array(
-            'notifications' => 0,
-        );
+        $batchcounts = array('notifications' => 0);
         foreach ($this->users as $user) {
 
             $usercounts = array('notifications' => 0);
@@ -209,7 +207,7 @@ class cron_task_notifications extends \core\task\scheduled_task {
                 ), 2);
 
                 // Reset batch.
-                $i = 1;
+                $i = 0;
                 $batch = array();
                 $batchcounts['notifications'] = 0;
             }
