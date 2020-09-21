@@ -83,35 +83,33 @@ class send_user_digests extends \core\task\adhoc_task {
     public function execute() {
         $starttime = time();
 
-        //for testing purposes:
-        //$this->set_userid(3);
+        $data = (array) $this->get_custom_data();
+        $this->log("Processing the following digests: " . json_encode($data), 1);
 
-        $this->recipient = \core_user::get_user($this->get_userid());
-        $this->log_start("Sending announcement digests for {$this->recipient->username} ({$this->recipient->id})");
+        foreach ($data as $userid => $postids) {
+            $this->recipient = \core_user::get_user($userid);
+            $this->log_start("Sending announcement digests for {$this->recipient->username} ({$this->recipient->id})");
 
-        if (empty($this->recipient->mailformat) || $this->recipient->mailformat != 1) {
-            // This user does not want to receive HTML.
-            $this->allowhtml = false;
+            if (empty($this->recipient->mailformat) || $this->recipient->mailformat != 1) {
+                // This user does not want to receive HTML.
+                $this->allowhtml = false;
+            }
+
+            $this->posts = $this->prepare_data($postids);
+
+            if (empty($this->posts)) {
+                $this->log_finish("No messages found to send.");
+                continue;
+            }
+
+            // This digest has at least one post and should therefore be sent.
+            if ($this->send_mail()) {
+                $idstr = implode(", ", $postids);
+                $this->log_finish("Digest sent with {$this->sentcount} announcements. Announcement IDs {$idstr}.");
+            } else {
+                $this->log_finish("Issue sending digest. Skipping.");
+            }
         }
-
-        // Fetch all of the data we need to mail these posts.
-        $data = $this->get_custom_data();
-        $postids = (array) $data;
-        $this->prepare_data($postids);
-
-        if (empty($this->posts)) {
-            $this->log_finish("No messages found to send.");
-            return;
-        }
-
-        // This digest has at least one post and should therefore be sent.
-        if ($this->send_mail()) {
-            $idstr = implode(", ", $postids);
-            $this->log_finish("Digest sent with {$this->sentcount} announcements. Announcement IDs {$idstr}.");
-        } else {
-            $this->log_finish("Issue sending digest. Skipping.");
-        }
-
     }
 
     /**
@@ -126,6 +124,8 @@ class send_user_digests extends \core\task\adhoc_task {
             return;
         }
 
+        $posts = array();
+
         $announcements = announcement::get_by_ids_and_username($postids, $this->recipient->username);
         
         $context = \context_system::instance();
@@ -134,13 +134,15 @@ class send_user_digests extends \core\task\adhoc_task {
                 'context' => $context,
                 'audiences' => $announcement->audiences,
             ]);
-            $this->posts[] = $exporter->export($OUTPUT);
+            $posts[] = $exporter->export($OUTPUT);
         }
 
-        if (empty($this->posts)) {
+        if (empty($posts)) {
             // All posts have been removed since the task was queued.
             return;
         }
+
+        return $posts;
     }
 
     /**
@@ -150,6 +152,7 @@ class send_user_digests extends \core\task\adhoc_task {
         global $OUTPUT;
 
         $config = get_config('local_announcements');
+        $this->sentcount = 0;
 
         // Headers to help prevent auto-responders.
         $userfrom = \core_user::get_noreply_user();

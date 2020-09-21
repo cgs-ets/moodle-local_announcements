@@ -152,5 +152,14 @@ if ($hassiteconfig) {
     $setting = new admin_setting_configtext($name, $title, $description, $default, $type);
     $settings->add($setting);
 
+    // Number of digests to batch process in a single go.
+    $name = 'local_announcements/digestbatchnum';
+    $title = get_string('config:digestbatchnum', 'local_announcements');
+    $description = get_string('config:digestbatchnumdesc', 'local_announcements');
+    $default = 10;
+    $type = PARAM_INT;
+    $setting = new admin_setting_configtext($name, $title, $description, $default, $type);
+    $settings->add($setting);
+
 }
 

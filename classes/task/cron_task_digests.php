@@ -152,62 +152,82 @@ class cron_task_digests extends \core\task\scheduled_task {
     protected function queue_user_tasks() {
         global $DB;
 
+        $config = get_config('local_announcements');
+
         $timenow = time();
         $sitetimezone = \core_date::get_server_timezone();
         $counts = array(
             'digests' => 0,
-            'users' => 0,
+            'posts' => 0,
             'ignored' => 0,
         );
-        $this->log("Processing " . count($this->users) . " users", 1);
-        foreach ($this->users as $user) {
-            $counts['users']++;
-            $usercounts = [
-                'digests' => 0,
-                'posts' => 0,
-            ];
 
-            $send = false;
-            // Setup this user so that the capabilities are cached, and environment matches receiving user.
-            if (CLI_SCRIPT) {
-                cron_setup_user($user);
-            }
+        $pertask = isset($config->digestbatchnum) ? $config->digestbatchnum : '1';
+        $numusers = count($this->users);
+        $this->log("Processing " . $numusers . " users, in lots of " . $pertask, 1);
+
+        $i = 1;
+        $ui = 1;
+        $batch = array();
+        $batchcounts = array('posts' => 0);
+        foreach ($this->users as $user) {
 
             $digestposts = $this->fetch_posts_for_user($user);
-
             if (!empty($digestposts)) {
-                $this->log("creating ad hoc task (send_user_digests) for " . $user->id, 1);
-                $task = new \local_announcements\task\send_user_digests();
-                $task->set_userid($user->id);
-                $task->set_custom_data($digestposts);
-                $task->set_component('local_announcements');
-                \core\task\manager::queue_adhoc_task($task);
-                $usercounts['posts'] = $usercounts['posts'] + count($digestposts);
-                $send = true;
-            }
-
-            if ($send) {
-                $usercounts['digests']++;
                 $counts['digests']++;
+                $counts['posts'] += count($digestposts);
+                $batchcounts['posts'] += count($digestposts);
+
+                // Add the user posts to the batch.
+                $batch[$user->id] = $digestposts;
             } else {
                 $counts['ignored']++;
             }
 
-            $this->log(sprintf("Queued %d digests with %d posts for %s",
-                    $usercounts['digests'],
-                    $usercounts['posts'],
-                    $user->id
+            $this->log(sprintf("Found %d posts for %s (%d)",
+                count($digestposts),
+                $user->username,
+                $user->id,
+            ), 2);
+
+            // If we have reached the per task limit, or have processed all users, create the next adhoc batch.
+            if ( $i == $pertask || $ui == $numusers) {
+
+                
+                $task = new \local_announcements\task\send_user_digests();
+                $task->set_custom_data($batch);
+                $task->set_component('local_announcements');
+                \core\task\manager::queue_adhoc_task($task);
+
+                $this->log(sprintf("Queued %d posts for %d users in batch",
+                    $batchcounts['posts'],
+                    $i,
                 ), 2);
+
+                // Reset batch.
+                $i = 0;
+                $batch = array();
+                $batchcounts['posts'] = 0;
+            }
+
+            $i++;
+            $ui++;
         }
+
         $this->log(
             sprintf(
-                "Queued %d digests. " .
-                "Unique users: %d (%d ignored)",
+                "%d digests. " .
+                "%d posts. " .
+                "%d ignored. ",
                 $counts['digests'],
-                $counts['users'],
+                $counts['posts'],
                 $counts['ignored']
             ), 1);
+
     }
+
+
+        
 
     /**
      * Fetch posts for this user.

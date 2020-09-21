@@ -157,7 +157,6 @@ class cron_task_notifications extends \core\task\scheduled_task {
         $sitetimezone = \core_date::get_server_timezone();
         $counts = [
             'notifications' => 0,
-            'notifications' => 0,
             'forcesends' => 0,
             'users' => 0,
             'ignored' => 0,
@@ -172,9 +171,6 @@ class cron_task_notifications extends \core\task\scheduled_task {
         $batch = array();
         $batchcounts = array('notifications' => 0);
         foreach ($this->users as $user) {
-
-            $usercounts = array('notifications' => 0);
-            $send = false;
 
             $notificationposts = $this->fetch_posts_for_user($user);
             if (!empty($notificationposts)) {
