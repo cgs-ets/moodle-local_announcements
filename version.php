@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2020083100;
+$plugin->version = 2020092500;
 $plugin->requires = 2019052000; //Requires Moodle 3.7
 $plugin->component = 'local_announcements';
 $plugin->maturity = MATURITY_BETA;

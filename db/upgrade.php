@@ -122,6 +122,15 @@ function xmldb_local_announcements_upgrade($oldversion) {
         }
     }
 
+    if ($oldversion < 2020092500) {
+        $table = new xmldb_table('ann_posts');
+        $sorttime = new xmldb_field('sorttime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0, null, 'impersonate');
+
+        if (!$dbman->field_exists($table, $sorttime)) {
+            $dbman->add_field($table, $sorttime);
+        }
+    }
+
     return true;
 
 }

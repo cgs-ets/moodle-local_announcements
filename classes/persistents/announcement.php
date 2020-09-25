@@ -127,6 +127,10 @@ class announcement extends persistent {
             "impersonate" => [
                 'type' => PARAM_RAW,
             ],
+            "sorttime" => [
+                'type' => PARAM_INT,
+                'default' => 0,
+            ],
         ];
     }
 
@@ -159,7 +163,7 @@ class announcement extends persistent {
         $params = array_merge($params, $availparams);
 
         // Order by.
-        $sql .= "ORDER BY p.timemodified DESC ";
+        $sql .= "ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
 
         // Create array of announcement persistents.
         $records = $DB->get_records_sql($sql, $params, $from, $perpage);
@@ -237,7 +241,7 @@ class announcement extends persistent {
         }
 
         // Order by.
-        $sql .= ") ) ORDER BY p.timemodified DESC ";
+        $sql .= ") ) ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
 
         //Debug sql
         //echo "<pre>";
@@ -312,7 +316,7 @@ class announcement extends persistent {
         $params[] = $user->username;
 
         // Order by.
-        $sql .= "ORDER BY p.timemodified DESC ";
+        $sql .= "ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
 
         // Debug sql.
         //echo "<pre>";
@@ -423,7 +427,7 @@ class announcement extends persistent {
         $params = array_merge($params, $comboparams);
 
         // Order by.
-        $sql .= " ) ) ) ) ORDER BY p.timemodified DESC ";
+        $sql .= " ) ) ) ) ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
 
         //Debug sql
         //echo "<pre>";
@@ -480,7 +484,7 @@ class announcement extends persistent {
         $params = array_merge($params, $availparams);
 
         // Order by.
-        $sql .= "ORDER BY p.timemodified DESC, p.id DESC";
+        $sql .= "ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC, p.id DESC";
 
         $records = $DB->get_records_sql($sql, $params);
         $posts = array();
@@ -856,7 +860,8 @@ class announcement extends persistent {
         }
 
         // Set/update the data.
-        $announcement->set('timeedited', time());
+        $timenow = time();
+        $announcement->set('timeedited', $timenow);
         $announcement->set('subject', $data->subject);
         $announcement->set('message', '');
         $announcement->set('messageformat', $data->messageformat);
@@ -867,6 +872,9 @@ class announcement extends persistent {
         $announcement->set('forcesend', $data->forcesend);
         $announcement->set('attachment', 0);
         $announcement->set('notified', 0);
+        // Determine the sort time.
+        $sorttime = ($data->timestart > $timenow) ? $data->timestart : $timenow;
+        $announcement->set('sorttime', $sorttime);
         // No moderation set initially. Moderation requirements processed below.
         $announcement->set('modrequired', ANN_MOD_REQUIRED_NO);
         $announcement->set('modstatus', ANN_MOD_STATUS_PENDING);
