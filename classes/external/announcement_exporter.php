@@ -239,7 +239,9 @@ class announcement_exporter extends persistent_exporter {
 			$authorjobpositions = $author->profile_field_JobPositions;
 		}
         $authorurl = new \moodle_url('/user/profile.php', array('id' => $author->id));
-        $authorphototokenised = $OUTPUT->user_picture($author, array('size' => 35, 'includetoken' => true));
+        $authorphototokenised = new \user_picture($author, ['size' => 35]);
+        $authorphototokenised->includetoken = $author->id;
+        $authorphototokenised = $authorphototokenised->get_url($PAGE)->out(false);
 
         $displaytime = max(array($this->data->timecreated, $this->data->timeedited));
         $displaytime = $this->data->sorttime > $displaytime ? $this->data->sorttime : $displaytime;
@@ -276,7 +278,7 @@ class announcement_exporter extends persistent_exporter {
 	    	"<h1>", "<h2>", "<h3>", "<h4>", "<h5>", "<h6>", "<span>", "<hr>", "<small>", "<strong>", "<em>",
 	    	"<sub>", "<sup>", "<label>", "<ul>", "<ol>", "<li>", "<table>", "<tr>", "<th>", "<td>");
 	    $messagemobile = strip_tags($messagemobile, $allowedtags); // The second param is a whitelist of allowed tags. 
-	    
+
 	    $attachmentstokenized = $this->export_attachmentstokenized($output);
 
     	$viewurl = new \moodle_url('/local/announcements/view.php', array('id' => $this->data->id));
@@ -369,7 +371,7 @@ class announcement_exporter extends persistent_exporter {
 	    return [
 	        'audiences' => $audiencesgrouped,
 	        'authorphoto' => $authorphoto,
-	        'authorphototokenised' => $authorphototokenised->out(false),
+	        'authorphototokenised' => $authorphototokenised,
 	        'authorfullname' => $authorfullname,
 	        'authorjobpositions' => $authorjobpositions,
 	        'authorurl' => $authorurl->out(false),
