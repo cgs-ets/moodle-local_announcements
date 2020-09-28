@@ -109,10 +109,7 @@ class announcement_exporter extends persistent_exporter {
 	        'messagetokenized' => [
 	        	'type' => PARAM_RAW,
 	        ],
-	        'attachmentstokenized' => [
-	        	'type' => PARAM_RAW,
-	        ],
-	        'viewurl' => [
+	        'messagemobile' => [
 	        	'type' => PARAM_RAW,
 	        ],
 	        'shortmessage' => [
@@ -120,6 +117,12 @@ class announcement_exporter extends persistent_exporter {
 	        ],
 	        'islong' => [
 	        	'type' => PARAM_BOOL,
+	        ],
+	        'attachmentstokenized' => [
+	        	'type' => PARAM_RAW,
+	        ],
+	        'viewurl' => [
+	        	'type' => PARAM_RAW,
 	        ],
             "ismodapproved" => [
                 'type' => PARAM_BOOL,
@@ -259,9 +262,21 @@ class announcement_exporter extends persistent_exporter {
 	    	$isavailable = true;
 	    }
 
-	    $messagetokenized = file_rewrite_pluginfile_urls($this->data->message,'pluginfile.php',$this->related['context']->id,
+	    $messagetokenized = $messagemobile = file_rewrite_pluginfile_urls($this->data->message,'pluginfile.php',$this->related['context']->id,
 	        		'local_announcements','announcement',$this->data->id,['includetoken' => true]);
 	    $messageplain = trim(html_to_text(format_text_email($messagetokenized, FORMAT_PLAIN)));
+	    
+	    // Mobile shows the full tokenised message with minimal formating. 
+	    // Replace <p> with <br> as it is common for editor html to have p's inside p's and this breaks the template.
+	    $messagemobile = preg_replace("/<p[^>]*?>/", "", $messagemobile);
+		$messagemobile = str_replace("</p>", "<br />", $messagemobile);
+		// Remove inline styles
+		$messagemobile = preg_replace('#(<[a-z ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $messagemobile);
+	    $allowedtags = array("<b>", "<i>", "<a>", "<img>", "<br>", "<div>", "<blockquote>", 
+	    	"<h1>", "<h2>", "<h3>", "<h4>", "<h5>", "<h6>", "<span>", "<hr>", "<small>", "<strong>", "<em>",
+	    	"<sub>", "<sup>", "<label>", "<ul>", "<ol>", "<li>", "<table>", "<tr>", "<th>", "<td>");
+	    $messagemobile = strip_tags($messagemobile, $allowedtags); // The second param is a whitelist of allowed tags. 
+	    
 	    $attachmentstokenized = $this->export_attachmentstokenized($output);
 
     	$viewurl = new \moodle_url('/local/announcements/view.php', array('id' => $this->data->id));
@@ -354,7 +369,7 @@ class announcement_exporter extends persistent_exporter {
 	    return [
 	        'audiences' => $audiencesgrouped,
 	        'authorphoto' => $authorphoto,
-	        'authorphototokenised' => $authorphototokenised,
+	        'authorphototokenised' => $authorphototokenised->out(false),
 	        'authorfullname' => $authorfullname,
 	        'authorjobpositions' => $authorjobpositions,
 	        'authorurl' => $authorurl->out(false),
@@ -365,10 +380,11 @@ class announcement_exporter extends persistent_exporter {
 	        'isavailable' => $isavailable,
 	        'messagetokenized' => $messagetokenized,
 	        'messageplain' => $messageplain,
-	        'attachmentstokenized' => $attachmentstokenized,
-	        'viewurl' => $viewurl,
+	        'messagemobile' => $messagemobile,
 	        'shortmessage' => $shortmessage,
 	        'islong' => $islong,
+	        'attachmentstokenized' => $attachmentstokenized,
+	        'viewurl' => $viewurl,
 	        'ismodapproved' => $ismodapproved,
 	        'ismodpending' => $ismodpending,
 	        'ismodrejected' => $ismodrejected,
