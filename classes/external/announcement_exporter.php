@@ -115,6 +115,12 @@ class announcement_exporter extends persistent_exporter {
 	        'shortmessage' => [
 	        	'type' => PARAM_RAW,
 	        ],
+	        'shortmessagetokenized' => [
+	        	'type' => PARAM_RAW,
+	        ],
+	        'shortmessageplain' => [
+	        	'type' => PARAM_RAW,
+	        ],
 	        'islong' => [
 	        	'type' => PARAM_BOOL,
 	        ],
@@ -306,7 +312,15 @@ class announcement_exporter extends persistent_exporter {
 		$shortmessage = trim($dom->saveHTML());
     	$islong = ($islong || $shortmessage != $shortmessagebeforetrims);
 
+    	// Append view more link to short message.
+		$viewlink = '<p><a class="view-full-link btn btn-secondary" href="' . $viewurl . '">' . get_string('list:viewmore', 'local_announcements') . '</a></p>';
+		if ($islong) {
+			$shortmessage .= $viewlink;
+		}
+
 		// Rewrite pluginfile urls.
+    	$shortmessagetokenized = file_rewrite_pluginfile_urls($shortmessage,'pluginfile.php', $this->related['context']->id, 'local_announcements', 'announcement', $this->data->id, ['includetoken' => true]);
+	    $shortmessageplain = trim(html_to_text(format_text_email($shortmessagetokenized, FORMAT_PLAIN)));
 	    $shortmessage = file_rewrite_pluginfile_urls($shortmessage,'pluginfile.php',$this->related['context']->id, 'local_announcements','announcement',$this->data->id);
 
 	   	$ismodapproved = false;
@@ -316,7 +330,6 @@ class announcement_exporter extends persistent_exporter {
 	    $ismodpending = false;
 	    if ($this->data->modrequired == 1 and $this->data->modstatus == 0) {
 	    	$ismodpending = true;
-
 	    }
 	    $ismodrejected = false;
 	    if ($this->data->modrequired == 1 and $this->data->modstatus == 2) {
@@ -324,12 +337,6 @@ class announcement_exporter extends persistent_exporter {
 	    }
 	    // Get any moderation details.
 	    $modinfo = moderation::get_mod_info($this->data->id);
-
-	    // Append view more link to short message.
-		$viewlink = '<p><a class="view-full-link btn btn-secondary" href="' . $viewurl . '">' . get_string('list:viewmore', 'local_announcements') . '</a></p>';
-		if ($islong) {
-			$shortmessage .= $viewlink;
-		}
 
 		// Deliver status
 		$deliverystatus = '';
@@ -365,7 +372,6 @@ class announcement_exporter extends persistent_exporter {
 				$deliveryicon = '<i class="fa fa-check-circle" aria-hidden="true"></i>';
 				$deliverymessage = get_string('list:deliverydigestmailed', 'local_announcements');
 			}
-			
 		}
 
 	    return [
@@ -384,6 +390,8 @@ class announcement_exporter extends persistent_exporter {
 	        'messageplain' => $messageplain,
 	        'messagemobile' => $messagemobile,
 	        'shortmessage' => $shortmessage,
+	        'shortmessagetokenized' => $shortmessagetokenized,
+	        'shortmessageplain' => $shortmessageplain,
 	        'islong' => $islong,
 	        'attachmentstokenized' => $attachmentstokenized,
 	        'viewurl' => $viewurl,
