@@ -181,7 +181,19 @@ class send_user_notifications extends \core\task\adhoc_task {
             'notificationiconurl' => $userpicture->get_url($PAGE)->out(false),
         ];
 
+        // Send email/web notification
+        $result = message_send($eventdata);
+
+        // Send mobile notification
+        $eventdata->name                = 'notificationsmobile';
+        if ($post->forcesend) {
+            $eventdata->name            = 'forcedmobile';
+        }
+        $eventdata->fullmessage         = $post->shortmessageplain;
+        $eventdata->fullmessageformat   = FORMAT_PLAIN;
+        $eventdata->fullmessagehtml     = $post->shortmessagetokenized;
         return message_send($eventdata);
+
     }
 
     /**

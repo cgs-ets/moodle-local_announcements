@@ -25,23 +25,42 @@
 
 
 $messageproviders = array (
-    // Ordinary single notifications
+    // Ordinary single notifications.
     'notifications' => array(
         'defaults' => array(
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
             'email' => MESSAGE_PERMITTED,
+            'airnotifier' => MESSAGE_DISALLOWED,
+        ),
+    ),
+
+    // Notification to mobile. Can't use other notifications for mobile as payload too large.
+    'notificationsmobile' => array(
+        'defaults' => array(
+            'popup' => MESSAGE_DISALLOWED,
+            'email' => MESSAGE_DISALLOWED,
             'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
         ),
     ),
 
-    // Forced single notifications
+    // Forced single notifications.
     'forced' => array(
         'defaults' => array(
             'popup' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
             'email' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'airnotifier' => MESSAGE_DISALLOWED,
+        ),
+    ),
+
+    // Forced single notifications for mobile. Can't use other notifications for mobile as payload too large.
+    'forcedmobile' => array(
+        'defaults' => array(
+            'popup' => MESSAGE_DISALLOWED,
+            'email' => MESSAGE_DISALLOWED,
             'airnotifier' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
         ),
     ),
+
 
     // digest messages.
     'digests' => array(
