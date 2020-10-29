@@ -66,8 +66,10 @@ $string['list:deliverydigestpending'] = 'Scheduled for delivery via the Daily Di
 $string['list:deliverydigestsending'] = 'Sending in-progress via the Daily Digest';
 $string['list:deliverydigestmailed'] = 'Delivered via the Daily Digest';
 
-$string['messageprovider:notifications'] = 'New announcement posted notifications';
-$string['messageprovider:forced'] = 'Emergency announcement notifications';
+$string['messageprovider:notifications'] = 'Individual announcement emails';
+$string['messageprovider:notifications'] = 'Individual announcement push notifications';
+$string['messageprovider:forced'] = 'Emergency announcement emails';
+$string['messageprovider:forcedmobile'] = 'Emergency announcement push notifications';
 $string['messageprovider:digests'] = 'Daily Digest';
 $string['messageprovider:moderationmail'] = 'Announcement moderation notifications';
 

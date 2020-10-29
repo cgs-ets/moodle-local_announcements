@@ -18,7 +18,7 @@
  * Defines message providers (types of messages being sent)
  *
  * @package   local_announcements
- * @category    external
+ * @category  external
  * @copyright 2020 Michael Vangelovski <michael.vangelovski@hotmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
