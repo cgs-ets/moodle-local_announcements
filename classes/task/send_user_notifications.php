@@ -191,7 +191,7 @@ class send_user_notifications extends \core\task\adhoc_task {
         }
         $eventdata->fullmessage         = $post->shortmessageplain;
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml     = $post->shortmessagetokenized;
+        $eventdata->fullmessagehtml     = $post->shortmessage;
         return message_send($eventdata);
 
     }

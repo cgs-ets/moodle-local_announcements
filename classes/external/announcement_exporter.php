@@ -115,9 +115,6 @@ class announcement_exporter extends persistent_exporter {
 	        'shortmessage' => [
 	        	'type' => PARAM_RAW,
 	        ],
-	        'shortmessagetokenized' => [
-	        	'type' => PARAM_RAW,
-	        ],
 	        'shortmessageplain' => [
 	        	'type' => PARAM_RAW,
 	        ],
@@ -319,9 +316,9 @@ class announcement_exporter extends persistent_exporter {
 		}
 
 		// Rewrite pluginfile urls.
-    	$shortmessagetokenized = file_rewrite_pluginfile_urls($shortmessage,'pluginfile.php', $this->related['context']->id, 'local_announcements', 'announcement', $this->data->id, ['includetoken' => true]);
-	    $shortmessageplain = trim(html_to_text(format_text_email($shortmessagetokenized, FORMAT_PLAIN)));
-	    $shortmessage = file_rewrite_pluginfile_urls($shortmessage,'pluginfile.php',$this->related['context']->id, 'local_announcements','announcement',$this->data->id);
+		$shortmessage = file_rewrite_pluginfile_urls($shortmessage,'pluginfile.php',$this->related['context']->id, 'local_announcements','announcement',$this->data->id);
+	    // Convert to plain version.
+	    $shortmessageplain = trim(html_to_text(format_text_email($shortmessage, FORMAT_PLAIN)));
 
 	   	$ismodapproved = false;
 	    if ($this->data->modrequired == 0 or $this->data->modstatus == 1) {
@@ -390,7 +387,6 @@ class announcement_exporter extends persistent_exporter {
 	        'messageplain' => $messageplain,
 	        'messagemobile' => $messagemobile,
 	        'shortmessage' => $shortmessage,
-	        'shortmessagetokenized' => $shortmessagetokenized,
 	        'shortmessageplain' => $shortmessageplain,
 	        'islong' => $islong,
 	        'attachmentstokenized' => $attachmentstokenized,
