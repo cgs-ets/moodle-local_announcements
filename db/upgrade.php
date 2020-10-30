@@ -131,6 +131,49 @@ function xmldb_local_announcements_upgrade($oldversion) {
         }
     }
 
+    if ($oldversion < 2020103002) {
+
+        // Immediately clean default notification settings and preferences.
+        $sql = "update mdl_config_plugins
+        set value = 'disallowed'
+        where plugin = 'message'
+        and name = 'airnotifier_provider_local_announcements_notifications_permitted'
+        and value = 'permitted'";
+        $DB->execute($sql);
+
+        $sql = "update mdl_config_plugins
+        set value = 'disallowed'
+        where plugin = 'message'
+        and name = 'airnotifier_provider_local_announcements_forced_permitted'
+        and value = 'forced'";
+        $DB->execute($sql);
+
+        $sql = "update mdl_user_preferences 
+        set value = 'popup,email'
+        where name LIKE 'message_provider_local_announcements_notifications_%'
+        and value = 'popup,email,airnotifier'";
+        $DB->execute($sql);
+
+        $sql = "update mdl_user_preferences 
+        set value = 'popup'
+        where name LIKE 'message_provider_local_announcements_notifications_%'
+        and value = 'popup,airnotifier'";
+        $DB->execute($sql);
+
+        $sql = "update mdl_user_preferences 
+        set value = 'email'
+        where name LIKE 'message_provider_local_announcements_notifications_%'
+        and value = 'email,airnotifier'";
+        $DB->execute($sql);
+
+        $sql = "update mdl_user_preferences 
+        set value = 'none'
+        where name LIKE 'message_provider_local_announcements_notifications_%'
+        and value = 'airnotifier'";
+        $DB->execute($sql);
+
+    }
+
     return true;
 
 }
