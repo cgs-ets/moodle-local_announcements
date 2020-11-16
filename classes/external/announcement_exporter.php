@@ -318,7 +318,7 @@ class announcement_exporter extends persistent_exporter {
 		// Rewrite pluginfile urls.
 		$shortmessage = file_rewrite_pluginfile_urls($shortmessage,'pluginfile.php',$this->related['context']->id, 'local_announcements','announcement',$this->data->id);
 	    // Convert to plain version.
-	    $shortmessageplain = trim(html_to_text(format_text_email($shortmessage, FORMAT_PLAIN)));
+	    $shortmessageplain = trim(html_to_text($shortmessage, 0));
 
 	   	$ismodapproved = false;
 	    if ($this->data->modrequired == 0 or $this->data->modstatus == 1) {
