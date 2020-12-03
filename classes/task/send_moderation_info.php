@@ -157,7 +157,7 @@ class send_moderation_info extends \core\task\adhoc_task {
             $message->subject = $postsubject;
             $contexturl = new \moodle_url('/local/announcements/view.php', ['id' => $post->id]);
             $message->contexturl = $contexturl->out();
-            $message->contexturlname = html_to_text($post->subject);
+            $message->contexturlname = html_to_text($post->subject, 0);
             $sender = $DB->get_record('user', array('username' => $moderation->actionedusername));
             $modfullname = '';
             if ($moderation->actionedusername != $moderation->modusername) {
@@ -180,7 +180,7 @@ class send_moderation_info extends \core\task\adhoc_task {
             $message->subject = $postsubject;
             $contexturl = new \moodle_url('/local/announcements/view.php', ['id' => $post->id]);
             $message->contexturl = $contexturl->out();
-            $message->contexturlname = html_to_text($post->subject);
+            $message->contexturlname = html_to_text($post->subject, 0);
             $sender = $DB->get_record('user', array('username' => $moderation->actionedusername));
             $modfullname = '';
             if ($moderation->actionedusername != $moderation->modusername) {

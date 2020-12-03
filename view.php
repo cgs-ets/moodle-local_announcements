@@ -61,7 +61,7 @@ if(empty($announcement)) {
 	echo $OUTPUT->footer();
 }
 
-$subjecttext = html_to_text($announcement->persistent->get('subject'));
+$subjecttext = html_to_text($announcement->persistent->get('subject'), 0);
 $PAGE->navbar->add($subjecttext);
 $PAGE->requires->css(new moodle_url($CFG->wwwroot . '/local/announcements/styles.css', array('nocache' => rand().rand())));
 

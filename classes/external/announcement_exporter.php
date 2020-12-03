@@ -269,7 +269,7 @@ class announcement_exporter extends persistent_exporter {
 
 	    $messagetokenized = $messagemobile = file_rewrite_pluginfile_urls($this->data->message,'pluginfile.php',$this->related['context']->id,
 	        		'local_announcements','announcement',$this->data->id,['includetoken' => true]);
-	    $messageplain = trim(html_to_text(format_text_email($messagetokenized, FORMAT_PLAIN)));
+	    $messageplain = trim(html_to_text(format_text_email($messagetokenized, FORMAT_PLAIN), 0));
 	    
 	    // Mobile shows the full tokenised message with minimal formating. 
 	    // Replace <p> with <br> as it is common for editor html to have p's inside p's and this breaks the template.

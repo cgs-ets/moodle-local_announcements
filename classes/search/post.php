@@ -114,7 +114,7 @@ class post extends \core_search\base {
      */
     public function get_document_display_title(\core_search\document $doc) {
         $announcement = new announcement($doc->get('itemid'));
-        return html_to_text($announcement->get('subject'));
+        return html_to_text($announcement->get('subject'), 0);
     }
 
     /**
