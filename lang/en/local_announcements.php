@@ -85,6 +85,8 @@ $string['config:globaldisable'] = 'Disable posting';
 $string['config:globaldisabledesc'] = 'Enable this setting if you want to completely disable announcement posting for some reason.';
 $string['config:enabledigest'] = 'Enable Daily Digest';
 $string['config:enablenotify'] = 'Enable Post Notifications';
+$string['config:myconnectheaderimage'] = 'Myconnect header image';
+$string['config:myconnectheaderimagedesc'] = 'A url to an image file to be added as the myconnect digest header';
 $string['config:digestheaderimage'] = 'Digest header image';
 $string['config:digestheaderimagedesc'] = 'A url to an image file to be added to the digest header';
 $string['config:digestfooterimage'] = 'Digest footer image';
@@ -103,6 +105,8 @@ $string['config:cronsendnum'] = 'Notification batch amount';
 $string['config:cronsendnumdesc'] = 'Users to process in a single ad hoc cron task.';
 $string['config:digestbatchnum'] = 'Digest batch amount';
 $string['config:digestbatchnumdesc'] = 'User digests to process in a single ad hoc cron task.';
+$string['config:myconnectdigest'] = 'Include MyConnect in digest';
+$string['config:myconnectdigestdesc'] = 'Include new MyConnect posts in the announcement daily digest.';
 
 $string['announcements:post'] = 'Post announcements';
 $string['announcements:administer'] = 'Administer announcements';

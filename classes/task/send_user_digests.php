@@ -78,15 +78,36 @@ class send_user_digests extends \core\task\adhoc_task {
     protected $sentcount = 0;
 
     /**
+     * MyConnect Vars
+     */
+    protected $myconnectsentcount = 0;
+    protected $includemyconnect = false;
+
+    /**
      * Send out messages.
      */
     public function execute() {
+        global $CFG;
+
+        $config = get_config('local_announcements');
+
         $starttime = time();
 
         $data = (array) $this->get_custom_data();
         $this->log("Processing the following digests: " . json_encode($data), 1);
 
-        foreach ($data as $userid => $postids) {
+        $myconnectdir = '/local/myconnect/version.php';
+        $cfgincludemyconnect = isset($config->myconnectdigest) ? $config->myconnectdigest : false;
+        if ($cfgincludemyconnect && file_exists($CFG->dirroot.$myconnectdir)) {
+            $this->includemyconnect = true;
+        }
+
+        foreach ($data as $userid => $posts) {
+            $postids = $posts->posts;
+            if ($this->includemyconnect) {
+                $myconnectpostdefs = (array) $posts->myconnectposts;
+            }
+
             $this->recipient = \core_user::get_user($userid);
             $this->log_start("Sending announcement digests for {$this->recipient->username} ({$this->recipient->id})");
 
@@ -96,16 +117,22 @@ class send_user_digests extends \core\task\adhoc_task {
             }
 
             $this->posts = $this->prepare_data($postids);
+            $this->myconnectposts = \local_myconnect\persistents\post::prepare_data(
+                $myconnectpostdefs, 
+                $this->recipient, 
+                $this->get_trace()
+            );
 
-            if (empty($this->posts)) {
-                $this->log_finish("No messages found to send.");
+            if (empty($this->posts) && empty($this->myconnectposts)) {
+                $this->log_finish("No posts found to send.");
                 continue;
             }
 
             // This digest has at least one post and should therefore be sent.
             if ($this->send_mail()) {
                 $idstr = implode(", ", $postids);
-                $this->log_finish("Digest sent with {$this->sentcount} announcements. Announcement IDs {$idstr}.");
+                $myconnectidstr = implode(", ", array_keys($myconnectpostdefs));
+                $this->log_finish("Digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts. Announcement IDs [{$idstr}]. MyConnect post ids [{$myconnectidstr}].");
             } else {
                 $this->log_finish("Issue sending digest. Skipping.");
             }
@@ -121,7 +148,7 @@ class send_user_digests extends \core\task\adhoc_task {
         global $OUTPUT;
 
         if (empty($postids)) {
-            return;
+            return [];
         }
 
         $posts = array();
@@ -139,7 +166,7 @@ class send_user_digests extends \core\task\adhoc_task {
 
         if (empty($posts)) {
             // All posts have been removed since the task was queued.
-            return;
+            return [];
         }
 
         return $posts;
@@ -153,6 +180,7 @@ class send_user_digests extends \core\task\adhoc_task {
 
         $config = get_config('local_announcements');
         $this->sentcount = 0;
+        $this->myconnectsentcount = 0;
 
         // Headers to help prevent auto-responders.
         $userfrom = \core_user::get_noreply_user();
@@ -168,7 +196,11 @@ class send_user_digests extends \core\task\adhoc_task {
         // Render the digest template with the posts
         $content = [
             'posts' => $this->posts,
+            'myconnectposts' => $this->myconnectposts,
+            'hasposts' => !empty($this->posts),
+            'hasmyconnectposts' => !empty($this->myconnectposts),
             'userprefs' => (new \moodle_url('/local/announcements/preferences.php'))->out(false),
+            'myconnectheaderimage' => $config->myconnectheaderimage,
             'digestheaderimage' => $config->digestheaderimage,
             'digestfooterimage' => $config->digestfooterimage,
             'digestfooterimageurl' => $config->digestfooterimageurl,
@@ -182,6 +214,7 @@ class send_user_digests extends \core\task\adhoc_task {
         }
 
         $this->sentcount = count($this->posts);
+        $this->myconnectsentcount = isset($this->myconnectposts) ? count($this->myconnectposts) : 0;
 
         $eventdata = new \core\message\message();
         $eventdata->courseid = SITEID;
@@ -194,7 +227,7 @@ class send_user_digests extends \core\task\adhoc_task {
         $eventdata->fullmessageformat = FORMAT_PLAIN;
         $eventdata->fullmessagehtml = $this->notificationhtml;
         $eventdata->notification = 1;
-        $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', $this->sentcount);
+        $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount + $this->myconnectsentcount));
 
         return message_send($eventdata);
     }

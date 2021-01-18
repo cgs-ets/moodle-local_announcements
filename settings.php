@@ -161,5 +161,24 @@ if ($hassiteconfig) {
     $setting = new admin_setting_configtext($name, $title, $description, $default, $type);
     $settings->add($setting);
 
+    // Check if moodle-local_myconnect is installed.
+    $myconnect = '/local/myconnect/version.php';
+    if (file_exists($CFG->dirroot.$myconnect)) {
+        // Include MyConnect posts into daily digest.
+        $name = 'local_announcements/myconnectdigest';
+        $title = get_string('config:myconnectdigest', 'local_announcements');
+        $description = get_string('config:myconnectdigestdesc', 'local_announcements');
+        $setting = new admin_setting_configcheckbox($name, $title, $description, 0);
+        $settings->add($setting);
+
+        // Digest header image
+        $name = 'local_announcements/myconnectheaderimage';
+        $title = get_string('config:myconnectheaderimage', 'local_announcements');
+        $description = get_string('config:myconnectheaderimagedesc', 'local_announcements');
+        $default = '';
+        $setting = new admin_setting_configtext($name, $title, $description, $default);
+        $settings->add($setting);
+    }
+
 }
 

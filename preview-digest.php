@@ -91,6 +91,7 @@ $sql = "SELECT an.id,
         $content = [
             'posts' => $exportedposts,
             'userprefs' => (new \moodle_url('/local/announcements/preferences.php'))->out(false),
+            'myconnectheaderimage' => $config->myconnectheaderimage,
             'digestheaderimage' => $config->digestheaderimage,
             'digestfooterimage' => $config->digestfooterimage,
             'digestfooterimageurl' => $config->digestfooterimageurl,

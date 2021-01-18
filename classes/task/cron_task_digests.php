@@ -62,6 +62,14 @@ class cron_task_digests extends \core\task\scheduled_task {
      */
     protected $userposts = [];
 
+    /**
+     * MyConnect Vars
+     */
+    protected $includemyconnect = false;
+    protected $myconnectposts = [];
+    protected $myconnectpostusers = [];
+    protected $myconnectuserposts = [];
+
 
     /**
      * Get a descriptive name for this task (shown to admins).
@@ -76,7 +84,7 @@ class cron_task_digests extends \core\task\scheduled_task {
      * Execute the scheduled task.
      */
     public function execute() {
-        global $DB;
+        global $DB, $CFG;
 
         $config = get_config('local_announcements');
 
@@ -86,16 +94,25 @@ class cron_task_digests extends \core\task\scheduled_task {
         }
 
         $timenow = time();
-        $this->log_start("Fetching unmailed announcements that are available now ({$timenow}).");
-        if (!$posts = announcement::get_unmailed($timenow)) {
-            $this->log_finish("No unmailed announcements found.", 1);
-            return false;
+        $this->log("Fetching unmailed announcements that are available now ({$timenow}).");
+        if ($posts = announcement::get_unmailed($timenow)) {
+            foreach ($posts as $id => $post) {
+                $this->posts[$id] = new \stdClass();
+                $this->posts[$id]->id = $post->get('id');
+            }
         }
-        $this->log_finish("Done");
 
-        foreach ($posts as $id => $post) {
-            $this->posts[$id] = new \stdClass();
-            $this->posts[$id]->id = $post->get('id');
+        $myconnectdir = '/local/myconnect/version.php';
+        $cfgincludemyconnect = isset($config->myconnectdigest) ? $config->myconnectdigest : false;
+        if ($cfgincludemyconnect && file_exists($CFG->dirroot.$myconnectdir)) {
+            $this->includemyconnect = true;
+            $this->log("Fetching unmailed myconnect posts.");
+            $this->myconnectposts = \local_myconnect\persistents\post::get_unmailed();
+        }
+
+        if (empty($this->myconnectposts) && empty($this->posts)) {
+            $this->log("No unmailed announcements / myconnect posts found.", 1);
+            return false;
         }
 
         // Please note, this order is intentional.
@@ -113,8 +130,14 @@ class cron_task_digests extends \core\task\scheduled_task {
         $this->log_finish("All tasks queued.");
 
         // Mark posts as read.
-        list($in, $params) = $DB->get_in_or_equal(array_keys($posts));
-        $DB->set_field_select('ann_posts', 'mailed', 1, "id {$in}", $params);
+        if (count($this->posts)) {
+            list($in, $params) = $DB->get_in_or_equal(array_keys($this->posts));
+            $DB->set_field_select('ann_posts', 'mailed', 1, "id {$in}", $params);
+        }
+        if ($this->includemyconnect && count($this->myconnectposts)) {
+            list($in, $params) = $DB->get_in_or_equal(array_keys($this->myconnectposts));
+            $DB->set_field_select('myconnect_posts', 'mailed', 1, "id {$in}", $params);
+        }
     }
 
 
@@ -122,6 +145,8 @@ class cron_task_digests extends \core\task\scheduled_task {
      * Fill the cache of recipients.
      */
     protected function fill_postusers_cache() {
+
+        // Announcements.
         foreach ($this->posts as $postid => $post) {
             $users = announcement::get_post_users($postid);
             foreach ($users as $user) {
@@ -132,6 +157,36 @@ class cron_task_digests extends \core\task\scheduled_task {
                 $this->users[$user->id] = $user;
             }
         }
+
+        // MyConnect.
+        if ($this->includemyconnect) {
+            foreach ($this->myconnectposts as $postid => $post) {
+                // Add the direct recipients.
+                $postusers = \local_myconnect\persistents\post::get_post_users($postid);
+                foreach ($postusers as $postuser) {
+                    $user = \local_myconnect\utils::get_user_with_extras($postuser->username);
+                    if ($user->suspended) {
+                        continue;
+                    }
+                    $this->myconnectpostusers[$postid][$user->id] = $user->id;
+                    $this->users[$user->id] = $user;
+
+                    // Add mentors too!
+                    foreach ($user->mentorusers as $mentor) {
+                        if ($mentor->suspended) {
+                            continue;
+                        }
+                        $this->myconnectpostusers[$postid][$mentor->id] = $user->id;
+                        $this->users[$mentor->id] = $mentor;
+                    }
+
+
+                }
+
+                
+            }
+        }
+
     }
 
 
@@ -139,9 +194,21 @@ class cron_task_digests extends \core\task\scheduled_task {
      * Fill the cache of recipients.
      */
     protected function fill_userposts_cache() {
+
+        // Announcements.
         foreach ($this->postusers as $postid => $users) {
             foreach ($users as $userid) {
                 $this->userposts[$userid][] = $postid;
+            }
+        }
+
+        // MyConnect.
+        foreach ($this->myconnectpostusers as $postid => $users) {
+            foreach ($users as $recipientid => $postuserid) {
+                $this->myconnectuserposts[$recipientid][] = array(
+                    'postid' => $postid,
+                    'postuserid' => $postuserid
+                );
             }
         }
     }
@@ -158,8 +225,9 @@ class cron_task_digests extends \core\task\scheduled_task {
         $sitetimezone = \core_date::get_server_timezone();
         $counts = array(
             'digests' => 0,
-            'posts' => 0,
             'ignored' => 0,
+            'posts' => 0,
+            'myconnectposts' => 0,
         );
 
         $pertask = isset($config->digestbatchnum) ? $config->digestbatchnum : '1';
@@ -169,23 +237,46 @@ class cron_task_digests extends \core\task\scheduled_task {
         $i = 1;
         $ui = 1;
         $batch = array();
-        $batchcounts = array('posts' => 0);
+        $batchcounts = array('posts' => 0, 'myconnectposts' => 0);
         foreach ($this->users as $user) {
+            // Custom data structure.
+            $batch[$user->id] = array (
+                'posts' => array(),
+                'myconnectposts' => array(),
+            );
 
+            // Announcements
             $digestposts = $this->fetch_posts_for_user($user);
             if (!empty($digestposts)) {
-                $counts['digests']++;
-                $counts['posts'] += count($digestposts);
-                $batchcounts['posts'] += count($digestposts);
+                $batch[$user->id]['posts'] = $digestposts;
+            }
 
-                // Add the user posts to the batch.
-                $batch[$user->id] = $digestposts;
+            // MyConnect posts.
+            $myconnectpostdefs = $this->fetch_myconnectposts_for_user($user);
+            if (!empty($myconnectpostdefs)) {
+                $batch[$user->id]['myconnectposts'] = $myconnectpostdefs;
+            }
+
+            // Stats
+            if (count($digestposts) || count($myconnectpostdefs)) {
+                $counts['digests']++;
             } else {
                 $counts['ignored']++;
             }
+            if (count($digestposts)) {
+                $counts['posts'] += count($digestposts);
+            }
+            if (count($myconnectpostdefs)) {
+                $counts['myconnectposts'] += count($myconnectpostdefs);
+            }
 
-            $this->log(sprintf("Found %d posts for %s (%d)",
+            $batchcounts['posts'] += count($digestposts);
+            $batchcounts['myconnectposts'] += count($myconnectpostdefs);
+
+            // Stats.
+            $this->log(sprintf("Found %d announcements, and %d myconnect posts, for %s (%d)",
                 count($digestposts),
+                count($myconnectpostdefs),
                 $user->username,
                 $user->id,
             ), 2);
@@ -199,8 +290,9 @@ class cron_task_digests extends \core\task\scheduled_task {
                 $task->set_component('local_announcements');
                 \core\task\manager::queue_adhoc_task($task);
 
-                $this->log(sprintf("Queued %d posts for %d users in batch",
+                $this->log(sprintf("Queued %d announcements, and %d myconnect posts, for %d users in batch",
                     $batchcounts['posts'],
+                    $batchcounts['myconnectposts'],
                     $i,
                 ), 2);
 
@@ -208,6 +300,7 @@ class cron_task_digests extends \core\task\scheduled_task {
                 $i = 0;
                 $batch = array();
                 $batchcounts['posts'] = 0;
+                $batchcounts['myconnectposts'] = 0;
             }
 
             $i++;
@@ -217,17 +310,16 @@ class cron_task_digests extends \core\task\scheduled_task {
         $this->log(
             sprintf(
                 "%d digests. " .
-                "%d posts. " .
+                "%d announcements. " .
+                "%d myconnect posts. " .
                 "%d ignored. ",
                 $counts['digests'],
                 $counts['posts'],
+                $counts['myconnectposts'],
                 $counts['ignored']
             ), 1);
 
-    }
-
-
-        
+    }        
 
     /**
      * Fetch posts for this user.
@@ -236,10 +328,27 @@ class cron_task_digests extends \core\task\scheduled_task {
      */
     protected function fetch_posts_for_user($user) {
         $digestposts = [];
-        foreach ($this->userposts[$user->id] as $postid) {
-            $digestposts[] = $postid;
+        if (isset($this->userposts[$user->id])) {
+            foreach ($this->userposts[$user->id] as $postid) {
+                $digestposts[] = $postid;
+            }   
         }
         return $digestposts;
+    }
+
+    /**
+     * Fetch myconnect for this user.
+     *
+     * @param   \stdClass   $user The user to fetch posts for.
+     */
+    protected function fetch_myconnectposts_for_user($user) {
+        $posts = [];
+        if (isset($this->myconnectuserposts[$user->id])) {
+            foreach ($this->myconnectuserposts[$user->id] as $postdef) {
+                $posts[$postdef['postid']] = $postdef;
+            }   
+        }
+        return $posts;
     }
 
 }
