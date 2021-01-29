@@ -62,9 +62,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                {{#attachmentstokenized}}
-                                                    <a target="_blank" href="{{path}}">{{filename}}</a>{{^last}}, {{/last}}
-                                                {{/attachmentstokenized}}
+                                                {{#attachmentstokenized}}<a target="_blank" href="{{path}}"><img width="90" height="90" src="{{path}}?preview=thumb" alt="{{filename}}" /></a>{{/attachmentstokenized}}
                                             </td>
                                         </tr>
                                     </tbody>
