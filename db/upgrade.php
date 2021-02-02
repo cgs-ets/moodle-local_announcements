@@ -174,6 +174,24 @@ function xmldb_local_announcements_upgrade($oldversion) {
 
     }
 
+    if ($oldversion < 2021020100) {
+        $id = new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $username = new xmldb_field('username', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null, null, 'id');
+        $draftaudience = new xmldb_field('draftaudience', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null, 'username');
+        $primarykey = new xmldb_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
+
+        $table = new xmldb_table('ann_draftaudiences');
+        $table->addField($id);
+        $table->addField($username);
+        $table->addField($draftaudience);
+        $table->addKey($primarykey);
+
+        // Add a new table for audience cc's.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+    }
+
     return true;
 
 }

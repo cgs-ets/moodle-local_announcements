@@ -134,6 +134,15 @@ $functions = [
         'loginrequired' => true,
         'ajax'          => true,
     ],
+    'local_announcements_set_draftaudience' => [
+        'classname'     => 'local_announcements\external\api',
+        'methodname'    => 'set_draftaudience',
+        'classpath'     => '',
+        'description'   => 'Set a draft audience for user based on userids',
+        'type'          => 'write',
+        'loginrequired' => true,
+        'ajax'          => true,
+    ],
 
 
 

@@ -318,3 +318,66 @@ function pr() {
     var_export($args);
     echo "<br>";
 }
+
+function convert_userids_to_audience($userids) {
+    $tag = new stdClass();
+    $tag->type = "union";
+    $tag->uid = time();
+
+    $selecteditems = array();
+    foreach ($userids as $userid) {
+        $user = core_user::get_user($userid);
+        $selecteditems[] = array(
+            "code" => $user->username,
+            "name" => fullname($user) . " (" . $user->username . ")",
+        );
+        
+    }
+
+    $tag->audiences = array(
+        array(
+            "audienceprovider" => "mdluser",
+            "audiencetype" => "user",
+            "audiencenamesingular" => "User",
+            "audiencenameplural" => "Users",
+            "selecteditems" => $selecteditems,
+            "selectedroles" => array(
+                array(
+                    "code" => "Users",
+                    "name" => "User(s)"
+                ),
+            ),
+        )
+    );
+
+    return json_encode(array($tag));
+}
+
+function set_draftaudience($audiencejson) {
+    global $USER, $DB;
+
+    // Insert draftaudience.
+    $record = new \stdClass();
+    $record->username = $USER->username;
+    $record->draftaudience = $audiencejson;
+    $draftaudienceid = $DB->insert_record('ann_draftaudiences', $record);
+
+    return $draftaudienceid;
+}
+
+function get_draftaudience($id) {
+    global $USER, $DB;
+
+    $draftaudiencejson = $DB->get_field('ann_draftaudiences', 'draftaudience', array(
+        'id' => $id,
+        'username' => $USER->username,
+    ));
+
+    return $draftaudiencejson;
+}
+
+function clean_draftaudience() {
+    global $USER, $DB;
+
+    $DB->delete_records('ann_draftaudiences', array('username' => $USER->username));
+}

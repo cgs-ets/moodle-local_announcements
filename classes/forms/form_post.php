@@ -85,6 +85,7 @@ class form_post extends \moodleform {
 
         $post = $this->_customdata['post'];
         $edit = $this->_customdata['edit'];
+        $draftaudiencejson = $this->_customdata['draftaudiencejson'];
 
         $mform->addElement('header', 'general', '');
 

@@ -31,6 +31,7 @@ use \local_announcements\persistents\announcement;
 
 // Gather form data.
 $edit = optional_param('edit', 0, PARAM_INT);
+$draftaudience = optional_param('draftaudience', 0, PARAM_INT);
 
 // Set context.
 $context = context_system::instance();
@@ -87,10 +88,16 @@ if (!empty($edit)) {
     }
 }
 
+$draftaudiencejson = '';
+if (!empty($draftaudience)) {
+    $draftaudiencejson = get_draftaudience($draftaudience);
+}
+
 // Load the post form with the data.
 $mformpost = new form_post('post.php', array(
 	'post' => $post,
-	'edit' => $edit,
+    'edit' => $edit,
+    'draftaudiencejson' => $draftaudiencejson,
 ), 'post', '', array('data-form' => 'lann-post'));
 
 // Redirect to index if cancel was clicked.
@@ -120,9 +127,8 @@ $mformpost->set_data(
             'format' => empty($post->messageformat) ? editors_get_preferred_format() : $post->messageformat,
             'itemid' => $draftideditor
         ),
-        'audiencesjson' => $post->audiencesjson,
+        'audiencesjson' => ($draftaudiencejson) ? $draftaudiencejson : $post->audiencesjson,
         'impersonate' => $post->impersonate,
-        //'forcesend' => !empty($post->forcesend),
     ) +
 
     array('edit' => $edit) +
@@ -159,6 +165,9 @@ if ($formdata = $mformpost->get_data()) {
 
     // If edit is 0, this will create a new post.
     $result = announcement::save_from_data($edit, $formdata);
+
+    // If a draftaudience was used do some cleanup.
+    clean_draftaudience();
 
     // Set up result message and redirect.
     $message = get_string("postform:postupdatesuccess", "local_announcements");
