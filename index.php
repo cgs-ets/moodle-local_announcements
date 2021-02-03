@@ -140,7 +140,7 @@ if ($viewason && is_user_auditor()) {
 } elseif ($viewbyon && (is_user_auditor() || $viewbyuser->username == $USER->username)) {
 	$announcements = announcement::get_by_creator($viewbyuser->username, $page);
 } elseif ($viewbyon && (!is_user_auditor())) {
-	$announcements = announcement::get_by_creator_and_user($viewbyuser->username, $page);
+	$announcements = announcement::get_by_creator_and_user($viewbyuser->username, $USER->username, $page);
 } elseif (is_auditing_on()) {
 	if ($filtered) {
 		$announcements = announcement::get_all_by_audience(null, $type, $code, $page);

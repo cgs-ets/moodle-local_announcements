@@ -415,11 +415,11 @@ class announcement extends persistent {
      * @param bool $strictavailability. Whether to include pending and rejected posts.
      * @return array.
      */
-    public static function get_by_creator_and_user($username, $page = 0, $perpage = 0, $strictavailability = true) {
+    public static function get_by_creator_and_user($creator, $username, $page = 0, $perpage = 0, $strictavailability = true) {
         global $DB;
 
         // Load user object.
-        $user = core_user::get_user_by_username($username);
+        $user = core_user::get_user_by_username($creator);
         if (!$user) {
             return array();
         }
@@ -452,7 +452,7 @@ class announcement extends persistent {
         ";
         $params[] = $user->username;
         $params[] = $user->username;
-        $params[] = $user->username;
+        $params[] = $username;
 
         // Order by.
         $sql .= "ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
