@@ -37,15 +37,32 @@ $type = optional_param('type', '', PARAM_ALPHA);
 $code = optional_param('code', '', PARAM_ALPHANUMEXT);
 $audit = optional_param('audit', '', PARAM_ALPHANUMEXT);
 $viewas = optional_param('viewas', '', PARAM_ALPHANUMEXT);
+$viewby = optional_param('viewby', '', PARAM_ALPHANUMEXT);
 
 // Determine if viewing as another user.
 $viewason = false;
 $viewastitle = '';
 if (!empty($viewas)) {
-	$viewason = true;
 	$viewasuser = core_user::get_user_by_username($viewas);
 	if ($viewasuser) {
+		$viewason = true;
 		$viewastitle = get_string('list:viewastitle', 'local_announcements', fullname($viewasuser));
+	}
+}
+
+// Determine if viewing by user.
+$viewbyon = false;
+$viewbytitle = '';
+if (!empty($viewby)) {
+	$viewbyuser = null;
+	if ($viewby == "self") {
+		$viewbyuser = $USER;
+	} else {
+		$viewbyuser = core_user::get_user_by_username($viewby);
+	}
+	if ($viewbyuser) {
+		$viewbyon = true;
+		$viewbytitle = get_string('list:viewbytitle', 'local_announcements', fullname($viewbyuser));
 	}
 }
 
@@ -55,11 +72,11 @@ if (($type != '' || $provider != '') && $code != '') {
 	$filtered = true;
 }
 
-// Turn edit mode on or off if url param provided. Also turn off if viewing as a user.
+// Turn edit mode on or off if url param provided. Also turn off if viewing as/by a user.
 if ($audit == "on") {
 	turn_audit_mode_on();
 }
-if ($audit == "off" || $viewason) {
+if ($audit == "off" || $viewason || $viewbyon) {
 	turn_audit_mode_off();
 }
 
@@ -119,9 +136,11 @@ $output = $OUTPUT->header();
 // Get the announcements, depending on audit mode and audiences.
 $announcements = array();
 if ($viewason && is_user_auditor()) {
-	if ($viewasuser) {
-		$announcements = announcement::get_by_username($viewasuser->username, $page);
-	}
+	$announcements = announcement::get_by_username($viewasuser->username, $page);
+} elseif ($viewbyon && (is_user_auditor() || $viewbyuser->username == $USER->username)) {
+	$announcements = announcement::get_by_creator($viewbyuser->username, $page);
+} elseif ($viewbyon && (!is_user_auditor())) {
+	$announcements = announcement::get_by_creator_and_user($viewbyuser->username, $page);
 } elseif (is_auditing_on()) {
 	if ($filtered) {
 		$announcements = announcement::get_all_by_audience(null, $type, $code, $page);
@@ -156,6 +175,8 @@ $data = array(
 	'auditingon' => is_auditing_on(),
 	'viewason' => $viewason,
 	'viewastitle' => $viewastitle,
+	'viewbyon' => $viewbyon,
+	'viewbytitle' => $viewbytitle,
 );
 
 // Render the announcement list.

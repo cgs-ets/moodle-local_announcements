@@ -27,6 +27,7 @@
 <div class="local_announcements">
     <div class="lann-header">
         {{#viewastitle}}<strong>{{{viewastitle}}}</strong>{{/viewastitle}}
+        {{#viewbytitle}}<strong>{{{viewbytitle}}}</strong>{{/viewbytitle}}
         {{#canaudit}}
             {{#auditingon}}
                 <a class="auditing-icon auditing-is-on pulse" href="{{config.wwwroot}}/local/announcements/index.php?audit=off">
@@ -43,21 +44,28 @@
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actions-dropdown">
                 {{#canaudit}}
                     {{#auditingon}}
-                        <a id="btn-audit" class="dropdown-item option-audit" href="{{config.wwwroot}}/local/announcements/index.php?audit=off">{{# str }} list:auditingofficon, local_announcements {{/ str }} {{# str }} list:turnauditoff, local_announcements {{/ str }}</a>
+                        <a class="dropdown-item option-audit" href="{{config.wwwroot}}/local/announcements/index.php?audit=off">{{# str }} list:auditingofficon, local_announcements {{/ str }} {{# str }} list:turnauditoff, local_announcements {{/ str }}</a>
                     {{/auditingon}}
                     {{^auditingon}}
-                        <a id="btn-audit" class="dropdown-item option-audit" href="{{config.wwwroot}}/local/announcements/index.php?audit=on">{{# str }} list:auditingonicon, local_announcements {{/ str }} {{# str }} list:turnauditon, local_announcements {{/ str }}</a>
+                        <a class="dropdown-item option-audit" href="{{config.wwwroot}}/local/announcements/index.php?audit=on">{{# str }} list:auditingonicon, local_announcements {{/ str }} {{# str }} list:turnauditon, local_announcements {{/ str }}</a>
                     {{/auditingon}}
                     {{#viewason}}
-                        <a id="btn-audit" class="dropdown-item option-exitviewas" href="{{config.wwwroot}}/local/announcements/index.php">{{# str }} list:exitviewas, local_announcements {{/ str }}</a>
+                        <a class="dropdown-item option-exitviewas" href="{{config.wwwroot}}/local/announcements/index.php">{{# str }} list:exitviewas, local_announcements {{/ str }}</a>
                     {{/viewason}}
                     {{^viewason}}
-                        <a id="btn-audit" class="dropdown-item option-viewas" href="#">{{# str }} list:viewas, local_announcements {{/ str }}</a>
+                        <a class="dropdown-item option-viewas" href="#">{{# str }} list:viewas, local_announcements {{/ str }}</a>
                     {{/viewason}}
                 {{/canaudit}}
                 {{#canmoderate}}
-                    <a id="btn-moderation" class="dropdown-item option-moderate" href="{{config.wwwroot}}/local/announcements/moderation.php">{{# str }} list:moderation, local_announcements {{/ str }}</a>
+                    <a class="dropdown-item option-moderate" href="{{config.wwwroot}}/local/announcements/moderation.php">{{# str }} list:moderation, local_announcements {{/ str }}</a>
                 {{/canmoderate}}
+                {{#viewbyon}}
+                    <a class="dropdown-item option-exitviewby" href="{{config.wwwroot}}/local/announcements/index.php">{{# str }} list:exitviewby, local_announcements {{/ str }}</a>
+                {{/viewbyon}}
+                {{^viewbyon}}
+                    <a class="dropdown-item option-viewby" href="#">{{# str }} list:viewby, local_announcements {{/ str }}</a>
+                    <a class="dropdown-item option-viewbyself" href="#">{{# str }} list:viewbyself, local_announcements {{/ str }}</a>
+                {{/viewbyon}}
                 <a id="btn-preferences" class="dropdown-item option-preferences" href="{{config.wwwroot}}/local/announcements/preferences.php">{{# str }} list:preferences, local_announcements {{/ str }}</a>
             </div>
         </div>

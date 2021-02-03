@@ -310,7 +310,146 @@ class announcement extends persistent {
                         WHERE pu.username = ? )
         )
         ";
+        $params[] = $user->username;
+        $params[] = $user->username;
+        $params[] = $user->username;
 
+        // Order by.
+        $sql .= "ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
+
+        // Debug sql.
+        //echo "<pre>";
+        //foreach($params as $replace){$sql = preg_replace('/\?/i', '`'.$replace.'`', $sql, 1);}
+        //$sql = preg_replace('/\{/i', 'mdl_', $sql);$sql = preg_replace('/\}/i', '', $sql);
+        //var_export($sql);
+        //exit;
+
+        // Create array of announcement persistents.
+        $records = $DB->get_records_sql($sql, $params, $from, $perpage);
+        $posts = array();
+        foreach ($records as $postid => $record) {
+            $out = static::get_for_user_with_audiences($username, $postid);
+            // Only include announcement if there are audiences. 
+            // No audiences indicates something went wrong on creation.
+            if (!empty($out->audiences)) {
+                $posts[$postid] = $out;
+            }
+        }
+
+        return $posts;
+    }
+
+
+    /**
+     * Get announcements created by a specified user.
+     *
+     * @param string $username
+     * @param int $page.
+     * @param int $perpage.
+     * @param bool $strictavailability. Whether to include pending and rejected posts.
+     * @return array.
+     */
+    public static function get_by_creator($username, $page = 0, $perpage = 0, $strictavailability = true) {
+        global $DB;
+
+        // Load user object.
+        $user = core_user::get_user_by_username($username);
+        if (!$user) {
+            return array();
+        }
+
+        // Determine paging. 
+        $from = 0;
+        if (!$perpage) {
+            $perpage = get_per_page();
+            $from=$perpage*$page;
+        }
+
+        // Get the next set of announcements for user.
+        $params = array();
+        $sql = "SELECT p.*
+                  FROM {" . static::TABLE . "} p
+                 WHERE 1 = 1 ";
+
+        // Add standard post availability clauses.
+        list ($availsql, $availparams) = static::append_standard_availability_clauses($user, false);
+        $sql .= $availsql;
+        $params = array_merge($params, $availparams);
+
+        // Include announcements the user is allowed to see.
+        $sql .= " AND (p.authorusername = ? OR p.impersonate = ?) ";
+        $params[] = $user->username;
+        $params[] = $user->username;
+
+        // Order by.
+        $sql .= "ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
+
+        // Debug sql.
+        //echo "<pre>";
+        //foreach($params as $replace){$sql = preg_replace('/\?/i', '`'.$replace.'`', $sql, 1);}
+        //$sql = preg_replace('/\{/i', 'mdl_', $sql);$sql = preg_replace('/\}/i', '', $sql);
+        //var_export($sql);
+        //exit;
+
+        // Create array of announcement persistents.
+        $records = $DB->get_records_sql($sql, $params, $from, $perpage);
+        $posts = array();
+        foreach ($records as $postid => $record) {
+            $out = static::get_for_user_with_audiences($username, $postid, true); // Get all audiences.
+            // Only include announcement if there are audiences. 
+            // No audiences indicates something went wrong on creation.
+            if (!empty($out->audiences)) {
+                $posts[$postid] = $out;
+            }
+        }
+
+        return $posts;
+    }
+
+    /**
+     * Get announcements created by a specified user.
+     *
+     * @param string $username
+     * @param int $page.
+     * @param int $perpage.
+     * @param bool $strictavailability. Whether to include pending and rejected posts.
+     * @return array.
+     */
+    public static function get_by_creator_and_user($username, $page = 0, $perpage = 0, $strictavailability = true) {
+        global $DB;
+
+        // Load user object.
+        $user = core_user::get_user_by_username($username);
+        if (!$user) {
+            return array();
+        }
+
+        // Determine paging. 
+        $from = 0;
+        if (!$perpage) {
+            $perpage = get_per_page();
+            $from=$perpage*$page;
+        }
+
+        // Get the next set of announcements for user.
+        $params = array();
+        $sql = "SELECT p.*
+                  FROM {" . static::TABLE . "} p
+                 WHERE 1 = 1 ";
+
+        // Add standard post availability clauses.
+        list ($availsql, $availparams) = static::append_standard_availability_clauses($user, $strictavailability);
+        $sql .= $availsql;
+        $params = array_merge($params, $availparams);
+
+        // Include announcements the user is allowed to see.
+        $sql .= " 
+        AND ( (p.authorusername = ? OR p.impersonate = ?) AND
+               p.id IN ( SELECT pu.postid
+                         FROM {ann_posts_users} pu
+                        WHERE pu.username = ? )
+        )
+        ";
         $params[] = $user->username;
         $params[] = $user->username;
         $params[] = $user->username;

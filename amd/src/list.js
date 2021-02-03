@@ -62,6 +62,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
             DELETE: null,
             VIEWUSERS: null,
             VIEWAS: null,
+            VIEWBY: null,
         };
         self.templates = {
             VIEWUSERS: 'local_announcements/announcement_users_list',
@@ -96,6 +97,18 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
             self.viewAs();
         });
 
+        // Handle view by button click.
+        self.rootel.on('click', '.option-viewby', function(e) {
+            e.preventDefault();
+            self.viewBy();
+        });
+
+        // Handle view by self button click.
+        self.rootel.on('click', '.option-viewbyself', function(e) {
+            e.preventDefault();
+            self.viewBySelf();
+        });
+
         // Handle view full message link.
         self.rootel.on('click', '.view-full-link', function(e) {
             e.preventDefault();
@@ -108,6 +121,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
         preloads.push(self.loadModal('DELETE', 'Delete Announcement', 'Delete', ModalFactory.types.SAVE_CANCEL));
         preloads.push(self.loadModal('VIEWUSERS', 'Announcement Recipients', '', ModalFactory.types.DEFAULT));
         preloads.push(self.loadModal('VIEWAS', 'View as another user', 'Go', ModalFactory.types.SAVE_CANCEL));
+        preloads.push(self.loadModal('VIEWBY', 'View by creator', 'Go', ModalFactory.types.SAVE_CANCEL));
         preloads.push(self.loadTemplate('VIEWUSERS'));
         // Do not show actions until all modals and templates are preloaded.
         $.when.apply($, preloads).then(function() {
@@ -128,7 +142,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
     };
 
     /**
-     * View a list of users for an announcement
+     * View announcements from the perspective of a specified user.
      *
      * @method
      */
@@ -143,6 +157,34 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
             });
             self.modals.VIEWAS.show();
         }
+    };
+
+    /**
+     * View announcements created by a specified user.
+     *
+     * @method
+     */
+    List.prototype.viewBy = function () {
+        var self = this;
+
+        if (self.modals.VIEWBY) {
+            self.modals.VIEWBY.setBody('<p>Enter the ID of a user:</p><p><input class="form-control" id="viewby-user" size="48"/></p>');
+            self.modals.VIEWBY.getRoot().on(ModalEvents.save, function(e) {
+              var viewby = $('input#viewby-user').val();
+              window.location.href = Config.wwwroot + "/local/announcements/index.php?viewby=" + viewby;
+            });
+            self.modals.VIEWBY.show();
+        }
+    };
+
+    /**
+     * View announcements created by a specified user.
+     *
+     * @method
+     */
+    List.prototype.viewBySelf = function () {
+        var self = this;
+        window.location.href = Config.wwwroot + "/local/announcements/index.php?viewby=self";
     };
 
     /**
