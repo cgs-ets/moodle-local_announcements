@@ -57,7 +57,9 @@ class audience_mdlcourse extends \local_announcements\providers\audience_provide
         if (!empty($enrols)) {
             foreach ($enrols as $enrol) {
                 $metacourse = $DB->get_record('course', array('id' => $enrol->courseid));
-                $params[] = array('provider' => 'mdlcourse', 'code' => $metacourse->idnumber);
+                if (!empty($metacourse->idnumber)) {
+                    $params[] = array('provider' => 'mdlcourse', 'code' => $metacourse->idnumber);
+                }
             }
         }
 
