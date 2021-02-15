@@ -767,7 +767,7 @@ class announcement extends persistent {
                           FROM {ann_audience_ccgroups}
                          WHERE audiencetype = ?
                            AND (? LIKE code OR code = '*')";
-                    $code = $providers[$audience->audienceprovider]::true_code($item->code);
+                    $code = strtolower($providers[$audience->audienceprovider]::true_code($item->code));
                     $params = array($audience->audiencetype, $code);
                     $ccgrouprows = $DB->get_records_sql($sql, $params);
                     foreach ($ccgrouprows as $ccgrouprow) {
