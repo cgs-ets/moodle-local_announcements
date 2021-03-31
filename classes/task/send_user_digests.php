@@ -192,7 +192,7 @@ class send_user_digests extends \core\task\adhoc_task {
         );
 
         // Set the subject of the message.
-        $this->postsubject = get_string('digest:mailsubject', 'local_announcements');
+        $this->postsubject = get_string('digest:mailsubject', 'local_announcements', fullname($this->recipient));
 
         // Render the digest template with the posts
         $content = [

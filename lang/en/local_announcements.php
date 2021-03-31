@@ -156,7 +156,7 @@ $string['audienceselector:audienceitemsinfo'] = 'Select {$a} you want to target'
 $string['audienceselector:roleitemsinfo'] = 'Select the roles you want to target in the selected audiences';
 $string['audienceselector:filterplaceholder'] = 'Search for a {$a} to see results...';
 
-$string['digest:mailsubject'] = 'My Daily Announcements from CGS Connect';
+$string['digest:mailsubject'] = 'My Daily Announcements from CGS Connect for {$a}';
 $string['digest:textmailheader'] = 'This is your daily digest of new announcements. To change your default email preferences, go to {$a}.';
 $string['digest:textpostedit'] = 'To edit this post, go to {$a}.';
 $string['digest:textdivider'] = "\n=====================================================================\n";
