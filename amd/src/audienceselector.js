@@ -185,7 +185,6 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
         var type = tab.data('audiencetype');
         var contents = self.rootel.find('.contents[data-audiencetype="' + type +'"]').first();
 
-        
         var alreadyLoaded = contents.hasClass('loaded');
         var currentlyLoadingTab = ( contents.parent().hasClass('loading') && self.selectedtabcode == type );
 
@@ -232,7 +231,9 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
                             items.html(html);
                             if (preselect) {
                                 Log.debug("Preselecting: " + preselect);
-                                contents.find('.item[value="' + preselect + '"]').first().prop('checked', true);
+                                var item = contents.find('.item[value="' + preselect + '"]').first();
+                                item.prop('checked', true);
+                                self.handleItemChange(item);
                             }
                             if (response.grouped) {
                                 self.initialiseTreeView(contents);
@@ -762,7 +763,6 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
         }
         var tab = $('[data-audiencetype=' + type +']');
         self.openTab(tab, code);
-
     };
 
     /**

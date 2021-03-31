@@ -80,6 +80,7 @@ class send_user_digests extends \core\task\adhoc_task {
     /**
      * MyConnect Vars
      */
+    protected $myconnectposts = array();
     protected $myconnectsentcount = 0;
     protected $includemyconnect = false;
 
