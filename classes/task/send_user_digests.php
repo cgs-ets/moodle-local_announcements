@@ -43,46 +43,14 @@ class send_user_digests extends \core\task\adhoc_task {
     use \core\task\logging_trait;
 
     /**
-     * @var \stdClass   A shortcut to $USER.
-     */
-    protected $recipient;
-
-    /**
-     * @var \stdClass[] The posts to be sent.
-     */
-    protected $posts = [];
-
-    /**
-     * @var bool    Whether the user has requested HTML or not.
-     */
-    protected $allowhtml = true;
-
-    /**
-     * @var string  The subject of the message.
-     */
-    protected $postsubject = '';
-
-    /**
-     * @var string  The plaintext content of the whole message.
-     */
-    protected $notificationtext = '';
-
-    /**
-     * @var string  The HTML content of the whole message.
-     */
-    protected $notificationhtml = '';
-
-    /**
      * @var int     The number of messages sent in this digest.
      */
     protected $sentcount = 0;
 
     /**
-     * MyConnect Vars
+     * @var int     The number of myconnect messages sent in this digest.
      */
-    protected $myconnectposts = array();
     protected $myconnectsentcount = 0;
-    protected $includemyconnect = false;
 
     /**
      * Send out messages.
@@ -97,43 +65,38 @@ class send_user_digests extends \core\task\adhoc_task {
         $data = (array) $this->get_custom_data();
         $this->log("Processing the following digests: " . json_encode($data), 1);
 
-        $myconnectdir = '/local/myconnect/version.php';
-        $cfgincludemyconnect = isset($config->myconnectdigest) ? $config->myconnectdigest : false;
-        if ($cfgincludemyconnect && file_exists($CFG->dirroot.$myconnectdir)) {
-            $this->includemyconnect = true;
-        }
+        $inclmyconnect = $this->include_myconnect();
 
         foreach ($data as $userid => $posts) {
+            $recipient = \core_user::get_user($userid);
+
+            $this->log_start("Sending announcement digests for {$recipient->username} ({$recipient->id})");
+
+            // Prepare announcement posts.
             $postids = $posts->posts;
-            if ($this->includemyconnect) {
+            $posts = $this->prepare_data($postids, $recipient);
+
+            // Prepare myconnect posts.
+            $myconnectpostdefs = $myconnectposts = array();
+            if ($inclmyconnect) {
                 $myconnectpostdefs = (array) $posts->myconnectposts;
+                $myconnectposts = \local_myconnect\persistents\post::prepare_data(
+                    $myconnectpostdefs, 
+                    $recipient, 
+                    $this->get_trace()
+                );
             }
-
-            $this->recipient = \core_user::get_user($userid);
-            $this->log_start("Sending announcement digests for {$this->recipient->username} ({$this->recipient->id})");
-
-            if (empty($this->recipient->mailformat) || $this->recipient->mailformat != 1) {
-                // This user does not want to receive HTML.
-                $this->allowhtml = false;
-            }
-
-            $this->posts = $this->prepare_data($postids);
-            $this->myconnectposts = \local_myconnect\persistents\post::prepare_data(
-                $myconnectpostdefs, 
-                $this->recipient, 
-                $this->get_trace()
-            );
-
-            if (empty($this->posts) && empty($this->myconnectposts)) {
+            
+            if (empty($posts) && empty($myconnectposts)) {
                 $this->log_finish("No posts found to send.");
                 continue;
             }
 
             // This digest has at least one post and should therefore be sent.
-            if ($this->send_mail()) {
-                $idstr = implode(", ", $postids);
+            if ($this->send_mail($recipient, $posts, $myconnectposts)) {
+                $announcementidstr = implode(", ", $postids);
                 $myconnectidstr = implode(", ", array_keys($myconnectpostdefs));
-                $this->log_finish("Digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts. Announcement IDs [{$idstr}]. MyConnect post ids [{$myconnectidstr}].");
+                $this->log_finish("Digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts. Announcement IDs [{$announcementidstr}]. MyConnect post ids [{$myconnectidstr}].");
             } else {
                 $this->log_finish("Issue sending digest. Skipping.");
             }
@@ -144,8 +107,9 @@ class send_user_digests extends \core\task\adhoc_task {
      * Prepare all data for this run.
      *
      * @param   int[]   $postids The list of post IDs
+     * @param   stdClass   $recipient user record
      */
-    protected function prepare_data(array $postids) {
+    protected function prepare_data($postids, $recipient) {
         global $OUTPUT;
 
         if (empty($postids)) {
@@ -154,7 +118,7 @@ class send_user_digests extends \core\task\adhoc_task {
 
         $posts = array();
 
-        $announcements = announcement::get_by_ids_and_username($postids, $this->recipient->username);
+        $announcements = announcement::get_by_ids_and_username($postids, $recipient);
         
         $context = \context_system::instance();
         foreach ($announcements as $announcement) {
@@ -176,7 +140,7 @@ class send_user_digests extends \core\task\adhoc_task {
     /**
      * Send the composed message to the user.
      */
-    protected function send_mail() {
+    protected function send_mail($recipient, $posts, $myconnectposts) {
         global $OUTPUT;
 
         $config = get_config('local_announcements');
@@ -192,14 +156,14 @@ class send_user_digests extends \core\task\adhoc_task {
         );
 
         // Set the subject of the message.
-        $this->postsubject = get_string('digest:mailsubject', 'local_announcements', fullname($this->recipient));
+        $postsubject = get_string('digest:mailsubject', 'local_announcements', fullname($recipient));
 
         // Render the digest template with the posts
         $content = [
-            'posts' => $this->posts,
-            'myconnectposts' => $this->myconnectposts,
-            'hasposts' => !empty($this->posts),
-            'hasmyconnectposts' => !empty($this->myconnectposts),
+            'posts' => $posts,
+            'myconnectposts' => $myconnectposts,
+            'hasposts' => !empty($posts),
+            'hasmyconnectposts' => !empty($myconnectposts),
             'userprefs' => (new \moodle_url('/local/announcements/preferences.php'))->out(false),
             'myconnectheaderimage' => $config->myconnectheaderimage,
             'digestheaderimage' => $config->digestheaderimage,
@@ -207,31 +171,40 @@ class send_user_digests extends \core\task\adhoc_task {
             'digestfooterimageurl' => $config->digestfooterimageurl,
             'digestfootercredits' => $config->digestfootercredits,
         ];
-        
-        if ($this->allowhtml) {
-            $this->notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
-        } else {
-            $this->notificationtext = $OUTPUT->render_from_template('local_announcements/message_digest_text', $content);
-        }
 
-        $this->sentcount = count($this->posts);
-        $this->myconnectsentcount = isset($this->myconnectposts) ? count($this->myconnectposts) : 0;
+        $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
+        $notificationtext = $OUTPUT->render_from_template('local_announcements/message_digest_text', $content);
+
+        $this->sentcount = count($posts);
+        $this->myconnectsentcount = isset($myconnectposts) ? count($myconnectposts) : 0;
 
         $eventdata = new \core\message\message();
         $eventdata->courseid = SITEID;
         $eventdata->component = 'local_announcements';
         $eventdata->name = 'digests';
         $eventdata->userfrom = $userfrom;
-        $eventdata->userto = $this->recipient;
-        $eventdata->subject = $this->postsubject;
-        $eventdata->fullmessage = $this->notificationtext;
+        $eventdata->userto = $recipient;
+        $eventdata->subject = $postsubject;
+        $eventdata->fullmessage = $notificationtext;
         $eventdata->fullmessageformat = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml = $this->notificationhtml;
+        $eventdata->fullmessagehtml = $notificationhtml;
         $eventdata->notification = 1;
         $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount + $this->myconnectsentcount));
 
         return message_send($eventdata);
     }
 
+    private function include_myconnect() {
+        $config = get_config('local_announcements');
+
+        $incl = isset($config->myconnectdigest) ? $config->myconnectdigest : false;
+
+        $dir = file_exists($CFG->dirroot . '/local/myconnect/version.php');
+        if ($incl && $dir) {
+            return true;
+        }
+
+        return false;
+    }
 
 }
