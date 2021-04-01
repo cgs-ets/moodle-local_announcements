@@ -172,8 +172,15 @@ class send_user_digests extends \core\task\adhoc_task {
             'digestfootercredits' => $config->digestfootercredits,
         ];
 
-        $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
-        $notificationtext = $OUTPUT->render_from_template('local_announcements/message_digest_text', $content);
+        // Commented mailformat check out. Send both and allow the client to determine display.
+        //$notificationhtml = $notificationtext = '';
+        //if (empty($recipient->mailformat) || $recipient->mailformat != 1) {
+            // This user does not want to receive HTML. Send text version.
+            $notificationtext = $OUTPUT->render_from_template('local_announcements/message_digest_text', $content);
+        //} else {
+            // Send HTML version of digest.
+            $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
+        //}
 
         $this->sentcount = count($posts);
         $this->myconnectsentcount = isset($myconnectposts) ? count($myconnectposts) : 0;
