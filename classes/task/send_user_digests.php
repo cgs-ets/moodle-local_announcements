@@ -118,7 +118,7 @@ class send_user_digests extends \core\task\adhoc_task {
 
         $posts = array();
 
-        $announcements = announcement::get_by_ids_and_username($postids, $recipient);
+        $announcements = announcement::get_by_ids_and_username($postids, $recipient->username);
         
         $context = \context_system::instance();
         foreach ($announcements as $announcement) {
