@@ -21,7 +21,6 @@ Key functionality:
 Author
 --------
 Michael Vangelovski<br/>
-<michael.vangelovski@gmail><br/>
 <https://github.com/michaelvangelovski><br/>
 <http://michaelvangelovski.com>
 
