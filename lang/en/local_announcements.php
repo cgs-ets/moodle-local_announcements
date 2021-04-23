@@ -70,8 +70,8 @@ $string['list:deliverydigestpending'] = 'Scheduled for delivery via the Daily Di
 $string['list:deliverydigestsending'] = 'Sending in-progress via the Daily Digest';
 $string['list:deliverydigestmailed'] = 'Delivered via the Daily Digest';
 
-$string['messageprovider:notifications'] = 'Individual announcement emails';
-$string['messageprovider:notificationsmobile'] = 'Individual announcement push notifications';
+$string['messageprovider:notifications'] = 'Instant announcement emails';
+$string['messageprovider:notificationsmobile'] = 'Instant push notifications';
 $string['messageprovider:forced'] = 'Emergency announcement emails';
 $string['messageprovider:forcedmobile'] = 'Emergency announcement push notifications';
 $string['messageprovider:digests'] = 'Daily Digest';
