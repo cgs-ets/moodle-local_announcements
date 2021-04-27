@@ -28,17 +28,12 @@ require_once(dirname(__FILE__) . '/../../config.php');
 use local_announcements\persistents\announcement;
 use local_announcements\providers\audience_loader;
 
-// Gather form data.
-$page = optional_param('page', 1, PARAM_INT);
-
 // Set context.
 $context = context_system::instance();
 
 // Set up page parameters.
 $PAGE->set_context($context);
-$pageurl = new moodle_url('/local/announcements/preferences.php', array(
-    'page' => $page,
-));
+$pageurl = new moodle_url('/local/announcements/preferences.php');
 $PAGE->set_url($pageurl);
 $title = get_string('pluginname', 'local_announcements');
 $pagetitle = 'Preferences';
@@ -48,36 +43,134 @@ $PAGE->set_title($SITE->fullname . ': ' . $fulltitle);
 $PAGE->navbar->add($title, new moodle_url('/local/announcements/'));
 $PAGE->navbar->add($pagetitle);
 
-
 // Add css
 $PAGE->requires->css(new moodle_url($CFG->wwwroot . '/local/announcements/styles.css', array('nocache' => rand().rand())));
 
 // Check user is logged in.
 require_login();
 
-// Build page output
-$output = '';
-$output .= $OUTPUT->header();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	$preferences = array(
+		'message_provider_local_announcements_digests_loggedin' => 'none',
+		'message_provider_local_announcements_digests_loggedoff' => 'none',
+		'message_provider_local_announcements_notifications_loggedin' => 'none',
+		'message_provider_local_announcements_notifications_loggedoff' => 'none',
+		'message_provider_local_announcements_notificationsmobile_loggedin' => 'none',
+		'message_provider_local_announcements_notificationsmobile_loggedoff' => 'none',
+	);
 
-$processors = get_message_processors();
-$providers = message_get_providers_from_db('local_announcements');
-$preferences = \core_message\api::get_all_message_preferences($processors, $providers, $USER);
-$notificationlistoutput = new \core_message\output\preferences\notification_list($processors, $providers,
-    $preferences, $USER);
-$data = $notificationlistoutput->export_for_template($OUTPUT);
+	if (isset($_POST['dailydigests'])) {
+		$preferences['message_provider_local_announcements_digests_loggedin'] = 'email';
+		$preferences['message_provider_local_announcements_digests_loggedoff'] = 'email';
+	}
+	if (isset($_POST['bellalerts'])) {
+		$preferences['message_provider_local_announcements_notifications_loggedin'] = 'popup';
+		$preferences['message_provider_local_announcements_notifications_loggedoff'] = 'popup';
+	}
+	if (isset($_POST['instantemails'])) {
+		if (!empty($preferences['message_provider_local_announcements_notifications_loggedin'])){
+			$preferences['message_provider_local_announcements_notifications_loggedin'] .= ',';
+			$preferences['message_provider_local_announcements_notifications_loggedoff'] .= ',';
+		}
+		$preferences['message_provider_local_announcements_notifications_loggedin'] .= 'email';
+		$preferences['message_provider_local_announcements_notifications_loggedoff'] .= 'email';
+	}
+	if (isset($_POST['pushnotifications'])) {
+		$preferences['message_provider_local_announcements_notificationsmobile_loggedin'] = 'airnotifier';
+		$preferences['message_provider_local_announcements_notificationsmobile_loggedoff'] = 'airnotifier';
+	}
 
-array_shift($data['components']); // remove System from the top
-// Remove the displayname as we already know we are changing "Announcement" preferences from the context...
-if (isset($data['components'][0]['displayname'])) {
-    $data['components'][0]['displayname'] = '';
+	foreach ($preferences as $key => $value) {
+		$sql = "SELECT *
+          	      FROM {user_preferences} p 
+                 WHERE p.userid = ?
+                   AND p.name = ?";
+        $params = array(
+        	$USER->id,
+        	$key,
+        );
+	    $exists = $DB->execute($sql, $params);
+	    if ($exists) {
+	    	$sql = "UPDATE {user_preferences} p
+	    			   SET value = ?
+	    			 WHERE p.userid = ?
+	                   AND p.name = ?";
+	        $params = array(
+	        	$value,
+	        	$USER->id,
+	        	$key,
+	        );
+		    $DB->execute($sql, $params);
+	    } else {
+	    	if ($value != 'none') {
+	    		$sql = "INSERT INTO {user_preferences} (userid, name, value)
+	    			   VALUES value = (?, ?, ?)";
+		        $params = array(
+		        	$USER->id,
+		        	$key,
+		        	$value,
+		        );
+			    $DB->execute($sql, $params);
+	    	}
+	    }
+	}
+
+	// Redirect to self with notification.
+    redirect(
+        $pageurl->out(),
+        '<p>Preferences saved.</p>',
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
+
+} else  {
+	// Load preferences.
+	$sql = "SELECT *
+          FROM {user_preferences} p 
+         WHERE p.userid = ?
+           AND p.name LIKE 'message_provider_local_announcements%'";
+	$params = array($USER->id);
+	$records = array_values($DB->get_records_sql($sql, $params));
+	$preferences = array();
+	$preferences['dailydigests'] = false;
+	$preferences['instantemails'] = false;
+	$preferences['pushnotifications'] = false;
+	$preferences['bellalerts'] = false;
+
+	// Load existing preferences.
+	foreach ($records as $preference) {
+		// Digest preference.
+		if ($preference->name == 'message_provider_local_announcements_digests_loggedin') {
+			if (strpos($preference->value, 'email') !== false) {
+				$preferences['dailydigests'] = true;
+			}
+		}
+
+		// Notifications.
+		if ($preference->name == 'message_provider_local_announcements_notifications_loggedin') {
+			if (strpos($preference->value, 'email') !== false) {
+				$preferences['instantemails'] = true;
+			}
+			if (strpos($preference->value, 'popup') !== false) {
+				$preferences['bellalerts'] = true;
+			}
+		}
+
+		// Mobile notifications.
+		if ($preference->name == 'message_provider_local_announcements_notificationsmobile_loggedin') {
+			if (strpos($preference->value, 'airnotifier') !== false) {
+				$preferences['pushnotifications'] = true;
+			}
+		}
+	}
+
+	// Build page output
+	$output = '';
+	$output .= $OUTPUT->header();
+
+	$output .= $OUTPUT->render_from_template('local_announcements/preferences', $preferences);
+
+	// Final outputs
+	$output .= $OUTPUT->footer();
+	echo $output;
 }
-       
-$output .= $OUTPUT->render_from_template('local_announcements/message_preferences',
-    $data);
-
-// Final outputs
-$output .= $OUTPUT->footer();
-echo $output;
-
-
-
