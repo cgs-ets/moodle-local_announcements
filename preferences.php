@@ -85,33 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           	      FROM {user_preferences}
                  WHERE userid = ?
                    AND name = ?";
-        $params = array(
-        	$USER->id,
-        	$key,
-        );
-	    $exists = $DB->execute($sql, $params);
-	    if ($exists) {
-	    	$sql = "UPDATE {user_preferences}
-	    			   SET value = ?
-	    			 WHERE userid = ?
-	                   AND name = ?";
-	        $params = array(
-	        	$value,
-	        	$USER->id,
-	        	$key,
-	        );
-		    $DB->execute($sql, $params);
+        $params = array($USER->id,$key);
+	    $record = $DB->get_record_sql($sql, $params);
+	    if ($record) {
+	    	$DB->update_record('user_preferences', array('id'=>$record->id, 'name'=>$key, 'value'=>$value, 'userid'=>$USER->id));
 	    } else {
-	    	if ($value != 'none') {
-	    		$sql = "INSERT INTO {user_preferences} (userid, name, value)
-	    			   VALUES value = (?, ?, ?)";
-		        $params = array(
-		        	$USER->id,
-		        	$key,
-		        	$value,
-		        );
-			    $DB->execute($sql, $params);
-	    	}
+	    	$DB->insert_record('user_preferences', array('name'=>$key, 'value'=>$value, 'userid'=>$USER->id));
 	    }
 	}
 
