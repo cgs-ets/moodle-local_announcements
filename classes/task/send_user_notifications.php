@@ -129,6 +129,7 @@ class send_user_notifications extends \core\task\adhoc_task {
         $data = array (
             'posts' => array($post),
             'forcesendheaderimage' => $config->forcesendheaderimage,
+            'userprefs' => (new \moodle_url('/local/announcements/preferences.php'))->out(false),
         );
 
         // Not all of these variables are used in the default string but are made available to support custom subjects.
