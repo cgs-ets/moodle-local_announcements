@@ -132,10 +132,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$params = array($USER->id);
 	$records = array_values($DB->get_records_sql($sql, $params));
 	$preferences = array();
-	$preferences['dailydigests'] = false;
+	$preferences['dailydigests'] = true;
 	$preferences['instantemails'] = false;
-	$preferences['pushnotifications'] = false;
-	$preferences['bellalerts'] = false;
+	$preferences['pushnotifications'] = true;
+	$preferences['bellalerts'] = true;
 
 	// Load existing preferences.
 	foreach ($records as $preference) {
@@ -143,6 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		if ($preference->name == 'message_provider_local_announcements_digests_loggedin') {
 			if (strpos($preference->value, 'email') !== false) {
 				$preferences['dailydigests'] = true;
+			} else {
+				$preferences['dailydigests'] = false;
 			}
 		}
 
@@ -151,8 +153,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			if (strpos($preference->value, 'email') !== false) {
 				$preferences['instantemails'] = true;
 			}
+
 			if (strpos($preference->value, 'popup') !== false) {
 				$preferences['bellalerts'] = true;
+			} else {
+				$preferences['bellalerts'] = false;
 			}
 		}
 
@@ -160,6 +165,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		if ($preference->name == 'message_provider_local_announcements_notificationsmobile_loggedin') {
 			if (strpos($preference->value, 'airnotifier') !== false) {
 				$preferences['pushnotifications'] = true;
+			} else {
+				$preferences['pushnotifications'] = false;
 			}
 		}
 	}
