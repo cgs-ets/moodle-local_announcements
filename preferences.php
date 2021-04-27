@@ -82,19 +82,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 	foreach ($preferences as $key => $value) {
 		$sql = "SELECT *
-          	      FROM {user_preferences} p 
-                 WHERE p.userid = ?
-                   AND p.name = ?";
+          	      FROM {user_preferences}
+                 WHERE userid = ?
+                   AND name = ?";
         $params = array(
         	$USER->id,
         	$key,
         );
 	    $exists = $DB->execute($sql, $params);
 	    if ($exists) {
-	    	$sql = "UPDATE {user_preferences} p
+	    	$sql = "UPDATE {user_preferences}
 	    			   SET value = ?
-	    			 WHERE p.userid = ?
-	                   AND p.name = ?";
+	    			 WHERE userid = ?
+	                   AND name = ?";
 	        $params = array(
 	        	$value,
 	        	$USER->id,
