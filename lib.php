@@ -65,6 +65,17 @@ function local_announcements_pluginfile($course, $cm, $context, $filearea, $args
 
     $postid = (int)array_shift($args);
 
+    // Custom email preview file.
+    if (!empty($options['preview'])) {
+        if ($options['preview'] === 'email') {
+            $previewfile = local_announcements_get_email_image_preview($stored_file);
+            // replace the file with its preview
+            if ($previewfile) {
+                $file = $previewfile;
+            }
+        }
+    }
+
     // finally send the file
     send_stored_file($file, 0, 0, true, $options); // download MUST be forced - security!
 }
@@ -90,3 +101,116 @@ function local_announcements_user_preferences() {
     );
     return $preferences;
 }
+
+function local_announcements_get_email_image_preview($stored_file) {
+    $context = context_system::instance();
+    $path = '/email/';
+    $previewfile = $this->get_file($context->id, 'core', 'preview', 0, $path, $stored_file->get_contenthash());
+
+    if (!$previewfile) {
+        // Create the preview.
+        $mimetype = $stored_file->get_mimetype();
+
+        if ($mimetype === 'image/gif' or $mimetype === 'image/jpeg' or $mimetype === 'image/png') {
+            // make a preview of the image
+            $content = $stored_file->get_content();
+            // Fetch the image information for this image.
+            $imageinfo = @getimagesizefromstring($content);
+            if (empty($imageinfo)) {
+                return false;
+            }
+
+            // Create a new image from the file.
+            $original = @imagecreatefromstring($content);
+
+            // Generate the thumbnail.
+            $preview =  generate_image_thumbnail_from_image($original, $imageinfo, 700, null); // Max 700px wide, scaled height.
+
+        } else {
+            // unable to create the preview of this mimetype yet
+            return false;
+        }
+
+        if (empty($preview)) {
+            return false;
+        }
+
+        $record = array(
+            'contextid' => $context->id,
+            'component' => 'core',
+            'filearea'  => 'preview',
+            'itemid'    => 0,
+            'filepath'  => '/email/',
+            'filename'  => $stored_file->get_contenthash(),
+        ); // Use the original files contenthash as the key.
+
+        $imageinfo = getimagesizefromstring($data);
+        if ($imageinfo) {
+            $record['mimetype'] = $imageinfo['mime'];
+        }
+        $fs = get_file_storage();
+        $previewfile = $fs->create_file_from_string($record, $data);
+    }
+
+    return $previewfile;
+}
+
+/*
+function local_announcements_create_email_image_previews($postid) {
+    global $CFG;
+    require_once($CFG->libdir.'/gdlib.php');
+
+    $context = context_system::instance();
+    $fs = get_file_storage();
+    $files = $fs->get_area_files($context->id, 'local_announcements', 'attachment', $postid, "filename", false);
+    if ($files) {
+        foreach ($files as $file) {
+            $preview = '';
+
+            $mimetype = $file->get_mimetype();
+
+                if ($mimetype === 'image/gif' or $mimetype === 'image/jpeg' or $mimetype === 'image/png') {
+                    // make a preview of the image
+                    $content = $file->get_content();
+                    // Fetch the image information for this image.
+                    $imageinfo = @getimagesizefromstring($content);
+                    if (empty($imageinfo)) {
+                        return false;
+                    }
+
+                    // Create a new image from the file.
+                    $original = @imagecreatefromstring($content);
+
+                    // Generate the thumbnail.
+                    $preview =  generate_image_thumbnail_from_image($original, $imageinfo, 700, null); // Max 700px wide, scaled height.
+
+                } else {
+                    // unable to create the preview of this mimetype yet
+                    return false;
+                }
+
+                if (empty($preview)) {
+                    return false;
+                }
+
+                $record = array(
+                    'contextid' => $context->id,
+                    'component' => 'core',
+                    'filearea'  => 'preview',
+                    'itemid'    => 0,
+                    'filepath'  => '/email/',
+                    'filename'  => $file->get_contenthash(),
+                ); // Use the original files contenthash as the key.
+
+                $imageinfo = getimagesizefromstring($data);
+                if ($imageinfo) {
+                    $record['mimetype'] = $imageinfo['mime'];
+                }
+
+                return $fs->create_file_from_string($record, $data);
+
+            }
+        }
+    }
+}
+*/
