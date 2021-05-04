@@ -319,14 +319,16 @@ class announcement_exporter extends persistent_exporter {
 	    foreach( $dom->getElementsByTagName("img") as $img ) {
 		    $newimage = $dom->createElement("img");
 		    $src =  $img->getAttribute('src');
-		    $query = parse_url($src, PHP_URL_QUERY);
-			if ($query) {
-			    $src .= '&preview=email';
-			} else {
-			    $src .= '?preview=email';
-			}
-		    $newimage->setAttribute('src', $src);
-		    $img->parentNode->replaceChild($newimage, $img);
+		    if (strpos($src, 'tokenpluginfile.php') !== false && strpos($src, 'local_announcements/announcement') !== false) {
+		    	$query = parse_url($src, PHP_URL_QUERY);
+				if ($query) {
+				    $src .= '&preview=email';
+				} else {
+				    $src .= '?preview=email';
+				}
+			    $newimage->setAttribute('src', $src);
+			    $img->parentNode->replaceChild($newimage, $img);
+		    }
 		}
 		$emailmessage = trim($dom->saveHTML());
 
