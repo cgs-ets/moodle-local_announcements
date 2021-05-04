@@ -67,19 +67,21 @@ class send_user_digests extends \core\task\adhoc_task {
 
         $inclmyconnect = $this->include_myconnect();
 
-        foreach ($data as $userid => $posts) {
+        foreach ($data as $userid => $posttypes) {
+            $this->log("posttypes: " . json_encode($posttypes), 1);
             $recipient = \core_user::get_user($userid);
 
             $this->log_start("Sending announcement digests for {$recipient->username} ({$recipient->id})");
 
             // Prepare announcement posts.
-            $postids = $posts->posts;
-            $posts = $this->prepare_data($postids, $recipient);
+            $postids = $posttypes->announcements;
+            $announcements = $this->prepare_data($postids, $recipient);
 
             // Prepare myconnect posts.
             $myconnectpostdefs = $myconnectposts = array();
             if ($inclmyconnect) {
-                $myconnectpostdefs = (array) $posts->myconnectposts;
+                $myconnectpostdefs = (array) $posttypes->myconnectposts;
+                $this->log("myconnectpostdefs: " . json_encode($myconnectpostdefs), 1);
                 $myconnectposts = \local_myconnect\persistents\post::prepare_data(
                     $myconnectpostdefs, 
                     $recipient, 
@@ -87,13 +89,13 @@ class send_user_digests extends \core\task\adhoc_task {
                 );
             }
             
-            if (empty($posts) && empty($myconnectposts)) {
+            if (empty($announcements) && empty($myconnectposts)) {
                 $this->log_finish("No posts found to send.");
                 continue;
             }
 
             // This digest has at least one post and should therefore be sent.
-            if ($this->send_mail($recipient, $posts, $myconnectposts)) {
+            if ($this->send_mail($recipient, $announcements, $myconnectposts)) {
                 $announcementidstr = implode(", ", $postids);
                 $myconnectidstr = implode(", ", array_keys($myconnectpostdefs));
                 $this->log_finish("Digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts. Announcement IDs [{$announcementidstr}]. MyConnect post ids [{$myconnectidstr}].");
@@ -140,7 +142,7 @@ class send_user_digests extends \core\task\adhoc_task {
     /**
      * Send the composed message to the user.
      */
-    protected function send_mail($recipient, $posts, $myconnectposts) {
+    protected function send_mail($recipient, $announcements, $myconnectposts) {
         global $OUTPUT;
 
         $config = get_config('local_announcements');
@@ -160,9 +162,9 @@ class send_user_digests extends \core\task\adhoc_task {
 
         // Render the digest template with the posts
         $content = [
-            'posts' => $posts,
+            'posts' => $announcements,
             'myconnectposts' => $myconnectposts,
-            'hasposts' => !empty($posts),
+            'hasposts' => !empty($announcements),
             'hasmyconnectposts' => !empty($myconnectposts),
             'userprefs' => (new \moodle_url('/local/announcements/preferences.php'))->out(false),
             'myconnectheaderimage' => $config->myconnectheaderimage,
@@ -182,7 +184,7 @@ class send_user_digests extends \core\task\adhoc_task {
             $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
         //}
 
-        $this->sentcount = count($posts);
+        $this->sentcount = count($announcements);
         $this->myconnectsentcount = isset($myconnectposts) ? count($myconnectposts) : 0;
 
         $eventdata = new \core\message\message();
@@ -202,6 +204,8 @@ class send_user_digests extends \core\task\adhoc_task {
     }
 
     private function include_myconnect() {
+        global $CFG;
+
         $config = get_config('local_announcements');
 
         $incl = isset($config->myconnectdigest) ? $config->myconnectdigest : false;

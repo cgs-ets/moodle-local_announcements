@@ -240,15 +240,15 @@ class cron_task_digests extends \core\task\scheduled_task {
         $batchcounts = array('posts' => 0, 'myconnectposts' => 0);
         foreach ($this->users as $user) {
             // Custom data structure.
-            $batch[$user->id] = array (
-                'posts' => array(),
+            $batch[$user->id] = array(
+                'announcements' => array(),
                 'myconnectposts' => array(),
             );
 
-            // Announcements
+            // Announcements.
             $digestposts = $this->fetch_posts_for_user($user);
             if (!empty($digestposts)) {
-                $batch[$user->id]['posts'] = $digestposts;
+                $batch[$user->id]['announcements'] = $digestposts;
             }
 
             // MyConnect posts.

@@ -163,6 +163,9 @@ class announcement_exporter extends persistent_exporter {
 	        'deliverymessage' => [
 	        	'type' => PARAM_RAW,
 	        ],
+	        'emailmessage' => [
+	        	'type' => PARAM_RAW,
+	        ],
 	    ];
 	}
 
@@ -309,6 +312,24 @@ class announcement_exporter extends persistent_exporter {
 		$shortmessage = trim($dom->saveHTML());
     	$islong = ($islong || $shortmessage != $shortmessagebeforetrims);
 
+    	// Process tokenized message for emails to replace src with preview image.
+    	$emailmessage = $messagetokenized;
+    	$dom = new \DOMDocument();
+	    @$dom->loadHTML(mb_convert_encoding($emailmessage, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+	    foreach( $dom->getElementsByTagName("img") as $img ) {
+		    $newimage = $dom->createElement("img");
+		    $src =  $img->getAttribute('src');
+		    $query = parse_url($src, PHP_URL_QUERY);
+			if ($query) {
+			    $src .= '&preview=email';
+			} else {
+			    $src .= '?preview=email';
+			}
+		    $newimage->setAttribute('src', $src);
+		    $img->parentNode->replaceChild($newimage, $img);
+		}
+		$emailmessage = trim($dom->saveHTML());
+
     	// Append view more link to short message.
 		$viewlink = '<p><a class="view-full-link btn btn-secondary" href="' . $viewurl . '">' . get_string('list:viewmore', 'local_announcements') . '</a></p>';
 		if ($islong) {
@@ -402,6 +423,7 @@ class announcement_exporter extends persistent_exporter {
 	        'deliverystatus' => $deliverystatus,
 	        'deliveryicon' => $deliveryicon,
 	        'deliverymessage' => $deliverymessage,
+	        'emailmessage' => $emailmessage,
 	    ];
 	}
 
