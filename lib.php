@@ -71,7 +71,7 @@ function local_announcements_pluginfile($course, $cm, $context, $filearea, $args
     if (!empty($options['preview'])) {
         if ($options['preview'] === 'email') {
             $imageinfo = $file->get_imageinfo();
-            if ($imageinfo['width'] > 700) { // Only do if original > 700px.
+            if ($imageinfo['width'] > 660) { // Only do if original > 660px.
                 $previewfile = local_announcements_get_email_image_preview($file);
                 // replace the file with its preview
                 if ($previewfile) {
@@ -137,7 +137,7 @@ function local_announcements_get_email_image_preview($file) {
             $original = @imagecreatefromstring($content);
 
             // Generate the thumbnail.
-            $preview = resize_image_from_image($original, $imageinfo, 700, null);
+            $preview = resize_image_from_image($original, $imageinfo, 660, null);
         } else {
             // unable to create the preview of this mimetype yet
             return false;
@@ -193,7 +193,7 @@ function local_announcements_create_email_image_previews($postid) {
                     $original = @imagecreatefromstring($content);
 
                     // Generate the thumbnail.
-                    $preview =  generate_image_thumbnail_from_image($original, $imageinfo, 700, null); // Max 700px wide, scaled height.
+                    $preview =  generate_image_thumbnail_from_image($original, $imageinfo, 660, null); // Max 660px wide, scaled height.
 
                 } else {
                     // unable to create the preview of this mimetype yet
