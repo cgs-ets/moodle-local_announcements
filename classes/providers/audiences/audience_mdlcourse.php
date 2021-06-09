@@ -357,7 +357,7 @@ class audience_mdlcourse extends \local_announcements\providers\audience_provide
                 // Convert privilege code to a regex.
                 $regcode = $regcode == '*' ? '(.*)' : str_replace('%', '(.*)', $regcode);
                 // Perform the checks if the audience code matches the privilege code.
-                if (preg_match('/' . $regcode . '/i', $code) !== 1) {
+                if (preg_match('/^' . $regcode . '$/i', $code) !== 1) {
                     continue;
                 }
                 foreach ($checktypes as $checktype => $checkvalues) {
