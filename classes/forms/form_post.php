@@ -45,7 +45,7 @@ class form_post extends \moodleform {
             'subdirs' => 0,
             'maxbytes' => $maxbytes,
             'maxfiles' => $config->maxattachments,
-            'accepted_types' => '*',
+            'accepted_types' => '*', //array('document', 'image', 'video', 'audio', 'archive', 'spreadsheet', 'presentation'),
             'return_types' => FILE_INTERNAL | FILE_CONTROLLED_LINK
         );
     }

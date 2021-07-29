@@ -80,9 +80,9 @@ function local_announcements_pluginfile($course, $cm, $context, $filearea, $args
                     $forcedownload = false;
                 }
             }
-            // Custom preview has been handled, remove from $options so that send_stored_file does not fail.
-            unset($options['preview']); 
         }
+        // Custom preview has been handled, remove from $options so that send_stored_file does not fail.
+        unset($options['preview']); 
     }
 
     // finally send the file
@@ -136,6 +136,15 @@ function local_announcements_get_email_image_preview($file) {
             // Create a new image from the file.
             $original = @imagecreatefromstring($content);
 
+            // Rotate if necessary.
+            // Extract directory and filename of the permanent file.
+            $dir = str_replace('\\\\', '\\', $CFG->dataroot) . 
+            '\filedir\\' . substr($file->get_contenthash(), 0, 2) . 
+            '\\' . substr($file->get_contenthash(), 2, 2) . 
+            '\\';
+            $physicalpath = $dir . $file->get_contenthash();
+            local_announcements_image_fix_orientation($original, $physicalpath, $imageinfo);
+
             // Generate the thumbnail.
             $preview = resize_image_from_image($original, $imageinfo, 660, null);
         } else {
@@ -166,62 +175,31 @@ function local_announcements_get_email_image_preview($file) {
     return $previewfile;
 }
 
-/*
-function local_announcements_create_email_image_previews($postid) {
-    global $CFG;
-    require_once($CFG->libdir.'/gdlib.php');
+function local_announcements_image_fix_orientation(&$image, $filename, &$imageinfo) {
+    $exif = exif_read_data($filename);
 
-    $context = context_system::instance();
-    $fs = get_file_storage();
-    $files = $fs->get_area_files($context->id, 'local_announcements', 'attachment', $postid, "filename", false);
-    if ($files) {
-        foreach ($files as $file) {
-            $preview = '';
+    if (empty($exif['Orientation'])) {
+        return;
+    }
 
-            $mimetype = $file->get_mimetype();
-
-                if ($mimetype === 'image/gif' or $mimetype === 'image/jpeg' or $mimetype === 'image/png') {
-                    // make a preview of the image
-                    $content = $file->get_content();
-                    // Fetch the image information for this image.
-                    $imageinfo = @getimagesizefromstring($content);
-                    if (empty($imageinfo)) {
-                        return false;
-                    }
-
-                    // Create a new image from the file.
-                    $original = @imagecreatefromstring($content);
-
-                    // Generate the thumbnail.
-                    $preview =  generate_image_thumbnail_from_image($original, $imageinfo, 660, null); // Max 660px wide, scaled height.
-
-                } else {
-                    // unable to create the preview of this mimetype yet
-                    return false;
-                }
-
-                if (empty($preview)) {
-                    return false;
-                }
-
-                $record = array(
-                    'contextid' => $context->id,
-                    'component' => 'core',
-                    'filearea'  => 'preview',
-                    'itemid'    => 0,
-                    'filepath'  => '/email/',
-                    'filename'  => $file->get_contenthash(),
-                ); // Use the original files contenthash as the key.
-
-                $imageinfo = getimagesizefromstring($data);
-                if ($imageinfo) {
-                    $record['mimetype'] = $imageinfo['mime'];
-                }
-
-                return $fs->create_file_from_string($record, $data);
-
-            }
-        }
+    if (in_array($exif['Orientation'], [3, 4])) {
+        $image = imagerotate($image, 180, 0);
+    }
+    if (in_array($exif['Orientation'], [5, 6])) {
+        $image = imagerotate($image, -90, 0);
+        $origw = $imageinfo[0];
+        $origh = $imageinfo[1];
+        $imageinfo[0] = $origh;
+        $imageinfo[1] = $origw;
+    }
+    if (in_array($exif['Orientation'], [7, 8])) {
+        $image = imagerotate($image, 90, 0);
+        $origw = $imageinfo[0];
+        $origh = $imageinfo[1];
+        $imageinfo[0] = $origh;
+        $imageinfo[1] = $origw;
+    }
+    if (in_array($exif['Orientation'], [2, 5, 7, 4])) {
+        imageflip($image, IMG_FLIP_HORIZONTAL);
     }
 }
-*/
