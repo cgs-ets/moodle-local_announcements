@@ -27,7 +27,7 @@
 <div data-id="{{id}}" class="announcement{{^isavailable}} unavailable{{/isavailable}}{{#ismodpending}} modpending{{/ismodpending}}{{#ismodrejected}} modrejected{{/ismodrejected}}">
     <div class="header">
         <div class="leftwrap">
-            <div class="subject">{{subject}}</div>
+            <div class="subject"><a href="{{viewurl}}">{{subject}}</a></div>
             {{#impersonate}}{{#iscreator}}
                 <div class="impersonatedby">
                     <div class="userphoto"><a href="{{impersonatedbyurl}}" title="{{impersonatedbyfullname}} profile"><img src="{{impersonatedbyphoto}}" alt="{{impersonatedbyfullname}}" title="{{impersonatedbyfullname}}" /></a></div>
