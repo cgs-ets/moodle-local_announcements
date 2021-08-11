@@ -80,9 +80,9 @@ function local_announcements_pluginfile($course, $cm, $context, $filearea, $args
                     $forcedownload = false;
                 }
             }
+            // Custom preview has been handled, remove from $options so that send_stored_file does not fail.
+            unset($options['preview']); 
         }
-        // Custom preview has been handled, remove from $options so that send_stored_file does not fail.
-        unset($options['preview']); 
     }
 
     // finally send the file
