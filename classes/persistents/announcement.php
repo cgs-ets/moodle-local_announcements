@@ -910,7 +910,7 @@ class announcement extends persistent {
                    AND pac.postsaudiencesid IN (
                        SELECT pua.postsaudiencesid
                          FROM {ann_posts_users_audiences} pua
-                        WHERE pua.postsusersid = (
+                        WHERE pua.postsusersid IN (
                               SELECT pu.id
                                 FROM {ann_posts_users} pu
                                WHERE pu.username = ?
