@@ -167,6 +167,8 @@ class send_user_digests extends \core\task\adhoc_task {
             'hasposts' => !empty($announcements),
             'hasmyconnectposts' => !empty($myconnectposts),
             'userprefs' => (new \moodle_url('/local/announcements/preferences.php'))->out(false),
+            'myconnecturl' => (new \moodle_url('/local/myconnect/index.php'))->out(false),
+            'announcementsurl' => (new \moodle_url('/local/announcements/index.php'))->out(false),
             'myconnectheaderimage' => $config->myconnectheaderimage,
             'digestheaderimage' => $config->digestheaderimage,
             'digestfooterimage' => $config->digestfooterimage,
