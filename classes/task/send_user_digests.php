@@ -80,7 +80,8 @@ class send_user_digests extends \core\task\adhoc_task {
             // Prepare myconnect posts.
             $myconnectpostdefs = $myconnectposts = array();
             if ($inclmyconnect) {
-                $myconnectpostdefs = (array) $posttypes->myconnectposts;
+                // Deep convert postdefs to array.
+                $myconnectpostdefs = json_decode(json_encode($posttypes->myconnectposts), true);
                 $this->log("myconnectpostdefs: " . json_encode($myconnectpostdefs), 1);
                 $myconnectposts = \local_myconnect\persistents\post::prepare_data(
                     $myconnectpostdefs, 
