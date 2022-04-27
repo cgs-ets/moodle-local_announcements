@@ -66,9 +66,13 @@ class cron_task_digests extends \core\task\scheduled_task {
      * MyConnect Vars
      */
     protected $includemyconnect = false;
+
     protected $myconnectposts = [];
     protected $myconnectpostusers = [];
+    protected $myconnectpostmentees = [];
+    
     protected $myconnectuserposts = [];
+    protected $myconnectmenteeposts = [];
 
 
     /**
@@ -82,6 +86,11 @@ class cron_task_digests extends \core\task\scheduled_task {
 
     /**
      * Execute the scheduled task.
+     * The process:
+     * 1. Get unmailed posts (announcements and myconnect)
+     * 2. Get the recipients of the posts. For myconnect posts also need to get the mentors of the recipients.
+     * 3. Reverse the array, so that you have users and their posts.
+     * 4. Queue send tasks for each user (batched).
      */
     public function execute() {
         global $DB, $CFG;
@@ -176,7 +185,10 @@ class cron_task_digests extends \core\task\scheduled_task {
                         if ($mentor->suspended) {
                             continue;
                         }
-                        $this->myconnectpostusers[$postid][$mentor->id] = $user->id;
+                        if (!isset($this->myconnectpostmentees[$postid][$mentor->id])) {
+                            $this->myconnectpostmentees[$postid][$mentor->id] = array();
+                        }
+                        $this->myconnectpostmentees[$postid][$mentor->id][] = $user->id;
                         $this->users[$mentor->id] = $mentor;
                     }
 
@@ -202,13 +214,31 @@ class cron_task_digests extends \core\task\scheduled_task {
             }
         }
 
-        // MyConnect.
+        // MyConnect - direct.
         foreach ($this->myconnectpostusers as $postid => $users) {
-            foreach ($users as $recipientid => $postuserid) {
+            foreach ($users as $userid) {
+                $this->myconnectuserposts[$userid][] = $postid;
+            }
+            /*foreach ($users as $recipientid => $postuserid) {
                 $this->myconnectuserposts[$recipientid][] = array(
                     'postid' => $postid,
                     'postuserid' => $postuserid
                 );
+            }*/
+        }
+
+        // MyConnect - mentees.
+        foreach ($this->myconnectpostmentees as $postid => $mentorusers) {
+            foreach ($mentorusers as $mentorid => $mentees) {
+                if (!isset($this->myconnectmenteeposts[$mentorid])) {
+                    $this->myconnectmenteeposts[$mentorid] = array();
+                }
+                foreach ($mentees as $menteeid) {
+                    if (!isset($this->myconnectmenteeposts[$mentorid][$menteeid])) {
+                        $this->myconnectmenteeposts[$mentorid][$menteeid] = array();
+                    }
+                    $this->myconnectmenteeposts[$mentorid][$menteeid][] = $postid;
+                }
             }
         }
     }
@@ -223,12 +253,12 @@ class cron_task_digests extends \core\task\scheduled_task {
 
         $timenow = time();
         $sitetimezone = \core_date::get_server_timezone();
-        $counts = array(
+        /*$counts = array(
             'digests' => 0,
             'ignored' => 0,
             'posts' => 0,
             'myconnectposts' => 0,
-        );
+        );*/
 
         $pertask = isset($config->digestbatchnum) ? $config->digestbatchnum : '1';
         $numusers = count($this->users);
@@ -237,7 +267,7 @@ class cron_task_digests extends \core\task\scheduled_task {
         $i = 1;
         $ui = 1;
         $batch = array();
-        $batchcounts = array('posts' => 0, 'myconnectposts' => 0);
+        //$batchcounts = array('posts' => 0, 'myconnectposts' => 0);
         foreach ($this->users as $user) {
             // Custom data structure.
             $batch[$user->id] = array(
@@ -251,14 +281,18 @@ class cron_task_digests extends \core\task\scheduled_task {
                 $batch[$user->id]['announcements'] = $digestposts;
             }
 
-            // MyConnect posts.
-            $myconnectpostdefs = $this->fetch_myconnectposts_for_user($user);
-            if (!empty($myconnectpostdefs)) {
-                $batch[$user->id]['myconnectposts'] = $myconnectpostdefs;
+            // MyConnect posts - direct.
+            if (isset($this->myconnectuserposts[$user->id])) {
+                $batch[$user->id]['myconnectposts'] = $this->myconnectuserposts[$user->id];
             }
 
+            // MyConnect posts - mentees.
+            if (isset($this->myconnectmenteeposts[$user->id])) {
+                $batch[$user->id]['myconnectmenteeposts'] = $this->myconnectmenteeposts[$user->id];
+            }           
+
             // Stats
-            if (count($digestposts) || count($myconnectpostdefs)) {
+            /*if (count($digestposts) || count($this->myconnectuserposts[$user->id])) {
                 $counts['digests']++;
             } else {
                 $counts['ignored']++;
@@ -266,48 +300,50 @@ class cron_task_digests extends \core\task\scheduled_task {
             if (count($digestposts)) {
                 $counts['posts'] += count($digestposts);
             }
-            if (count($myconnectpostdefs)) {
-                $counts['myconnectposts'] += count($myconnectpostdefs);
+            if (count($this->myconnectuserposts[$user->id])) {
+                $counts['myconnectposts'] += count($this->myconnectuserposts[$user->id]);
             }
+            if (isset($this->myconnectmenteeposts[$user->id])) {
+                $counts['myconnectposts'] += count(array_merge(...$this->myconnectmenteeposts[$user->id]));
+            }*/
 
-            $batchcounts['posts'] += count($digestposts);
-            $batchcounts['myconnectposts'] += count($myconnectpostdefs);
+            //$batchcounts['posts'] += count($digestposts);
+            //$batchcounts['myconnectposts'] += (count($this->myconnectuserposts[$user->id]) + count(array_merge(...$this->myconnectmenteeposts[$user->id])));
 
             // Stats.
-            $this->log(sprintf("Found %d announcements, and %d myconnect posts, for %s (%d)",
+            $this->log(sprintf("Found %d announcements, %d direct myconnect posts, %d mentee myconnect posts, for %s (%d)",
                 count($digestposts),
-                count($myconnectpostdefs),
+                isset($this->myconnectuserposts[$user->id]) ? count($this->myconnectuserposts[$user->id]) : 0,
+                isset($this->myconnectmenteeposts[$user->id]) ? count(array_merge(...$this->myconnectmenteeposts[$user->id])) : 0,
                 $user->username,
                 $user->id,
             ), 2);
 
             // If we have reached the per task limit, or have processed all users, create the next adhoc batch.
             if ( $i == $pertask || $ui == $numusers) {
-
-                
                 $task = new \local_announcements\task\send_user_digests();
                 $task->set_custom_data($batch);
                 $task->set_component('local_announcements');
                 \core\task\manager::queue_adhoc_task($task);
 
-                $this->log(sprintf("Queued %d announcements, and %d myconnect posts, for %d users in batch",
+                /*$this->log(sprintf("Queued %d announcements, and %d myconnect posts, for %d users in batch",
                     $batchcounts['posts'],
                     $batchcounts['myconnectposts'],
                     $i,
-                ), 2);
+                ), 2);*/
 
                 // Reset batch.
                 $i = 0;
                 $batch = array();
-                $batchcounts['posts'] = 0;
-                $batchcounts['myconnectposts'] = 0;
+                //$batchcounts['posts'] = 0;
+                //$batchcounts['myconnectposts'] = 0;
             }
 
             $i++;
             $ui++;
         }
 
-        $this->log(
+        /*$this->log(
             sprintf(
                 "%d digests. " .
                 "%d announcements. " .
@@ -317,7 +353,7 @@ class cron_task_digests extends \core\task\scheduled_task {
                 $counts['posts'],
                 $counts['myconnectposts'],
                 $counts['ignored']
-            ), 1);
+            ), 1);*/
 
     }        
 
@@ -334,21 +370,6 @@ class cron_task_digests extends \core\task\scheduled_task {
             }   
         }
         return $digestposts;
-    }
-
-    /**
-     * Fetch myconnect for this user.
-     *
-     * @param   \stdClass   $user The user to fetch posts for.
-     */
-    protected function fetch_myconnectposts_for_user($user) {
-        $posts = [];
-        if (isset($this->myconnectuserposts[$user->id])) {
-            foreach ($this->myconnectuserposts[$user->id] as $postdef) {
-                $posts[$postdef['postid']] = $postdef;
-            }   
-        }
-        return $posts;
     }
 
 }

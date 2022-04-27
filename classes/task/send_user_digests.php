@@ -78,7 +78,7 @@ class send_user_digests extends \core\task\adhoc_task {
             $announcements = $this->prepare_data($postids, $recipient);
 
             // Prepare myconnect posts.
-            $myconnectpostdefs = $myconnectposts = array();
+            /*$myconnectpostdefs = $myconnectposts = array();
             if ($inclmyconnect) {
                 // Deep convert postdefs to array.
                 $myconnectpostdefs = json_decode(json_encode($posttypes->myconnectposts), true);
@@ -88,17 +88,53 @@ class send_user_digests extends \core\task\adhoc_task {
                     $recipient, 
                     $this->get_trace()
                 );
+            }*/
+
+            $myconnectposts = array();
+            $myconnect_mentee_posts = array();
+            if ($inclmyconnect) {
+
+                $this->log("Direct MyConnect posts: " . json_encode($posttypes->myconnectposts), 1);
+                $myconnectpostids = json_decode(json_encode($posttypes->myconnectposts), true);
+                $myconnectposts = \local_myconnect\persistents\post::prepare_data(
+                    $myconnectpostids, 
+                    $recipient, 
+                    $this->get_trace()
+                );
+
+                if (isset($posttypes->myconnectmenteeposts)) {
+                    $this->log("Mentee MyConnect posts: " . json_encode($posttypes->myconnectmenteeposts), 1);
+                    $myconnectmenteeposts = json_decode(json_encode($posttypes->myconnectmenteeposts), true);
+                    foreach ($myconnectmenteeposts as $menteeid => $menteeposts) {
+                        $preparedposts = \local_myconnect\persistents\post::prepare_data_for_mentee(
+                            $menteeposts,
+                            $menteeid,
+                            $recipient,
+                            $this->get_trace()
+                        );
+                        $mentee = \core_user::get_user($menteeid);
+                        $myconnect_mentee_posts[] = array(
+                            'user' => $mentee,
+                            'posts' => $preparedposts
+                        );
+                    }
+                }
+
             }
+
+
+            //var_export($myconnectposts); exit;
             
-            if (empty($announcements) && empty($myconnectposts)) {
+            if (empty($announcements) && empty($myconnectposts) && empty($myconnect_mentee_posts)) {
                 $this->log_finish("No posts found to send.");
                 continue;
             }
 
             // This digest has at least one post and should therefore be sent.
-            if ($this->send_mail($recipient, $announcements, $myconnectposts)) {
+            if ($this->send_mail($recipient, $announcements, $myconnectposts, $myconnect_mentee_posts)) {
                 $announcementidstr = implode(", ", $postids);
-                $myconnectidstr = implode(", ", array_keys($myconnectpostdefs));
+                $myconnectidstr = implode(", ", $myconnectpostids);
+                $myconnectmenteepostidsstr = implode(", ", $myconnectpostids);
                 $this->log_finish("Digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts. Announcement IDs [{$announcementidstr}]. MyConnect post ids [{$myconnectidstr}].");
             } else {
                 $this->log_finish("Issue sending digest. Skipping.");
@@ -143,7 +179,7 @@ class send_user_digests extends \core\task\adhoc_task {
     /**
      * Send the composed message to the user.
      */
-    protected function send_mail($recipient, $announcements, $myconnectposts) {
+    protected function send_mail($recipient, $announcements, $myconnect_direct_posts, $myconnect_mentee_posts) {
         global $OUTPUT;
 
         $config = get_config('local_announcements');
@@ -164,9 +200,10 @@ class send_user_digests extends \core\task\adhoc_task {
         // Render the digest template with the posts
         $content = [
             'posts' => $announcements,
-            'myconnectposts' => $myconnectposts,
+            'myconnectposts' => $myconnect_direct_posts,
+            'myconnectmenteeposts' => $myconnect_mentee_posts,
             'hasposts' => !empty($announcements),
-            'hasmyconnectposts' => !empty($myconnectposts),
+            'hasmyconnectposts' => !empty($myconnect_direct_posts) || !empty($myconnect_mentee_posts),
             'userprefs' => (new \moodle_url('/local/announcements/preferences.php'))->out(false),
             'myconnecturl' => (new \moodle_url('/local/myconnect/index.php'))->out(false),
             'announcementsurl' => (new \moodle_url('/local/announcements/index.php'))->out(false),
@@ -177,15 +214,8 @@ class send_user_digests extends \core\task\adhoc_task {
             'digestfootercredits' => $config->digestfootercredits,
         ];
 
-        // Commented mailformat check out. Send both and allow the client to determine display.
-        //$notificationhtml = $notificationtext = '';
-        //if (empty($recipient->mailformat) || $recipient->mailformat != 1) {
-            // This user does not want to receive HTML. Send text version.
-            $notificationtext = $OUTPUT->render_from_template('local_announcements/message_digest_text', $content);
-        //} else {
-            // Send HTML version of digest.
-            $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
-        //}
+        $notificationtext = $OUTPUT->render_from_template('local_announcements/message_digest_text', $content);
+        $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
 
         $this->sentcount = count($announcements);
         $this->myconnectsentcount = isset($myconnectposts) ? count($myconnectposts) : 0;
