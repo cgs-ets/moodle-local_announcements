@@ -130,8 +130,6 @@ $PAGE->navbar->add($title);
 $PAGE->requires->css(new moodle_url($CFG->wwwroot . '/local/announcements/styles.css', array('nocache' => rand().rand())));
 $PAGE->requires->js( new moodle_url($CFG->wwwroot . '/local/announcements/js/infinite-scroll.pkgd.min.js'), true );
 
-// Build page output.
-$output = $OUTPUT->header();
 
 // Get the announcements, depending on audit mode and audiences.
 $announcements = array();
@@ -179,14 +177,17 @@ $data = array(
 	'viewbytitle' => $viewbytitle,
 );
 
+// Add classes to body
+$PAGE->add_body_class('limitedwidth');
+
+// Build page output.
+$output = $OUTPUT->header();
+
 // Render the announcement list.
 $output .= $OUTPUT->render_from_template('local_announcements/index', $data);
 
 // Add amd scripts.
 $PAGE->requires->js_call_amd('local_announcements/list', 'init', array('rootselector' => '.local_announcements'));
-
-// Add classes to body
-$PAGE->add_body_class('limitedwidth');
 
 // Final outputs.
 $output .= $OUTPUT->footer();
