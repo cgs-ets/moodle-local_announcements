@@ -157,6 +157,12 @@ if ($viewason && is_user_auditor()) {
 	}
 }
 
+// Add classes to body
+$PAGE->add_body_class('limitedwidth');
+
+// Build page output.
+$output = $OUTPUT->header();
+
 // Export the announcements list.
 $relateds = [
 	'context' => $context,
@@ -176,12 +182,6 @@ $data = array(
 	'viewbyon' => $viewbyon,
 	'viewbytitle' => $viewbytitle,
 );
-
-// Add classes to body
-$PAGE->add_body_class('limitedwidth');
-
-// Build page output.
-$output = $OUTPUT->header();
 
 // Render the announcement list.
 $output .= $OUTPUT->render_from_template('local_announcements/index', $data);

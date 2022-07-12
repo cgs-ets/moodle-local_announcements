@@ -208,7 +208,9 @@ class audience_mdluser extends \local_announcements\providers\audience_provider 
         global $DB;
 
         $audienceuser = $DB->get_record('user', array('username'=>$code));
-
+        if (empty($audienceuser)) {
+            return '';
+        }
         return $audienceuser->firstname . " " . $audienceuser->lastname;
     }
 
