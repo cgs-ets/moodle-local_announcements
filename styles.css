@@ -589,7 +589,7 @@ body.path-local-announcements.modal-open {
   /* Modals */
 }
 #page-local-announcements-index #region-main {
-  background-color: #f4f6f8;
+  background-color: #fff;
   overflow: visible;
 }
 #page-local-announcements-index .modal .userslist a {

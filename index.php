@@ -185,6 +185,9 @@ $output .= $OUTPUT->render_from_template('local_announcements/index', $data);
 // Add amd scripts.
 $PAGE->requires->js_call_amd('local_announcements/list', 'init', array('rootselector' => '.local_announcements'));
 
+// Add classes to body
+$PAGE->add_body_class('limitedwidth');
+
 // Final outputs.
 $output .= $OUTPUT->footer();
 echo $output;
