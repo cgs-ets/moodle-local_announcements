@@ -72,7 +72,7 @@ class audience_mdlcourse extends \local_announcements\providers\audience_provide
         }
 
         // Get relevant combo codes based on relateds. E.g. year,mdlcourse|Year-4-2020|Year 4,Students.
-        $combosql = "SELECT id, code
+        $combosql = "SELECT code
                        FROM {ann_posts_audiences_cond}
                       WHERE 0 = 1";
         $comboparams = array();
