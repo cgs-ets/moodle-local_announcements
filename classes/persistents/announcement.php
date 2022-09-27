@@ -241,7 +241,7 @@ class announcement extends persistent {
         }
 
         // Order by.
-        $sql .= ") ) ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
+        $sql .= ") )";
 
         //Debug sql
         //echo "<pre>";
@@ -252,6 +252,9 @@ class announcement extends persistent {
 
         // Create array of announcement persistents.
         $records = $DB->get_records_sql($sql, $params, $from, $perpage);
+        // Get again with all data and ORDER.
+        $records = static::get_by_ids(array_column($records, 'id'));
+
         $posts = array();
         foreach ($records as $postid => $record) {
             $out = static::get_for_user_with_audiences(null, $postid, true);
@@ -566,7 +569,7 @@ class announcement extends persistent {
         $params = array_merge($params, $comboparams);
 
         // Order by.
-        $sql .= " ) ) ) ) ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC ";
+        $sql .= " ) ) ) )";
 
         //Debug sql
         //echo "<pre>";
@@ -577,6 +580,10 @@ class announcement extends persistent {
 
         // Create array of announcement persistents.
         $records = $DB->get_records_sql($sql, $params, $from, $perpage);
+
+        // Get again with all data and ORDER.
+        $records = static::get_by_ids(array_column($records, 'id'));
+        
         $posts = array();
         foreach ($records as $postid => $record) {
             $out = static::get_for_user_with_audiences($username, $postid);
@@ -588,6 +595,22 @@ class announcement extends persistent {
         }
 
         return $posts;
+    }
+
+    /**
+     * Get announcements from an array of ids.
+     *
+     * @param array $ids.
+     * @return array.
+     */
+    public static function get_by_ids($ids) {
+        global $DB;
+        list($idsql, $params) = $DB->get_in_or_equal($ids);
+        $sql = "SELECT p.id
+                FROM {ann_posts} p
+                WHERE p.id $idsql
+                ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC, p.id DESC";
+        return $DB->get_records_sql($sql, $params);
     }
 
     /**
