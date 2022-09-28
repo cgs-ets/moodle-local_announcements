@@ -605,6 +605,9 @@ class announcement extends persistent {
      */
     public static function get_by_ids($ids) {
         global $DB;
+        if (empty($ids)) {
+            return [];
+        }
         list($idsql, $params) = $DB->get_in_or_equal($ids);
         $sql = "SELECT p.id
                 FROM {ann_posts} p
