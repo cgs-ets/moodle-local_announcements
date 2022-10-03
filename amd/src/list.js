@@ -136,6 +136,7 @@ define(['jquery', 'core/log', 'core/config', 'core/ajax','core/templates',
             append: '.announcement',
             history: false,
             status: '.page-load-status',
+            elementScroll: '#page',
           });
         }
 
