@@ -3,7 +3,7 @@
   "private": true,
   "description": "Announcements plugin for Moodle",
   "devDependencies": {
-    "grunt": "^1.1.0",
+    "grunt": "^1.5.3",
     "grunt-contrib-less": "^2.0.0",
     "grunt-contrib-uglify": "^4.0.1"
   },
