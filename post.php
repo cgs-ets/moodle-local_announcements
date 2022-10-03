@@ -169,8 +169,6 @@ if ($formdata = $mformpost->get_data()) {
     // If a draftaudience was used do some cleanup.
     clean_draftaudience();
 
-    var_export('refresh me'); exit;
-
     // Set up result message and redirect.
     $message = get_string("postform:postupdatesuccess", "local_announcements");
     if ($formdata->edit == 0 ) { 
