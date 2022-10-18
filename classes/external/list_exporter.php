@@ -95,7 +95,9 @@ class list_exporter extends exporter {
             $announcements[] = $announcementexporter->export($output);
         }
 
-        $possiblemore = ( count($announcements) >= get_per_page() );
+        //$possiblemore = ( count($announcements) >= get_per_page() );
+        // Keeping it simple, there is always possibly more.
+        $possiblemore = true;
 
         // Pagination.
         // Arbitrarily large total count. To minimise load time, we do not attempt to figure out how many announcements this user actually has, given the complexity of the sql to determine audiences number of announcement. Instead we produce a large number of pagination links that don't actually have any posts, but the infinite scroll is smart enough to continue loading the next set of announcements until there is nothing left to load. 
