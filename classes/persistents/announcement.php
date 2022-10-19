@@ -253,7 +253,7 @@ class announcement extends persistent {
         // Create array of announcement persistents.
         $records = $DB->get_records_sql($sql, $params);
         // Get again with all data and ORDER.
-        $records = static::get_by_ids_limited(array_column($records, 'id'));
+        $records = static::get_by_ids_limited(array_column($records, 'id'), $from, $perpage);
 
         $posts = array();
         foreach ($records as $postid => $record) {
