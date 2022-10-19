@@ -73,6 +73,7 @@ class list_exporter extends exporter {
             'context' => 'context',
             'announcements' => 'stdClass[]',
             'page' => 'int',
+            'querystring' => 'string?',
         ];
     }
 
@@ -95,15 +96,14 @@ class list_exporter extends exporter {
             $announcements[] = $announcementexporter->export($output);
         }
 
-        //$possiblemore = ( count($announcements) >= get_per_page() );
-        // Keeping it simple, there is always possibly more.
-        $possiblemore = true;
+        // Keeping it simple, there is always possibly more if there are any announcements.
+        $possiblemore = count($announcements) ? true : false;
 
         // Pagination.
         // Arbitrarily large total count. To minimise load time, we do not attempt to figure out how many announcements this user actually has, given the complexity of the sql to determine audiences number of announcement. Instead we produce a large number of pagination links that don't actually have any posts, but the infinite scroll is smart enough to continue loading the next set of announcements until there is nothing left to load. 
         $totalcount = 999999999; 
         $perpage = get_per_page();
-        $pagingbar = new \paging_bar($totalcount, $this->related['page'], $perpage, 'index.php', 'page');
+        $pagingbar = new \paging_bar($totalcount, $this->related['page'], $perpage, 'index.php' . $this->related['querystring'], 'page');
         $pagingbar->prepare($output, $PAGE, '');
         $nextpagelink = $pagingbar->nextlink;
 

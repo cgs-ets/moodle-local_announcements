@@ -168,6 +168,7 @@ $relateds = [
 	'context' => $context,
 	'announcements' => $announcements,
 	'page' => $page,
+	'querystring' => ($filtered) ? "?type={$type}&code={$code}" : '',
 ];
 $list = new local_announcements\external\list_exporter(null, $relateds);
 $data = array(
