@@ -251,9 +251,9 @@ class announcement extends persistent {
         //exit;
 
         // Create array of announcement persistents.
-        $records = $DB->get_records_sql($sql, $params, $from, $perpage);
+        $records = $DB->get_records_sql($sql, $params);
         // Get again with all data and ORDER.
-        $records = static::get_by_ids(array_column($records, 'id'));
+        $records = static::get_by_ids_limited(array_column($records, 'id'));
 
         $posts = array();
         foreach ($records as $postid => $record) {
@@ -517,7 +517,7 @@ class announcement extends persistent {
 
         // Get the next set of announcements for user.
         $params = array();
-        $sql = "SELECT p.*
+        $sql = "SELECT p.id
                   FROM {" . static::TABLE . "} p
                  WHERE 1 = 1 ";
 
@@ -579,10 +579,10 @@ class announcement extends persistent {
         //exit;
 
         // Create array of announcement persistents.
-        $records = $DB->get_records_sql($sql, $params, $from, $perpage);
+        $records = $DB->get_records_sql($sql, $params);
 
         // Get again with all data and ORDER.
-        $records = static::get_by_ids(array_column($records, 'id'));
+        $records = static::get_by_ids_limited(array_column($records, 'id'), $from, $perpage);
         
         $posts = array();
         foreach ($records as $postid => $record) {
@@ -614,6 +614,25 @@ class announcement extends persistent {
                 WHERE p.id $idsql
                 ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC, p.id DESC";
         return $DB->get_records_sql($sql, $params);
+    }
+
+    /**
+     * Get announcements from an array of ids.
+     *
+     * @param array $ids.
+     * @return array.
+     */
+    public static function get_by_ids_limited($ids, $from, $perpage) {
+        global $DB;
+        if (empty($ids)) {
+            return [];
+        }
+        list($idsql, $params) = $DB->get_in_or_equal($ids);
+        $sql = "SELECT p.id
+                FROM {ann_posts} p
+                WHERE p.id $idsql
+                ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC, p.id DESC";
+        return $DB->get_records_sql($sql, $params, $from, $perpage);
     }
 
     /**
