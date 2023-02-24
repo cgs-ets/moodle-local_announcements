@@ -61,9 +61,10 @@ $post->message       = '';
 $post->messageformat = editors_get_preferred_format();
 $post->messagetrust = 1; // True to allow for special content such as clickview.
 $post->audiencesjson = '';
+$post->moderatorjson = 'na';
 $post->impersonate = '';
 
-if (!empty($edit)) { 
+if (!empty($edit)) {
     //Load the announcement data into the form.
     $exists = announcement::record_exists($edit);
     $canusereditpost = announcement::can_user_edit_post($edit);
@@ -77,6 +78,7 @@ if (!empty($edit)) {
         $post->messageformat  = editors_get_preferred_format();
         $post->messagetrust   = 1; // True to allow for special content such as clickview.
         $post->audiencesjson  = $announcement->get('audiencesjson');
+        $post->moderatorjson  = $announcement->get('moderatorjson');
         $post->impersonate    = $announcement->get('impersonate');
         $post->timestart      = $announcement->get('timestart');
         $post->timeend        = $announcement->get('timeend');
@@ -128,6 +130,7 @@ $mformpost->set_data(
             'itemid' => $draftideditor
         ),
         'audiencesjson' => ($draftaudiencejson) ? $draftaudiencejson : $post->audiencesjson,
+        'moderatorjson' => $post->moderatorjson,
         'impersonate' => $post->impersonate,
     ) +
 

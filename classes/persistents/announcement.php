@@ -104,6 +104,10 @@ class announcement extends persistent {
                 'type' => PARAM_RAW,
                 'default' => 0,
             ],
+            "moderatorjson" => [
+                'type' => PARAM_RAW,
+                'default' => 0,
+            ],
             "pinned" => [
                 'type' => PARAM_BOOL,
                 'default' => 0,
@@ -1053,6 +1057,7 @@ class announcement extends persistent {
         $announcement->set('timestart', $data->timestart);
         $announcement->set('timeend', $data->timeend);
         $announcement->set('audiencesjson', $data->audiencesjson);
+        $announcement->set('moderatorjson', $data->moderatorjson);
         $announcement->set('forcesend', $data->forcesend);
         $announcement->set('attachment', 0);
         $announcement->set('notified', 0);
@@ -1101,7 +1106,7 @@ class announcement extends persistent {
         $announcement->update();
 
         // Determine whether announcement needs moderation.
-        moderation::setup_moderation($id, $tags);
+        moderation::setup_moderation($id, $tags, $data->moderatorjson);
 
         // Save the audiences.
         static::save_audiences($id, $tags);

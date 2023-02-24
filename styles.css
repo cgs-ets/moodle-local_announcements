@@ -160,6 +160,24 @@
     box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
   }
 }
+#page-local-announcements-post #fitem_id_moderatorjson {
+  display: none;
+}
+#page-local-announcements-post #id_moderation {
+  display: none;
+}
+#page-local-announcements-post #id_moderation.show {
+  display: block !important;
+}
+#page-local-announcements-post #fgroup_id_buttonar .col-md-3 {
+  display: none !important;
+}
+#page-local-announcements-post #fgroup_id_buttonar .col-md-9 {
+  padding: 20px 25px;
+}
+#page-local-announcements-post .fdescription.required {
+  display: none;
+}
 .audience-selector {
   position: relative;
 }

@@ -192,6 +192,29 @@ function xmldb_local_announcements_upgrade($oldversion) {
         }
     }
 
+    if ($oldversion < 2021020103) {
+
+        // Define field moderatorjson to be added to ann_posts.
+        $table = new xmldb_table('ann_posts');
+        $field = new xmldb_field('moderatorjson', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'audiencesjson');
+
+        // Conditionally launch add field moderatorjson.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+         // Changing precision of field modusername on table ann_privileges to (100).
+         $table = new xmldb_table('ann_privileges');
+         $field = new xmldb_field('modusername', XMLDB_TYPE_CHAR, '500', null, XMLDB_NOTNULL, null, null, 'modthreshold');
+ 
+         // Launch change of precision for field modusername.
+         $dbman->change_field_precision($table, $field);
+
+        // Announcements savepoint reached.
+        upgrade_plugin_savepoint(true, 2021020103, 'local', 'announcements');
+    }
+
+
     return true;
 
 }

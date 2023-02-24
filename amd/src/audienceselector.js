@@ -816,7 +816,6 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
         var moderationroot = $('.moderation-status');
         var moderationstatus = $('.moderation-status .status');
         var moderationdesc = $('.moderation-status .description');
-        var moderationajax = $('.moderation-status .ajax');
         moderationdesc.removeClass('active');
         moderationroot.removeClass('visible hasmod');
         
@@ -825,18 +824,60 @@ define(['jquery', 'core/log', 'core/ajax','core/templates', 'core/str', 'core/mo
             return;
         }
 
+        // Moderator is initially NA.
+        var moderatorjson = document.querySelector('input[name="moderatorjson"]');
+
         moderationroot.addClass('visible loading');
         Ajax.call([{
             methodname: 'local_announcements_get_moderation_for_audiences',
             args: { audiencesjson: tagsjson },
             done: function(mod) {
-                if (mod.required) {
-                    moderationstatus.html(mod.status + ' <a class="rule-toggle" href="#">More</a>');
-                    moderationdesc.html(mod.description);
-                    moderationroot.removeClass('loading').addClass('hasmod');                    
-                } else {
-                    moderationroot.removeClass('loading').removeClass('visible')
+              if (mod.required) {
+                moderationstatus.html(mod.status + ' <a class="rule-toggle" href="#">More</a>');
+                moderationdesc.html(mod.description);
+                moderationroot.removeClass('loading').addClass('hasmod');
+
+                // Do we need to select a moderator?
+                if (mod.modusername.indexOf('[') > -1) {
+                  // Moderation from a list is needed. Recreate the options.
+                  if (moderatorjson.value == 'na') {
+                    moderatorjson.value !== ''
+                  }
+                  // Blank option.
+                  var select = document.getElementById('id_moderator')
+                  select.innerHTML = "";
+                  var opt = document.createElement('option')
+                  opt.value = ''
+                  opt.innerHTML = '-- select --'
+                  select.appendChild(opt)
+                  // List of users.
+                  var moderators = JSON.parse(mod.modusername)
+                  if (moderators.length) {
+                    for (var i = 0; i < moderators.length; ++i) {
+                      var opt = document.createElement('option')
+                      opt.value = moderators[i]['username']
+                      opt.innerHTML = moderators[i]['fullname']
+                      select.appendChild(opt)
+                    }
+                    // Select the default/existing moderator if in list.
+                    if (moderatorjson.value !== '') {
+                      var modoption = document.querySelector('#id_moderator option[value="' + moderatorjson.value + '"]')
+                      if (modoption) {
+                        document.getElementById('id_moderator').value = moderatorjson.value
+                      } else {
+                        moderatorjson.value = ''
+                      }
+                    }
+                    var fieldset = document.getElementById('id_moderation')
+                    fieldset.classList.add("show");
+                  }
                 }
+              } else {
+                  moderatorjson.value = 'na'
+                  moderationroot.removeClass('loading').removeClass('visible')
+                  var fieldset = document.getElementById('id_moderation')
+                  fieldset.classList.remove("show")
+              }
             },
             fail: function(reason) {
                 moderationroot.removeClass('visible loading');

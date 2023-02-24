@@ -87,6 +87,12 @@ define(['jquery', 'local_announcements/audienceselector', 'local_announcements/i
             cancel = true;
         });
 
+        // Handle moderator selected.
+        self.rootel.on('change', '#id_moderator', function(e) {
+          self.moderatorChanged();
+        });
+
+
         // Fix for bug: when editing an announcement that has an impersonate value, the autocomplete
         // field does not initialise correctly. The click event to remove the value does not work 
         // and the initial value is not set in the underlying select. To make the remove work, the input 
@@ -109,6 +115,12 @@ define(['jquery', 'local_announcements/audienceselector', 'local_announcements/i
         }, 3000);*/
 
     };
+
+    Post.prototype.moderatorChanged = function () {
+      var moderator = document.getElementById("id_moderator").value;
+      var moderatorjson = document.querySelector('input[name="moderatorjson"]');
+      moderatorjson.value = moderator;
+    }
 
     /**
      * Check if user is building an audience before submitting.

@@ -193,6 +193,24 @@ class form_post extends \moodleform {
         }
         $mform->setExpanded('displaysettings');
 
+
+
+
+
+
+
+        /*----------------------
+         *   Moderation
+         *----------------------*/
+        $mform->addElement('header', 'moderation', 'Moderation');
+        $mform->setExpanded('moderation');
+        $mform->addElement('select', 'moderator', 'Select a moderator', array());
+        $mform->addElement('text', 'moderatorjson', 'ModeratorJSON');
+        $mform->setType('moderatorjson', PARAM_RAW);
+
+
+
+
         /*----------------------
          *   Buttons.
          *----------------------*/
@@ -229,6 +247,9 @@ class form_post extends \moodleform {
         }
         if (empty($data['audiencesjson'])) {
             $errors['audiencesjson'] = get_string('postform:errornoaudienceselected', 'local_announcements');
+        }
+        if (empty($data['moderatorjson'])) {
+            $errors['moderator'] = get_string('postform:erroremptymoderator', 'local_announcements');
         }
         return $errors;
     }

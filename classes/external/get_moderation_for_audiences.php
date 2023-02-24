@@ -80,8 +80,28 @@ trait get_moderation_for_audiences {
             $moderation['required'] = false;
         }
         if ($moderation['required'] && !$moderation['autoapprove']) {
-            $user = \core_user::get_user_by_username($moderation['modusername']);
-            $moderation['status'] = 'This announcement will be sent to ' . fullname($user) . ' for moderation.';
+
+            // Moderator select.
+            if( strpos($moderation['modusername'], ',') !== false ) {
+                $moderation['status'] = 'This announcement requires moderation.';
+                $modusernames = trim($moderation['modusername'], '[');
+                $modusernames = trim($modusernames, ']');
+                $modusernames = explode(',', $modusernames);
+                $moderators = array();
+                foreach ($modusernames as $modusername) {
+                    $moderator = \core_user::get_user_by_username($modusername);
+                    $moderators[] = array (
+                        'username' => $modusername,
+                        'fullname' => fullname($moderator),
+                    );
+                }
+                $moderation['modusername'] = json_encode($moderators);    
+            } else {
+                // Single moderator.
+                $user = \core_user::get_user_by_username($moderation['modusername']);
+                $moderation['status'] = 'This announcement will be sent to ' . fullname($user) . ' for moderation.';
+            }
+
         }
         return $moderation;
     }

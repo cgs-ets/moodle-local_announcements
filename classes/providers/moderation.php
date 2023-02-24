@@ -232,9 +232,10 @@ class moderation {
      *
      * @param int $postid.
      * @param array $tags.
+     * @param string $selectedmoderator.
      * @return void.
      */
-    public static function setup_moderation($postid, $tags) {
+    public static function setup_moderation($postid, $tags, $selectedmoderator) {
         global $DB, $USER;
 
         // Deactivate any current moderations.
@@ -285,12 +286,22 @@ class moderation {
             $modrec = new \stdClass();
             $modrec->postid = $postid;
             $modrec->privilegeid = $modsettings['privilegeid'];
-            $modrec->modusername = $modsettings['modusername'];
             $modrec->actionedusername = '';
             $modrec->status = ANN_MOD_STATUS_PENDING;
             $modrec->mailed = ANN_MOD_MAIL_PENDING;
             $modrec->comment = '';
             $modrec->timecreated = time();
+            $modrec->modusername = $modsettings['modusername'];
+
+            // Determin whether we need to use the selected moderator.
+            if( strpos($modsettings['modusername'], ',') !== false ) {
+                if (strpos($modsettings['modusername'], $selectedmoderator) !== false) {
+                    $modrec->modusername = $selectedmoderator;
+                } else {
+                    // The selected moderator is not in the list. This should never happen.
+                    exit;
+                }
+            }
 
             // Continue without moderation if the user is the moderator or assistant moderator.
             if ($modsettings['autoapprove']) {
@@ -712,6 +723,22 @@ class moderation {
 
         // Admins bypass checks
         if (is_user_admin()) { 
+            return true;
+        }
+
+        if ($DB->record_exists(static::TABLE_PRIVILEGES, array('modusername' => $USER->username, 'active' => 1))) {
+            return true;
+        }
+
+        // Does privilegs > modusername contain the user id?
+        $sql = "SELECT * 
+                  FROM {" . static::TABLE_PRIVILEGES . "}
+                  WHERE active = 1
+                  AND ( modusername LIKE '[" . $USER->username . ",%'
+                    OR modusername LIKE '%," . $USER->username . ",%'
+                    OR modusername LIKE '%," . $USER->username . "]'
+                  )";
+        if ($DB->record_exists_sql($sql)) {
             return true;
         }
 

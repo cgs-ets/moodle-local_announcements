@@ -136,6 +136,7 @@ $string['postform:post'] = 'Post';
 $string['postform:timestartenderror'] = 'Display end date cannot be earlier than the start date';
 $string['postform:erroremptysubject'] = 'Post subject cannot be empty';
 $string['postform:erroremptymessage'] = 'Post message cannot be empty';
+$string['postform:erroremptymoderator'] = 'You must select a moderator';
 $string['postform:errornoaudienceselected'] = 'You must select an audience.';
 $string['postform:postaddedsuccess'] = 'Your announcement was successfully added.';
 $string['postform:postupdatesuccess'] = 'Your post was successfully updated.';
