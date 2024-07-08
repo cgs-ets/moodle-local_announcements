@@ -191,7 +191,7 @@ class announcement extends persistent {
      * @param int $page. For pagination
      * @return array.
      */
-    public static function get_all_by_audience($provider = '', $type = '', $code, $page = 0, $perpage = 0) {
+    public static function get_all_by_audience($provider = '', $type = '', $code = '', $page = 0, $perpage = 0) {
         global $DB, $USER;
 
 
@@ -497,7 +497,7 @@ class announcement extends persistent {
      * @param bool $strictavailability. Whether to include pending and rejected posts.
      * @return array.
      */
-    public static function get_by_username_and_audience($username, $provider = '', $type = '', $code, $page = 0, $perpage = 0, $strictavailability = true) {
+    public static function get_by_username_and_audience($username, $provider = '', $type = '', $code = '', $page = 0, $perpage = 0, $strictavailability = true) {
         global $DB;
 
         // Load user object.
@@ -1042,7 +1042,7 @@ class announcement extends persistent {
         // Check that the author can actually impersonate the selected user.
         if ($data->impersonate) {
             $impersonator = core_user::get_user_by_username($announcement->get('authorusername'));
-            if (!can_impersonate_user($impersonator, $data->impersonate)) {
+            if (!can_impersonate_user($data->impersonate, $impersonator)) {
                 $announcement->set('impersonate', '');
             }
         }
@@ -1410,7 +1410,7 @@ class announcement extends persistent {
      * @param string $code. 
      * @return boolean
      */
-    public static function can_user_post_to_audience($provider = '', $type = '', $code) {
+    public static function can_user_post_to_audience($provider = '', $type = '', $code = '') {
         // Load the provider.
         $provider = get_provider($provider, $type);
         if(!isset($provider)) {

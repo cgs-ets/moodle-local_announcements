@@ -275,7 +275,7 @@ function can_impersonate($user = null) {
 }
 
 
-function can_impersonate_user($user = null, $impersonate) {
+function can_impersonate_user($impersonate, $user = null) {
     global $DB, $USER;
 
     if (empty($user)) {

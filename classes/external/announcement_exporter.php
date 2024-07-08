@@ -448,7 +448,7 @@ class announcement_exporter extends persistent_exporter {
 
 	            $attachment = [
 	            	'filename' => $filename,
-	            	'formattedfilename' => format_text($filename, FORMAT_HTML, array('context'=>$this->related['context'])),
+	            	//'formattedfilename' => format_text($filename, FORMAT_HTML, array('context'=>$this->related['context'])),
 	            	'mimetype' => $mimetype,
 	            	'iconimage' => $iconimage,
 	            	'path' => $path,
@@ -481,7 +481,7 @@ class announcement_exporter extends persistent_exporter {
 
 	            $attachment = [
 	            	'filename' => $filename,
-	            	'formattedfilename' => format_text($filename, FORMAT_HTML, array('context'=>$this->related['context'])),
+	            	//'formattedfilename' => format_text($filename, FORMAT_HTML, array('context'=>$this->related['context'])),
 	            	'mimetype' => $mimetype,
 	            	'iconimage' => $iconimage,
 	            	'path' => $path,
@@ -509,7 +509,7 @@ class announcement_exporter extends persistent_exporter {
             'component' => 'local_announcements',
             'filearea' => 'announcement',
             'itemid' => $this->data->id,
-            'options' => \local_announcements\forms\form_post::editor_options($this->data->id),
+            //'options' => \local_announcements\forms\form_post::editor_options($this->data->id),
         ];
     }
 
