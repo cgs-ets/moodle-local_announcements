@@ -181,17 +181,18 @@ class cron_task_digests extends \core\task\scheduled_task {
                     $this->users[$user->id] = $user;
 
                     // Add mentors too!
-                    foreach ($user->mentorusers as $mentor) {
-                        if ($mentor->suspended) {
-                            continue;
+                    if (isset($user->mentorusers)) {
+                        foreach ($user->mentorusers as $mentor) {
+                            if ($mentor->suspended) {
+                                continue;
+                            }
+                            if (!isset($this->myconnectpostmentees[$postid][$mentor->id])) {
+                                $this->myconnectpostmentees[$postid][$mentor->id] = array();
+                            }
+                            $this->myconnectpostmentees[$postid][$mentor->id][] = $user->id;
+                            $this->users[$mentor->id] = $mentor;
                         }
-                        if (!isset($this->myconnectpostmentees[$postid][$mentor->id])) {
-                            $this->myconnectpostmentees[$postid][$mentor->id] = array();
-                        }
-                        $this->myconnectpostmentees[$postid][$mentor->id][] = $user->id;
-                        $this->users[$mentor->id] = $mentor;
                     }
-
 
                 }
 
