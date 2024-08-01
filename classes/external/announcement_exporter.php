@@ -273,11 +273,13 @@ class announcement_exporter extends persistent_exporter {
 	    $messagetokenized = $messagemobile = file_rewrite_pluginfile_urls($this->data->message,'pluginfile.php',$this->related['context']->id,
 	        		'local_announcements','announcement',$this->data->id,['includetoken' => true]);
 	    $messageplain = trim(html_to_text(format_text_email($messagetokenized, FORMAT_PLAIN), 0));
+		//var_export($messageplain);
 	    
 	    // Mobile shows the full tokenised message with minimal formating. 
 	    // Replace <p> with <br> as it is common for editor html to have p's inside p's and this breaks the template.
 	    $messagemobile = preg_replace("/<p[^>]*?>/", "", $messagemobile);
 		$messagemobile = str_replace("</p>", "<br />", $messagemobile);
+		$messagemobile = str_replace("@", "&commat;", $messagemobile); // Replace @ because this breaks the mobile app template.
 		// Remove inline styles
 		$messagemobile = preg_replace('#(<[a-z ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $messagemobile);
 	    $allowedtags = array("<b>", "<i>", "<a>", "<img>", "<br>", "<div>", "<blockquote>", 
