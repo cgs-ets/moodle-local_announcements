@@ -77,7 +77,7 @@ class audience_mdlcourse extends \local_announcements\providers\audience_provide
                       WHERE 0 = 1";
         $comboparams = array();
         foreach ($params as $related) {
-            $combocode = "%" . $related['provider'] . "|" . $related['code'] . "%";
+            $combocode = "%" . $related['provider'] . "|" . $related['code'] . "|%";
             $combosql .= " OR (code LIKE ?)";
             $comboparams[] = $combocode;
         }
