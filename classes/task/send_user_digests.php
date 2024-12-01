@@ -192,6 +192,9 @@ class send_user_digests extends \core\task\adhoc_task {
             'Precedence: Bulk',
             'X-Auto-Response-Suppress: All',
             'Auto-Submitted: auto-generated',
+            
+            // Header to send via Postmark Broadcast stream.
+            'X-PM-Message-Stream: broadcasts',
         );
 
         // Set the subject of the message.
