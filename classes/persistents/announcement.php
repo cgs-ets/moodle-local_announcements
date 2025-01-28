@@ -1186,7 +1186,10 @@ class announcement extends persistent {
             }
         }
         // Merge the users for this tag.
-        $audienceusers = array_values(array_unique(array_merge(...$itemusers)));
+        $audienceusers = [];
+        if (!empty($itemusers)) {
+            $audienceusers = array_values(array_unique(array_merge(...$itemusers)));
+        }
 
         return [$audienceusers, $postsusersaudiences];
     }
