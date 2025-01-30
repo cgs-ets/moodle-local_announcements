@@ -218,7 +218,7 @@ class send_user_notifications extends \core\task\adhoc_task {
             'Auto-Submitted: auto-generated',
 
             // Header to send via Postmark Broadcast stream.
-            'X-PM-Message-Stream: broadcasts',
+            //'X-PM-Message-Stream: broadcasts',
         ];
         return $headers;
     }
