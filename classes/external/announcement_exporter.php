@@ -295,9 +295,20 @@ class announcement_exporter extends persistent_exporter {
     	$shortmessage = shorten_text($this->data->message, get_shortpost(), false, '...');
     	$islong = ($shortmessage != $this->data->message);
 
+
+		if (empty($messagetokenized)) {
+			$messagetokenized = '...';
+		}
+
+		if (empty($shortmessage)) {
+			$shortmessage = '...';
+		}
+
     	// Replace images, videos and iframes in short message with a word.
 		$dom = new \DOMDocument;
-		@$dom->loadHTML(mb_convert_encoding($shortmessage, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+		$htmlcontent = mb_convert_encoding($shortmessage, 'HTML-ENTITIES', 'UTF-8');
+		$htmlcontent = !empty($htmlcontent) ? $htmlcontent : '...';
+		@$dom->loadHTML($htmlcontent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 		$shortmessagebeforetrims = trim($dom->saveHTML());
 		foreach( $dom->getElementsByTagName("img") as $img ) {
 		    $text = $dom->createElement("p", "(image)");
@@ -312,6 +323,8 @@ class announcement_exporter extends persistent_exporter {
 		    $iframe->parentNode->replaceChild($text, $iframe);
 		}
 		$shortmessage = trim($dom->saveHTML());
+
+
     	$islong = ($islong || $shortmessage != $shortmessagebeforetrims);
 
     	// Process tokenized message for emails to replace src with preview image.
