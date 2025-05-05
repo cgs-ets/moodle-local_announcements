@@ -206,6 +206,10 @@ function is_user_admin($user = null) {
         $user = $USER;
     }
 
+    if (is_siteadmin()) {
+        return true;
+    }
+
     $hascap = has_capability('local/announcements:administer', context_user::instance($user->id), $user, false);
 
     return $hascap;

@@ -28,7 +28,7 @@ $messageproviders = array (
     // Ordinary single notifications.
     'notifications' => array(
         'defaults' => array(
-            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF, // On by default
+            'popup' => MESSAGE_PERMITTED, // On by default
             'email' => MESSAGE_PERMITTED, // Permitted but off by default
             'airnotifier' => MESSAGE_DISALLOWED,
         ),
@@ -39,15 +39,15 @@ $messageproviders = array (
         'defaults' => array(
             'popup' => MESSAGE_DISALLOWED,
             'email' => MESSAGE_DISALLOWED,
-            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'airnotifier' => MESSAGE_PERMITTED,
         ),
     ),
 
     // Forced single notifications.
     'forced' => array(
         'defaults' => array(
-            'popup' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
-            'email' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'popup' => MESSAGE_FORCED,
+            'email' => MESSAGE_FORCED,
             'airnotifier' => MESSAGE_DISALLOWED,
         ),
     ),
@@ -57,7 +57,7 @@ $messageproviders = array (
         'defaults' => array(
             'popup' => MESSAGE_DISALLOWED,
             'email' => MESSAGE_DISALLOWED,
-            'airnotifier' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'airnotifier' => MESSAGE_FORCED,
         ),
     ),
 
@@ -66,7 +66,7 @@ $messageproviders = array (
     'digests' => array(
     	'defaults' => array(
             'popup' => MESSAGE_DISALLOWED,
-            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'email' => MESSAGE_PERMITTED,
             'airnotifier' => MESSAGE_DISALLOWED,
         ),
     ),
@@ -74,9 +74,9 @@ $messageproviders = array (
     // moderation messages.
     'moderationmail' => array(
         'defaults' => array(
-            'popup' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
-            'email' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
-            'airnotifier' => MESSAGE_FORCED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'popup' => MESSAGE_FORCED,
+            'email' => MESSAGE_FORCED,
+            'airnotifier' => MESSAGE_FORCED,
         ),
     ),
 );
