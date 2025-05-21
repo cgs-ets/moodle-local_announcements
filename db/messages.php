@@ -28,7 +28,7 @@ $messageproviders = array (
     // Ordinary single notifications.
     'notifications' => array(
         'defaults' => array(
-            'popup' => MESSAGE_PERMITTED, // On by default
+            'popup' => MESSAGE_FORCED, // On by default
             'email' => MESSAGE_PERMITTED, // Permitted but off by default
             'airnotifier' => MESSAGE_DISALLOWED,
         ),
@@ -65,7 +65,7 @@ $messageproviders = array (
     // digest messages.
     'digests' => array(
     	'defaults' => array(
-            'popup' => MESSAGE_DISALLOWED,
+            'popup' => MESSAGE_FORCED,
             'email' => MESSAGE_PERMITTED,
             'airnotifier' => MESSAGE_DISALLOWED,
         ),
