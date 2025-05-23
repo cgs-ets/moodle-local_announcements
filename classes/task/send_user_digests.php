@@ -26,9 +26,13 @@ namespace local_announcements\task;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__.'/../utils.php');
+require_once($CFG->dirroot . '/local/announcements/locallib.php');
+
 use local_announcements\persistents\announcement;
 use local_announcements\external\announcement_exporter;
-require_once($CFG->dirroot . '/local/announcements/locallib.php');
+use \local_announcements\utils;
+
 
 /**
  * Adhoc task to send announcement digests for the specified user.
@@ -68,27 +72,13 @@ class send_user_digests extends \core\task\adhoc_task {
         $inclmyconnect = $this->include_myconnect();
 
         foreach ($data as $userid => $posttypes) {
-            $this->log("posttypes: " . json_encode($posttypes), 1);
             $recipient = \core_user::get_user($userid);
 
-            $this->log_start("Sending announcement digests for {$recipient->username} ({$recipient->id})");
+            $this->log("Sending announcement digests for {$recipient->username} ({$recipient->id}). Posts: " . json_encode($posttypes), 1);
 
             // Prepare announcement posts.
             $postids = $posttypes->announcements;
             $announcements = $this->prepare_data($postids, $recipient);
-
-            // Prepare myconnect posts.
-            /*$myconnectpostdefs = $myconnectposts = array();
-            if ($inclmyconnect) {
-                // Deep convert postdefs to array.
-                $myconnectpostdefs = json_decode(json_encode($posttypes->myconnectposts), true);
-                $this->log("myconnectpostdefs: " . json_encode($myconnectpostdefs), 1);
-                $myconnectposts = \local_myconnect\persistents\post::prepare_data(
-                    $myconnectpostdefs, 
-                    $recipient, 
-                    $this->get_trace()
-                );
-            }*/
 
             $myconnectposts = array();
             $myconnect_mentee_posts = array();
@@ -121,9 +111,6 @@ class send_user_digests extends \core\task\adhoc_task {
                 }
 
             }
-
-
-            //var_export($myconnectposts); exit;
             
             if (empty($announcements) && empty($myconnectposts) && empty($myconnect_mentee_posts)) {
                 $this->log_finish("No posts found to send.");
@@ -131,14 +118,7 @@ class send_user_digests extends \core\task\adhoc_task {
             }
 
             // This digest has at least one post and should therefore be sent.
-            if ($this->send_mail($recipient, $announcements, $myconnectposts, $myconnect_mentee_posts)) {
-                $announcementidstr = implode(", ", $postids);
-                $myconnectidstr = implode(", ", $myconnectpostids);
-                $myconnectmenteepostidsstr = implode(", ", $myconnectpostids);
-                $this->log_finish("Digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts. Announcement IDs [{$announcementidstr}]. MyConnect post ids [{$myconnectidstr}].");
-            } else {
-                $this->log_finish("Issue sending digest. Skipping.");
-            }
+            $this->send_mail($recipient, $announcements, $myconnectposts, $myconnect_mentee_posts);
         }
     }
 
@@ -149,7 +129,7 @@ class send_user_digests extends \core\task\adhoc_task {
      * @param   stdClass   $recipient user record
      */
     protected function prepare_data($postids, $recipient) {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE;
 
         if (empty($postids)) {
             return [];
@@ -160,12 +140,14 @@ class send_user_digests extends \core\task\adhoc_task {
         $announcements = announcement::get_by_ids_and_username($postids, $recipient->username);
         
         $context = \context_system::instance();
+        $output = $PAGE->get_renderer('core');
+
         foreach ($announcements as $announcement) {
             $exporter = new announcement_exporter($announcement->persistent, [
                 'context' => $context,
                 'audiences' => $announcement->audiences,
             ]);
-            $posts[] = $exporter->export($OUTPUT);
+            $posts[] = $exporter->export($output);
         }
 
         if (empty($posts)) {
@@ -180,7 +162,7 @@ class send_user_digests extends \core\task\adhoc_task {
      * Send the composed message to the user.
      */
     protected function send_mail($recipient, $announcements, $myconnect_direct_posts, $myconnect_mentee_posts) {
-        global $OUTPUT;
+        global $OUTPUT, $DB;
 
         $config = get_config('local_announcements');
         $this->sentcount = 0;
@@ -192,9 +174,6 @@ class send_user_digests extends \core\task\adhoc_task {
             'Precedence: Bulk',
             'X-Auto-Response-Suppress: All',
             'Auto-Submitted: auto-generated',
-            
-            // Header to send via Postmark Broadcast stream.
-            //'X-PM-Message-Stream: broadcasts',
         );
 
         // Set the subject of the message.
@@ -217,13 +196,14 @@ class send_user_digests extends \core\task\adhoc_task {
             'digestfootercredits' => $config->digestfootercredits,
         ];
 
-        $notificationtext = $OUTPUT->render_from_template('local_announcements/message_digest_text', $content);
-        $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
+        $digesthtml = $OUTPUT->render_from_template('local_announcements/message_digest_email', $content);
 
         $this->sentcount = count($announcements);
         $this->myconnectsentcount = isset($myconnectposts) ? count($myconnectposts) : 0;
 
-        $eventdata = new \core\message\message();
+
+
+        /*$eventdata = new \core\message\message();
         $eventdata->courseid = SITEID;
         $eventdata->component = 'local_announcements';
         $eventdata->name = 'digests';
@@ -235,9 +215,50 @@ class send_user_digests extends \core\task\adhoc_task {
         $eventdata->fullmessagehtml = $notificationhtml;
         $eventdata->notification = 1;
         $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount + $this->myconnectsentcount));
+        return message_send($eventdata);*/
 
-        return message_send($eventdata);
+
+
+        // CHECK USER PREFERENCES.
+        $digests = $DB->get_field('ann_user_preferences', 'digests', array('username' => $recipient->username)) ?? 1; // By default, send digests.
+        $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $recipient->username)) ?? 1; // By default, send digest notification.
+
+        if (!$digests) {
+            $this->log("User {$recipient->username} does not want digests. Not sending.", 1);
+            return false;
+        }
+
+        // THE EMAIL.
+        $result = utils::email_to_user($recipient, $userfrom, $postsubject, '', $digesthtml, '');
+        $this->log("Email digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts.", 1);
+
+
+        // THE NOTIFICATION.
+        if ($notify) {
+            $digesttext = $OUTPUT->render_from_template('local_announcements/message_digest', $content);
+            $eventdata = new \core\message\message();
+            $eventdata->courseid = SITEID;
+            $eventdata->component = 'local_announcements';
+            $eventdata->name = 'notificationsv2';
+            $eventdata->userfrom = $userfrom;
+            $eventdata->userto = $recipient;
+            $eventdata->subject = $postsubject;
+            $eventdata->fullmessage = '';
+            $eventdata->fullmessageformat = FORMAT_PLAIN;
+            $eventdata->fullmessagehtml = $digesttext;
+            $eventdata->notification = 1;
+            $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount + $this->myconnectsentcount));
+            message_send($eventdata);
+            $this->log("Notification digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts.", 1);
+        } else {
+            $this->log("User {$recipient->username} does not want notifications. Not notifying.", 1);
+        }
+        return $result;
+
+
     }
+
+
 
     private function include_myconnect() {
         global $CFG;

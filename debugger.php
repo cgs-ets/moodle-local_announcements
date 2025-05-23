@@ -57,14 +57,60 @@ require_capability('moodle/site:config', $context, $USER->id);
 $output = '';
 //$output .= $OUTPUT->header();
 
+echo "<pre>";
 
+$cron = new \local_announcements\task\cron_task_digests();
+$cron->execute();
+echo "<hr>";
+
+$cron = new \local_announcements\task\send_user_digests();
+$cron->set_component('local_announcements');
+$cron->set_custom_data(array (
+    2 => 
+    array (
+      'announcements' => 
+      array (
+        0 => 9,
+        1 => 10,
+      ),
+      'myconnectposts' => 
+      array (
+        0 => 1,
+      ),
+      'myconnectmenteeposts' => 
+      array (
+        3 => 
+        array (
+        0 => 4,
+        ),
+      ),
+    ),
+));
+$cron->execute();
+echo "<hr>";
+
+/*
+$cron = new \local_announcements\task\cron_task_notifications();
+$cron->execute();
+echo "<hr>";
+
+$cron = new \local_announcements\task\send_user_notifications();
+$cron->set_component('local_announcements');
+$cron->set_custom_data(array (2 => array (0 => 9, 1 => 10, 2 => 11)));
+$cron->execute();
+echo "<hr>";
+*/
+
+
+
+
+/*
 echo "<pre>";
 $api = new local_announcements\external\api;
 $out = $api->get_impersonate_users("te");
 var_export($out);
 exit;
-
-
+*/
 
 
 //$t = announcement::get_unsent();
@@ -333,17 +379,4 @@ exit;
 */
 
 
-
-
-
-
-
-
-
-
-// Final outputs
-$output .= $OUTPUT->footer();
-echo $output;
-
-
-
+exit;

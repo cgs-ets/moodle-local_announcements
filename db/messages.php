@@ -25,6 +25,23 @@
 
 
 $messageproviders = array (
+    // Emails - send them separately.
+    // Save a copy of the email in the database.
+    // Have a single message type to handle mobile and bell notifications.
+    // for forced announcements, email will be sent regardless of notification settings.
+    // for non-forced announcements, email will only be sent if user has notifications set to on.
+
+    'notificationsv2' => array(
+        'defaults' => array(
+            'popup' => MESSAGE_FORCED, // Always on.
+            'email' => MESSAGE_DISALLOWED, // Off -- emails are sent separately.
+            'airnotifier' => MESSAGE_FORCED, // Always on.
+        ),
+    ),
+
+
+
+
     // Ordinary single notifications.
     'notifications' => array(
         'defaults' => array(

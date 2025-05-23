@@ -51,48 +51,42 @@ require_login();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$preferences = array(
-		'message_provider_local_announcements_digests_loggedin' => 'none',
-		'message_provider_local_announcements_digests_loggedoff' => 'none',
-		'message_provider_local_announcements_notifications_loggedin' => 'none',
-		'message_provider_local_announcements_notifications_loggedoff' => 'none',
-		'message_provider_local_announcements_notificationsmobile_loggedin' => 'none',
-		'message_provider_local_announcements_notificationsmobile_loggedoff' => 'none',
+		'digests' => 0,
+		'email' => 0,
+		'notify' => 0,
 	);
 
-	if (isset($_POST['dailydigests'])) {
-		$preferences['message_provider_local_announcements_digests_loggedin'] = 'email';
-		$preferences['message_provider_local_announcements_digests_loggedoff'] = 'email';
+	if (isset($_POST['digests'])) {
+		$preferences['digests'] = 1;
 	}
-	if (isset($_POST['bellalerts'])) {
-		$preferences['message_provider_local_announcements_notifications_loggedin'] = 'popup';
-		$preferences['message_provider_local_announcements_notifications_loggedoff'] = 'popup';
+	if (isset($_POST['email'])) {
+		$preferences['email'] = 1;
 	}
-	if (isset($_POST['instantemails'])) {
-		if (!empty($preferences['message_provider_local_announcements_notifications_loggedin'])){
-			$preferences['message_provider_local_announcements_notifications_loggedin'] .= ',';
-			$preferences['message_provider_local_announcements_notifications_loggedoff'] .= ',';
-		}
-		$preferences['message_provider_local_announcements_notifications_loggedin'] .= 'email';
-		$preferences['message_provider_local_announcements_notifications_loggedoff'] .= 'email';
-	}
-	if (isset($_POST['pushnotifications'])) {
-		$preferences['message_provider_local_announcements_notificationsmobile_loggedin'] = 'airnotifier';
-		$preferences['message_provider_local_announcements_notificationsmobile_loggedoff'] = 'airnotifier';
+	if (isset($_POST['notify'])) {
+		$preferences['notify'] = 1;
 	}
 
-	foreach ($preferences as $key => $value) {
-		$sql = "SELECT *
-          	      FROM {user_preferences}
-                 WHERE userid = ?
-                   AND name = ?";
-        $params = array($USER->id,$key);
-	    $record = $DB->get_record_sql($sql, $params);
-	    if ($record) {
-	    	$DB->update_record('user_preferences', array('id'=>$record->id, 'name'=>$key, 'value'=>$value, 'userid'=>$USER->id));
-	    } else {
-	    	$DB->insert_record('user_preferences', array('name'=>$key, 'value'=>$value, 'userid'=>$USER->id));
-	    }
-	}
+    $sql = "SELECT *
+            FROM {ann_user_preferences}
+            WHERE username = ?";
+    $params = array($USER->username);
+    $record = $DB->get_record_sql($sql, $params);
+    if ($record) {
+        $DB->update_record('ann_user_preferences', array(
+            'id'=>$record->id, 
+            'digests'=>$preferences['digests'], 
+            'email'=>$preferences['email'], 
+            'notify'=>$preferences['notify']
+        ));
+    } else {
+        $DB->insert_record('ann_user_preferences', array(
+            'username'=>$USER->username, 
+            'digests'=>$preferences['digests'], 
+            'email'=>$preferences['email'], 
+            'notify'=>$preferences['notify']
+        ));
+    }
+
 
 	// Redirect to self with notification.
     redirect(
@@ -105,48 +99,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else  {
 	// Load preferences.
 	$sql = "SELECT *
-          FROM {user_preferences} p 
-         WHERE p.userid = ?
-           AND p.name LIKE 'message_provider_local_announcements%'";
-	$params = array($USER->id);
+          FROM {ann_user_preferences} p 
+         WHERE p.username = ?";
+	$params = array($USER->username);
 	$records = array_values($DB->get_records_sql($sql, $params));
 	$preferences = array();
-	$preferences['dailydigests'] = true;
-	$preferences['instantemails'] = false;
-	$preferences['pushnotifications'] = true;
-	$preferences['bellalerts'] = true;
+	$preferences['digests'] = 1;
+	$preferences['email'] = 0;
+	$preferences['notify'] = 1;
 
-	// Load existing preferences.
 	foreach ($records as $preference) {
-		// Digest preference.
-		if ($preference->name == 'message_provider_local_announcements_digests_loggedin') {
-			if (strpos($preference->value, 'email') !== false) {
-				$preferences['dailydigests'] = true;
-			} else {
-				$preferences['dailydigests'] = false;
-			}
+		$preferences['digests'] = 0;
+		$preferences['email'] = 0;
+		$preferences['notify'] = 0;
+
+		if ($preference->digests == 1) {
+			$preferences['digests'] = 1;
 		}
-
-		// Notifications.
-		if ($preference->name == 'message_provider_local_announcements_notifications_loggedin') {
-			if (strpos($preference->value, 'email') !== false) {
-				$preferences['instantemails'] = true;
-			}
-
-			if (strpos($preference->value, 'popup') !== false) {
-				$preferences['bellalerts'] = true;
-			} else {
-				$preferences['bellalerts'] = false;
-			}
+		if ($preference->email == 1) {
+			$preferences['email'] = 1;
 		}
-
-		// Mobile notifications.
-		if ($preference->name == 'message_provider_local_announcements_notificationsmobile_loggedin') {
-			if (strpos($preference->value, 'airnotifier') !== false) {
-				$preferences['pushnotifications'] = true;
-			} else {
-				$preferences['pushnotifications'] = false;
-			}
+		if ($preference->notify == 1) {
+			$preferences['notify'] = 1;
 		}
 	}
 

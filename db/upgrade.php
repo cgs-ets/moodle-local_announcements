@@ -215,6 +215,33 @@ function xmldb_local_announcements_upgrade($oldversion) {
     }
 
 
+    if ($oldversion < 2025052101) {
+        $id = new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $username = new xmldb_field('username', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null, null, 'id');
+        $digests = new xmldb_field('digests', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, 0, null, 'username');
+        $email = new xmldb_field('email', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, 0, null, 'digests');
+        $notify = new xmldb_field('notify', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, 0, null, 'email');
+        $primarykey = new xmldb_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
+
+
+        $table = new xmldb_table('ann_user_preferences');
+        $table->addField($id);
+        $table->addField($username);
+        $table->addField($digests);
+        $table->addField($email);
+        $table->addField($notify);
+        $table->addKey($primarykey);
+
+        // Add a new table for audience cc's.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Announcements savepoint reached.
+        upgrade_plugin_savepoint(true, 2025052101, 'local', 'announcements');
+    }
+
+
     return true;
 
 }

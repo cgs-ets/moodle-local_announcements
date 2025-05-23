@@ -24,19 +24,16 @@
 <p>Tick the notifications you want to receive</p>
 <form action="preferences.php" method="post">
 
-    <input type="checkbox" id="dailydigests" name="dailydigests" value="dailydigests" {{#dailydigests}}checked="checked"{{/dailydigests}}>
-    <label for="dailydigests">The daily digest <i>(recommended)</i></label><br>
+    <input type="checkbox" id="digests" name="digests" value="digests" {{#digests}}checked="checked"{{/digests}}>
+    <label for="digests">The daily digest <i>(recommended)</i></label><br>
 
-    <input type="checkbox" id="instantemails" name="instantemails" value="instantemails" {{#instantemails}}checked="checked"{{/instantemails}}>
-    <label for="instantemails">Email each time an announcement is made</label><br>
+    <input type="checkbox" id="notify" name="notify" value="notify" {{#notify}}checked="checked"{{/notify}}>
+    <label for="notify">Notification (via the CGS Connect mobile app and CGS Connect bell) each time an announcement is made <i>(recommended)</i></label><br>
 
-    <input type="checkbox" id="pushnotifications" name="pushnotifications" value="pushnotifications" {{#pushnotifications}}checked="checked"{{/pushnotifications}}>
-    <label for="pushnotifications">Push notification (via the CGS Connect mobile app) each time an announcement is made <i>(recommended)</i></label><br>
+    <input type="checkbox" id="email" name="email" value="email" {{#email}}checked="checked"{{/email}}>
+    <label for="email">Email each time an announcement is made</label><br>
 
-    <input type="checkbox" id="bellalerts" name="bellalerts" value="bellalerts" {{#bellalerts}}checked="checked"{{/bellalerts}}>
-    <label for="bellalerts">CGS Connect bell alert each time an announcement is made <i>(recommended)</i></label><br>
-
-    <p><i>Emergency announcemets will always be sent via email regardless of individual preferences.</i></p>
+    <p><i>Emergency announcements will always be sent via email regardless of individual preferences.</i></p>
 
     <input class="btn btn-primary" type="submit">
 </form>

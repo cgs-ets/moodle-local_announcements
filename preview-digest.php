@@ -102,7 +102,7 @@ $sql = "SELECT an.id,
         //var_export($exportedposts);
         //exit;
 
-        $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_html', $content);
+        $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_digest_email', $content);
 
         echo "<pre>";
         var_export($notificationhtml);

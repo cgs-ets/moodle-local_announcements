@@ -26,8 +26,11 @@ namespace local_announcements\task;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__.'/../utils.php');
+
 use local_announcements\persistents\announcement;
 use local_announcements\external\announcement_exporter;
+use \local_announcements\utils;
 
 /**
  * Adhoc task to send user notifications.
@@ -69,10 +72,8 @@ class send_user_notifications extends \core\task\adhoc_task {
 
             foreach ($posts as $post) {
                 if ($this->send_post($post)) {
-                    $this->log("Announcement {$post->id} sent", 1);
                     $sentcount++;
                 } else {
-                    $this->log("Failed to send announcement {$post->id}", 1);
                     $errorcount++;
                 }
             }
@@ -87,7 +88,7 @@ class send_user_notifications extends \core\task\adhoc_task {
      * @param   int[]   $postids The list of post IDs
      */
     protected function prepare_data(array $postids) {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE;
 
         if (empty($postids)) {
             return;
@@ -99,12 +100,14 @@ class send_user_notifications extends \core\task\adhoc_task {
         $this->log("Announcement data retrieved for: " . implode(',', array_keys($announcements)), 1);
         
         $context = \context_system::instance();
+        $output = $PAGE->get_renderer('core');
+
         foreach ($announcements as $announcement) {
             $exporter = new announcement_exporter($announcement->persistent, [
                 'context' => $context,
                 'audiences' => $announcement->audiences,
             ]);
-            $posts[] = $exporter->export($OUTPUT);
+            $posts[] = $exporter->export($output);
         }
         $this->log("Announcement data exported and ready for sending: " . implode(',', array_column($posts, 'id')), 1);
 
@@ -148,16 +151,16 @@ class send_user_notifications extends \core\task\adhoc_task {
         $eventdata = new \core\message\message();
         $eventdata->courseid            = SITEID;
         $eventdata->component           = 'local_announcements';
-        $eventdata->name                = 'notifications';
-        if ($post->forcesend) {
-            $eventdata->name            = 'forced';
-        }
+        //$eventdata->name                = 'notifications';
+        //if ($post->forcesend) {
+        //    $eventdata->name            = 'forced';
+        //}
         $eventdata->userfrom            = $userfrom;
         $eventdata->userto              = $this->recipient;
         $eventdata->subject             = $postsubject;
         $eventdata->fullmessage         = $post->messageplain;
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
-        $fullmessagehtml                = $OUTPUT->render_from_template('local_announcements/message_notification_html', $data);
+        $fullmessagehtml                = $OUTPUT->render_from_template('local_announcements/message_notification_email', $data);
         $eventdata->fullmessagehtml     = $fullmessagehtml;
         $eventdata->notification        = 1;
         $eventdata->smallmessage = get_string('notification:smallmessage', 'local_announcements', (object) [
@@ -183,17 +186,50 @@ class send_user_notifications extends \core\task\adhoc_task {
         ];
 
         // Send email/web notification
-        $result = message_send($eventdata);
+        //$result = message_send($eventdata);
+        //return $result;
+
+        $result = false;
+        // CHECK USER PREFERENCES.
+        $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $this->recipient->username)) ?? 1; // By default, send notifications.
+        $email = $DB->get_field('ann_user_preferences', 'email', array('username' => $this->recipient->username)) ?? 0; // By default, do not send emails.
+        if ($post->forcesend) {
+            $notify = $email = 1;
+        }
+        // THE EMAIL.
+        if ($email == 1) {
+            $result = utils::email_to_user($this->recipient, $userfrom, $postsubject, '', $fullmessagehtml, '');
+            $this->log("Email sent for announcement {$post->id}", 1);
+        }
+        // THE NOTIFICATION.
+        if ($notify == 1) {
+            $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_notification', $data);
+            $eventdata = new \core\message\message();
+            $eventdata->courseid = SITEID;
+            $eventdata->component = 'local_announcements';
+            $eventdata->name = 'notificationsv2';
+            $eventdata->userfrom = $userfrom;
+            $eventdata->userto = $this->recipient;
+            $eventdata->subject = $postsubject;
+            $eventdata->fullmessage = '';
+            $eventdata->fullmessageformat = FORMAT_PLAIN;
+            $eventdata->fullmessagehtml = $notificationhtml;
+            $eventdata->notification = 1;
+            $eventdata->smallmessage = get_string('notification:smallmessage', 'local_announcements', (object) [
+                'user' => $post->authorfullname,
+                'subject' => $postsubject,
+            ]);
+            $result = message_send($eventdata);
+            $this->log("Notification sent for announcement {$post->id}", 1);
+        } else {
+            $this->log("User {$this->recipient->username} does not want notifications. Not sending {$post->id}.", 1);
+        }
         return $result;
-        // Send mobile notification
-        //$eventdata->name                = 'notificationsmobile';
-        //if ($post->forcesend) {
-        //    $eventdata->name            = 'forcedmobile';
-        //}
-        //$eventdata->fullmessage         = $post->shortmessageplain;
-        //$eventdata->fullmessageformat   = FORMAT_PLAIN;
-        //$eventdata->fullmessagehtml     = $post->shortmessage;
-        //return message_send($eventdata);
+
+
+
+   
+
 
     }
 

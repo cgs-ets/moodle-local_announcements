@@ -203,3 +203,5 @@ function local_announcements_image_fix_orientation(&$image, $filename, &$imagein
         imageflip($image, IMG_FLIP_HORIZONTAL);
     }
 }
+
+

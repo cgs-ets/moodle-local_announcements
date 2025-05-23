@@ -19,18 +19,29 @@
     @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 }}
 {{!
-    @template local_announcements/message_announcement_text
+    @template local_announcements/message_announcement
 
-    View for a single myconnect post for messages.
+    View for a single announcement.
 }}
 
-Posted by: {{creatorfullname}}
-Posted on: {{readabletime}}
-Posted to: {{postuserfullname}}
-Content: {{commentplain}}
+<div style="margin-bottom: 20px;">
+  <strong>{{subject}}</strong><br>
+  <small>From: {{authorfullname}}{{#authorjobpositions}} ({{authorjobpositions}}){{/authorjobpositions}}</small><br>
+  <small>To: {{#audiences}}{{#conditions}}{{name}}{{^last}} + {{/last}}{{/conditions}}{{^last}}, {{/last}}{{/audiences}}</small><br>
+  <small>Date: {{readabletime}}</small>
+</div>
+
+<div>
+  {{{emailmessage}}}
+</div>
+             
 {{#attachmentstokenized.0}}
-Attachments: {{#attachmentstokenized}}
-   {{filename}}: {{path}}
-{{/attachmentstokenized}}
+  Attachments:<br>
+  {{#attachmentstokenized}}
+    <a target="_blank" href="{{path}}">{{filename}}</a><br>
+  {{/attachmentstokenized}}
 {{/attachmentstokenized.0}}
-{{#str}}digest:textdivider, local_announcements{{/str}}
+
+<p style="margin-top: 15px;">
+  <a href="{{viewurl}}">View on CGS Connect</a>
+</p>

@@ -385,3 +385,5 @@ function clean_draftaudience() {
 
     $DB->delete_records('ann_draftaudiences', array('username' => $USER->username));
 }
+
+

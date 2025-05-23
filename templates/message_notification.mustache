@@ -19,20 +19,10 @@
     @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 }}
 {{!
-    @template local_announcements/message_announcement_text
+    @template local_announcements/message_notification
 
-    View for a single announcement for messages.
+    View for an announcement notification.
 }}
-
-Subject: {{subject}}
-Posted by: {{authorfullname}}
-Posted on: {{readabletime}}
-Posted to: {{#audiences}}{{name}} {{audiencerolecode}}, {{/audiences}}
-Content: {{messageplain}}
-{{#attachmentstokenized.0}}
-Attachments: {{#attachmentstokenized}}
-   {{filename}}: {{path}}
-{{/attachmentstokenized}}
-{{/attachmentstokenized.0}}
-{{#str}}digest:textpostedit, local_announcements, {{editurl}}{{/str}}
-{{#str}}digest:textdivider, local_announcements{{/str}}
+{{#posts}}
+    {{>local_announcements/message_announcement}}
+{{/posts}}

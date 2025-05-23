@@ -19,7 +19,7 @@
     @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 }}
 {{!
-    @template local_announcements/message_digest_html
+    @template local_announcements/message_digest_email
 
     Digest base email template.
 }}
@@ -192,7 +192,7 @@
                                 <tr>
                                     <td class="inner contents">
                                     {{#myconnectposts}}
-                                        {{>local_announcements/myconnect_post_html}}
+                                        {{>local_announcements/myconnect_post_email}}
                                     {{/myconnectposts}}
 
                                     {{#myconnectmenteeposts}}
@@ -212,7 +212,7 @@
                                         </tbody>
                                       </table>
                                       {{#posts}}
-                                        {{>local_announcements/myconnect_post_html}}
+                                        {{>local_announcements/myconnect_post_email}}
                                       {{/posts}}
                                     {{/myconnectmenteeposts}}
                                     </td>
@@ -249,7 +249,7 @@
                                 <tr>
                                     <td class="inner contents">
                                     {{#posts}}
-                                        {{>local_announcements/message_announcement_html}}
+                                        {{>local_announcements/message_announcement_email}}
                                     {{/posts}}
                                     </td>
                                 </tr>
