@@ -199,8 +199,7 @@ class send_user_digests extends \core\task\adhoc_task {
         $digesthtml = $OUTPUT->render_from_template('local_announcements/message_digest_email', $content);
 
         $this->sentcount = count($announcements);
-        $this->myconnectsentcount = isset($myconnectposts) ? count($myconnectposts) : 0;
-
+        $this->myconnectsentcount = isset($myconnect_direct_posts) || isset($myconnect_mentee_posts) ? count($myconnect_direct_posts) + count($myconnect_mentee_posts) : 0;
 
 
         /*$eventdata = new \core\message\message();
