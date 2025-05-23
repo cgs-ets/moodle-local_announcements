@@ -190,9 +190,20 @@ class send_user_notifications extends \core\task\adhoc_task {
         //return $result;
 
         $result = false;
+
         // CHECK USER PREFERENCES.
-        $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $this->recipient->username)) ?? 1; // By default, send notifications.
-        $email = $DB->get_field('ann_user_preferences', 'email', array('username' => $this->recipient->username)) ?? 0; // By default, do not send emails.
+        $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $this->recipient->username)); 
+        if ($notify === false) {
+            // By default, send notifications.
+            $notify = 1;
+        }
+
+        $email = $DB->get_field('ann_user_preferences', 'email', array('username' => $this->recipient->username));
+        if ($email === false) {
+            // By default, do not send emails.
+            $email = 0;
+        }
+        
         if ($post->forcesend) {
             $notify = $email = 1;
         }

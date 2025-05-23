@@ -220,18 +220,26 @@ class send_user_digests extends \core\task\adhoc_task {
 
 
         // CHECK USER PREFERENCES.
-        $digests = $DB->get_field('ann_user_preferences', 'digests', array('username' => $recipient->username)) ?? 1; // By default, send digests.
-        $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $recipient->username)) ?? 1; // By default, send digest notification.
+        $digests = $DB->get_field('ann_user_preferences', 'digests', array('username' => $recipient->username));
+        if ($digests === false) {
+            // By default, do not send emails.
+            $digests = 1;
+        }
 
         if (!$digests) {
             $this->log("User {$recipient->username} does not want digests. Not sending.", 1);
             return false;
         }
 
+        $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $recipient->username)); 
+        if ($notify === false) {
+            // By default, send notifications.
+            $notify = 1;
+        }
+
         // THE EMAIL.
         $result = utils::email_to_user($recipient, $userfrom, $postsubject, '', $digesthtml, '');
         $this->log("Email digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts.", 1);
-
 
         // THE NOTIFICATION.
         if ($notify) {

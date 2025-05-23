@@ -59,6 +59,7 @@ $output = '';
 
 echo "<pre>";
 
+/*
 $cron = new \local_announcements\task\cron_task_digests();
 $cron->execute();
 echo "<hr>";
@@ -88,18 +89,19 @@ $cron->set_custom_data(array (
 ));
 $cron->execute();
 echo "<hr>";
+*/
 
-/*
-$cron = new \local_announcements\task\cron_task_notifications();
-$cron->execute();
-echo "<hr>";
+
+//$cron = new \local_announcements\task\cron_task_notifications();
+//$cron->execute();
+//echo "<hr>";
 
 $cron = new \local_announcements\task\send_user_notifications();
 $cron->set_component('local_announcements');
-$cron->set_custom_data(array (2 => array (0 => 9, 1 => 10, 2 => 11)));
+$cron->set_custom_data(array (6849 => array (0 => 41021)));
 $cron->execute();
 echo "<hr>";
-*/
+
 
 
 
