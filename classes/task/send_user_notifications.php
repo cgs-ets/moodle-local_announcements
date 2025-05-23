@@ -151,10 +151,6 @@ class send_user_notifications extends \core\task\adhoc_task {
         $eventdata = new \core\message\message();
         $eventdata->courseid            = SITEID;
         $eventdata->component           = 'local_announcements';
-        //$eventdata->name                = 'notifications';
-        //if ($post->forcesend) {
-        //    $eventdata->name            = 'forced';
-        //}
         $eventdata->userfrom            = $userfrom;
         $eventdata->userto              = $this->recipient;
         $eventdata->subject             = $postsubject;
@@ -185,12 +181,8 @@ class send_user_notifications extends \core\task\adhoc_task {
             'notificationiconurl' => $userpicture->get_url($PAGE)->out(false),
         ];
 
-        // Send email/web notification
-        //$result = message_send($eventdata);
-        //return $result;
-
         $result = false;
-
+        
         // CHECK USER PREFERENCES.
         $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $this->recipient->username)); 
         if ($notify === false) {
