@@ -26,6 +26,7 @@
 
 $messageproviders = array (
 
+    // We found from parents that popup and airnotifier need to contain the same information. Therefore we use this single channel. 
     'notificationsv2' => array(
         'defaults' => array(
             'popup' => MESSAGE_FORCED, // Always on.
