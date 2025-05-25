@@ -144,6 +144,10 @@ class send_user_notifications extends \core\task\adhoc_task {
         ];
         $postsubject = html_to_text(get_string('notification:subject', 'local_announcements', $a), 0);
 
+        if ($post->timemodified > $post->timecreated) {
+            $postsubject = '[Updated] ' . $postsubject;
+        }
+
         // Message headers are stored against the message author.
         $userfrom = \core_user::get_noreply_user();
         $userfrom->customheaders = $this->get_message_headers($post, $a);
