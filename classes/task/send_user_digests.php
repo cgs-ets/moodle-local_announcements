@@ -199,7 +199,7 @@ class send_user_digests extends \core\task\adhoc_task {
         $digesthtml = $OUTPUT->render_from_template('local_announcements/message_digest_email', $content);
 
         $this->sentcount = count($announcements);
-        $this->myconnectsentcount = isset($myconnect_direct_posts) || isset($myconnect_mentee_posts) ? count($myconnect_direct_posts) + count($myconnect_mentee_posts) : 0;
+        //$this->myconnectsentcount = isset($myconnect_direct_posts) || isset($myconnect_mentee_posts) ? count($myconnect_direct_posts) + count($myconnect_mentee_posts) : 0;
 
 
         /*$eventdata = new \core\message\message();
@@ -238,7 +238,7 @@ class send_user_digests extends \core\task\adhoc_task {
 
         // THE EMAIL.
         $result = utils::email_to_user($recipient, $userfrom, $postsubject, '', $digesthtml, '');
-        $this->log("Email digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts.", 1);
+        $this->log("Email digest sent with {$this->sentcount} announcements.", 1);
 
         // THE NOTIFICATION.
         if ($notify) {
@@ -254,9 +254,9 @@ class send_user_digests extends \core\task\adhoc_task {
             $eventdata->fullmessageformat = FORMAT_PLAIN;
             $eventdata->fullmessagehtml = $digesttext;
             $eventdata->notification = 1;
-            $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount + $this->myconnectsentcount));
+            $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount));
             message_send($eventdata);
-            $this->log("Notification digest sent with {$this->sentcount} announcements, and {$this->myconnectsentcount} myconnect posts.", 1);
+            $this->log("Notification digest sent with {$this->sentcount} announcements.", 1);
         } else {
             $this->log("User {$recipient->username} does not want notifications. Not notifying.", 1);
         }
