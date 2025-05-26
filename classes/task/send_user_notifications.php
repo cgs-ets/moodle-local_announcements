@@ -209,34 +209,34 @@ class send_user_notifications extends \core\task\adhoc_task {
             $this->log("Email sent for announcement {$post->id}", 1);
         }
         // THE NOTIFICATION.
-        if ($notify == 1) {
-            $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_notification', $data);
-            $eventdata = new \core\message\message();
-            $eventdata->courseid = SITEID;
-            $eventdata->component = 'local_announcements';
-            $eventdata->name = 'notificationsv2';
-            $eventdata->userfrom = $userfrom;
-            $eventdata->userto = $this->recipient;
-            $eventdata->subject = $postsubject;
-            $eventdata->fullmessage = '';
-            $eventdata->fullmessageformat = FORMAT_PLAIN;
-            $eventdata->fullmessagehtml = $notificationhtml;
-            $eventdata->notification = 1;
-            $eventdata->smallmessage = get_string('notification:smallmessage', 'local_announcements', (object) [
-                'user' => $post->authorfullname,
-                'subject' => $postsubject,
-            ]);
-            $result = message_send($eventdata);
-            $this->log("Notification sent for announcement {$post->id}", 1);
-        } else {
-            $this->log("User {$this->recipient->username} does not want notifications. Not sending {$post->id}.", 1);
+        try {
+            if ($notify == 1) {
+                $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_notification', $data);
+                $eventdata = new \core\message\message();
+                $eventdata->courseid = SITEID;
+                $eventdata->component = 'local_announcements';
+                $eventdata->name = 'notificationsv2';
+                $eventdata->userfrom = $userfrom;
+                $eventdata->userto = $this->recipient;
+                $eventdata->subject = $postsubject;
+                $eventdata->fullmessage = '';
+                $eventdata->fullmessageformat = FORMAT_PLAIN;
+                $eventdata->fullmessagehtml = $notificationhtml;
+                $eventdata->notification = 1;
+                $eventdata->smallmessage = get_string('notification:smallmessage', 'local_announcements', (object) [
+                    'user' => $post->authorfullname,
+                    'subject' => $postsubject,
+                ]);
+                $result = message_send($eventdata);
+                $this->log("Notification sent for announcement {$post->id}", 1);
+            } else {
+                $this->log("User {$this->recipient->username} does not want notifications. Not sending {$post->id}.", 1);
+            }
+        } catch (\Exception $e) {
+            $this->log("Error sending notification: " . $e->getMessage(), 1);
         }
+
         return $result;
-
-
-
-   
-
 
     }
 
