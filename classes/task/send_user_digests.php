@@ -241,25 +241,30 @@ class send_user_digests extends \core\task\adhoc_task {
         $this->log("Email digest sent with {$this->sentcount} announcements.", 1);
 
         // THE NOTIFICATION.
-        if ($notify) {
-            $digesttext = $OUTPUT->render_from_template('local_announcements/message_digest', $content);
-            $eventdata = new \core\message\message();
-            $eventdata->courseid = SITEID;
-            $eventdata->component = 'local_announcements';
-            $eventdata->name = 'notificationsv2';
-            $eventdata->userfrom = $userfrom;
-            $eventdata->userto = $recipient;
-            $eventdata->subject = $postsubject;
-            $eventdata->fullmessage = '';
-            $eventdata->fullmessageformat = FORMAT_PLAIN;
-            $eventdata->fullmessagehtml = $digesttext;
-            $eventdata->notification = 1;
-            $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount));
-            message_send($eventdata);
-            $this->log("Notification digest sent with {$this->sentcount} announcements.", 1);
-        } else {
-            $this->log("User {$recipient->username} does not want notifications. Not notifying.", 1);
+        try {
+            if ($notify) {
+                $digesttext = $OUTPUT->render_from_template('local_announcements/message_digest', $content);
+                $eventdata = new \core\message\message();
+                $eventdata->courseid = SITEID;
+                $eventdata->component = 'local_announcements';
+                $eventdata->name = 'notificationsv2';
+                $eventdata->userfrom = $userfrom;
+                $eventdata->userto = $recipient;
+                $eventdata->subject = $postsubject;
+                $eventdata->fullmessage = '';
+                $eventdata->fullmessageformat = FORMAT_PLAIN;
+                $eventdata->fullmessagehtml = $digesttext;
+                $eventdata->notification = 1;
+                $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount));
+                message_send($eventdata);
+                $this->log("Notification digest sent with {$this->sentcount} announcements.", 1);
+            } else {
+                $this->log("User {$recipient->username} does not want notifications. Not notifying.", 1);
+            }
+        } catch (\Exception $e) {
+            $this->log("Error sending notification: " . $e->getMessage(), 1);
         }
+
         return $result;
 
 
