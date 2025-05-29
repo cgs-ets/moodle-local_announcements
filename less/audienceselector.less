@@ -383,13 +383,14 @@
 }
 // The audiencesjson field is a text field hidden by css rather than a hidden field so that we can attach validation to it. 
 #fitem_id_audiencesjson {
-    display: none;
+    display: none !important;
 }
 #fitem_id_audiencesjson>div{
-    display: none;
+  display: none !important;
 }
+
 #fitem_id_audiencesjson.has-danger, #fitem_id_audiencesjson.is-invalid {
-    display: block;
+    display: block !important;
     height: 22px;
     overflow: hidden;
 }
