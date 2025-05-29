@@ -537,14 +537,14 @@
   display: block;
 }
 #fitem_id_audiencesjson {
-  display: none;
+  display: none !important;
 }
 #fitem_id_audiencesjson > div {
-  display: none;
+  display: none !important;
 }
 #fitem_id_audiencesjson.has-danger,
 #fitem_id_audiencesjson.is-invalid {
-  display: block;
+  display: block !important;
   height: 22px;
   overflow: hidden;
 }
