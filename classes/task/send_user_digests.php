@@ -256,7 +256,7 @@ class send_user_digests extends \core\task\adhoc_task {
                 $eventdata->fullmessagehtml = $digesttext;
                 $eventdata->notification = 1;
                 $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount));
-                message_send($eventdata);
+                //message_send($eventdata);
                 $this->log("Notification digest sent with {$this->sentcount} announcements.", 1);
             } else {
                 $this->log("User {$recipient->username} does not want notifications. Not notifying.", 1);

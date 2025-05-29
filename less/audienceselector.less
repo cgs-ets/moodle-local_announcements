@@ -388,12 +388,12 @@
 #fitem_id_audiencesjson>div{
     display: none;
 }
-#fitem_id_audiencesjson.has-danger {
+#fitem_id_audiencesjson.has-danger, #fitem_id_audiencesjson.is-invalid {
     display: block;
     height: 22px;
     overflow: hidden;
 }
-#fitem_id_audiencesjson.has-danger:before {
+#fitem_id_audiencesjson.has-danger:before, #fitem_id_audiencesjson.is-invalid:before {
     content: "You must select an audience.";
     color: red;
     width: 100%;
