@@ -648,7 +648,7 @@ class announcement extends persistent {
      * @param bool $strictavailability. Whether to exclude pending and rejected posts.
      * @return array.
      */
-    public static function get_by_ids_and_username($postids, $username, $getall = false, $strictavailability = true) {
+    public static function get_by_ids_and_username($postids, $username, $getall = false, $strictavailability = true, $viewpage = false) {
         global $DB;
 
         // Load user object.
@@ -676,7 +676,21 @@ class announcement extends persistent {
         // Order by.
         $sql .= "ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC, p.id DESC";
 
+
         $records = $DB->get_records_sql($sql, $params);
+
+        if ($viewpage && count($records) == 0 && count($postids) == 1) {
+            // If we are on the view page and there are no records found, try to get the post if the user is the author or impersonation user.
+            $postid = array_shift($postids);
+            // Insert a log
+            $log = new \stdClass();
+            $log->username = $username;
+            $log->postid = $postid;
+            $log->timecreated = time();
+            $DB->insert_record('ann_view_attempts', $log);
+
+        }
+
         $posts = array();
         foreach ($records as $postid => $record) {
             $out = static::get_for_user_with_audiences($username, $postid, $getall);

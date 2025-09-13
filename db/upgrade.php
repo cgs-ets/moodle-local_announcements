@@ -241,6 +241,27 @@ function xmldb_local_announcements_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025052101, 'local', 'announcements');
     }
 
+    if ($oldversion < 2025052102) {
+        // Define table ann_log to be created.
+        $table = new xmldb_table('ann_view_attempts');
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('username', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('postid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table ann_log.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for ann_log.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+   
+         // Announcements savepoint reached.
+         upgrade_plugin_savepoint(true, 2025052102, 'local', 'announcements');
+    }
+
 
     return true;
 
