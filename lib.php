@@ -67,6 +67,16 @@ function local_announcements_pluginfile($course, $cm, $context, $filearea, $args
 
     $postid = (int)array_shift($args);
 
+    // check the user is a postuser.
+    $sql = "SELECT p.id
+        FROM {ann_posts} p
+        INNER JOIN {ann_posts_users} pu on pu.postid = p.id
+        WHERE pu.username = ?
+        AND p.id = ?";
+    if (!$DB->record_exists_sql($sql, array($USER->username, $postid))) {
+        return false;
+    }
+
     // Custom email preview file.
     if (!empty($options['preview'])) {
         if ($options['preview'] === 'email') {
