@@ -66,14 +66,8 @@ function local_announcements_pluginfile($course, $cm, $context, $filearea, $args
     $forcedownload = true; // download MUST be forced - security!
 
     $postid = (int)array_shift($args);
-
-    // check the user is a postuser.
-    $sql = "SELECT p.id
-        FROM {ann_posts} p
-        INNER JOIN {ann_posts_users} pu on pu.postid = p.id
-        WHERE pu.username = ?
-        AND p.id = ?";
-    if (!$DB->record_exists_sql($sql, array($USER->username, $postid))) {
+    $allowed = announcement::can_user_view_post($postid);
+    if (!$allowed) {
         return false;
     }
 
