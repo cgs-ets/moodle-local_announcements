@@ -59,13 +59,15 @@
                 {{#canmoderate}}
                     <a class="dropdown-item option-moderate" href="{{config.wwwroot}}/local/announcements/moderation.php">{{# str }} list:moderation, local_announcements {{/ str }}</a>
                 {{/canmoderate}}
-                {{#viewbyon}}
-                    <a class="dropdown-item option-exitviewby" href="{{config.wwwroot}}/local/announcements/index.php">{{# str }} list:exitviewby, local_announcements {{/ str }}</a>
-                {{/viewbyon}}
-                {{^viewbyon}}
-                    <a class="dropdown-item option-viewby" href="#">{{# str }} list:viewby, local_announcements {{/ str }}</a>
-                    <a class="dropdown-item option-viewbyself" href="#">{{# str }} list:viewbyself, local_announcements {{/ str }}</a>
-                {{/viewbyon}}
+                {{#canpost}}
+                  {{#viewbyon}}
+                      <a class="dropdown-item option-exitviewby" href="{{config.wwwroot}}/local/announcements/index.php">{{# str }} list:exitviewby, local_announcements {{/ str }}</a>
+                  {{/viewbyon}}
+                  {{^viewbyon}}
+                      <a class="dropdown-item option-viewby" href="#">{{# str }} list:viewby, local_announcements {{/ str }}</a>
+                      <a class="dropdown-item option-viewbyself" href="#">{{# str }} list:viewbyself, local_announcements {{/ str }}</a>
+                  {{/viewbyon}}
+                {{/canpost}}
                 <a id="btn-preferences" class="dropdown-item option-preferences" href="{{config.wwwroot}}/local/announcements/preferences.php">{{# str }} list:preferences, local_announcements {{/ str }}</a>
             </div>
         </div>
