@@ -24,6 +24,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /** Include required files */
 require_once($CFG->libdir.'/filelib.php');
+use local_announcements\persistents\announcement;
 
 /**
  * Serves the plugin attachments.
