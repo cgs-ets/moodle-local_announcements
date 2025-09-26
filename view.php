@@ -47,6 +47,13 @@ $PAGE->set_title($SITE->fullname . ': ' . $title);
 // Check user is logged in.
 require_login();
 
+$allowed = announcement::can_user_view_post($postid);
+if (!$allowed) {
+    \core\notification::error(get_string('list:announcementnotfound', 'local_announcements'));
+	echo $OUTPUT->header();
+	echo $OUTPUT->footer();
+}
+
 // get the announcement and customise page props.
 $announcements = announcement::get_by_ids_and_username([$postid], $USER->username, is_user_auditor(), (!is_user_auditor()), true);
 $announcement = array_pop($announcements);

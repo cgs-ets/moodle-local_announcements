@@ -661,12 +661,17 @@ class announcement extends persistent {
         $postids = array_filter($postids);
 
         // Get the announcement data.
+        //list($idsql, $params) = $DB->get_in_or_equal($postids);
+        //$sql = "SELECT p.id
+        //        FROM {ann_posts} p
+        //        INNER JOIN {ann_posts_users} pu on pu.postid = p.id
+        //        WHERE pu.username = ?
+        //        AND p.id $idsql";
+
         list($idsql, $params) = $DB->get_in_or_equal($postids);
         $sql = "SELECT p.id
                 FROM {ann_posts} p
-                INNER JOIN {ann_posts_users} pu on pu.postid = p.id
-                WHERE pu.username = ?
-                AND p.id $idsql";
+                WHERE p.id $idsql";
 
         // Add standard post availability clauses.
         list ($availsql, $availparams) = static::append_standard_availability_clauses($user, $strictavailability);
