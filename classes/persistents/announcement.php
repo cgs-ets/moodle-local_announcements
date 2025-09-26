@@ -676,7 +676,7 @@ class announcement extends persistent {
         // Add standard post availability clauses.
         list ($availsql, $availparams) = static::append_standard_availability_clauses($user, $strictavailability);
         $sql .= $availsql;
-        $params = array_merge([$username], $params, $availparams);
+        $params = array_merge($params, $availparams);
 
         // Order by.
         $sql .= "ORDER BY p.sorttime DESC, p.timeedited DESC, p.timecreated DESC, p.id DESC";
