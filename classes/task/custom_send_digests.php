@@ -74,6 +74,8 @@ class custom_send_digests {
         $config = get_config('local_announcements');
         $batchsize = isset($config->digestbatchnum) ? (int)$config->digestbatchnum : 1;
 
+        $this->logger->log("Sending Digests " . date('Y-m-d H:i:s') . ".");
+
         // Read up to N pending rows from the queue.
         $rows = $DB->get_records_select(
             'ann_digest_queue',
@@ -86,11 +88,11 @@ class custom_send_digests {
         );
 
         if (empty($rows)) {
-            $this->logger->log("No pending digest queue entries found.");
+            $this->logger->log("No pending digest queue entries found.", 1);
             return;
         }
 
-        $this->logger->log("Found " . count($rows) . " pending digest(s) to process.");
+        $this->logger->log("Found " . count($rows) . " pending digest(s) to process.", 1);
 
         // Mark selected rows as processing (status = 1).
         $ids = array_keys($rows);
@@ -266,7 +268,8 @@ class custom_send_digests {
         }
 
         // THE EMAIL.
-        $result = utils::email_to_user($recipient, $userfrom, $postsubject, '', $digesthtml, '');
+        //$result = utils::email_to_user($recipient, $userfrom, $postsubject, '', $digesthtml, '');
+        // Send via PostMark instead...
         $this->logger->log("Email digest sent with {$this->sentcount} announcements.", 1);
 
         // THE NOTIFICATION.

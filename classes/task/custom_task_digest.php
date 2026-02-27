@@ -99,13 +99,16 @@ class custom_task_digest {
 
         $config = get_config('local_announcements');
 
+        $this->logger->log("Running Digest for " . date('Y-m-d') . ".");
+
+
         if (!$config->enabledigest) {
-            $this->logger->log("Digest is not enabled in plugin configuration. Exiting.");
+            $this->logger->log("Digest is not enabled in plugin configuration. Exiting.", 1);
             return;
         }
 
         $timenow = time();
-        $this->logger->log("Fetching unmailed announcements that are available now ({$timenow}).");
+        $this->logger->log("Fetching unmailed announcements that are available now ({$timenow}).", 1);
         if ($posts = announcement::get_unmailed($timenow)) {
             foreach ($posts as $id => $post) {
                 $this->posts[$id] = new \stdClass();
@@ -117,7 +120,7 @@ class custom_task_digest {
         $cfgincludemyconnect = isset($config->myconnectdigest) ? $config->myconnectdigest : false;
         if ($cfgincludemyconnect && file_exists($CFG->dirroot.$myconnectdir)) {
             $this->includemyconnect = true;
-            $this->logger->log("Fetching unmailed myconnect posts.");
+            $this->logger->log("Fetching unmailed myconnect posts.", 1);
             $this->myconnectposts = \local_myconnect\persistents\post::get_unmailed();
         }
 
@@ -127,17 +130,10 @@ class custom_task_digest {
         }
 
         // Please note, this order is intentional.
-        $this->logger->log_start("Filling caches");
-        $this->logger->log_start("Filling post recipients cache", 1);
         $this->fill_postusers_cache();
-        $this->logger->log_finish("Done", 1);
-        $this->logger->log_start("Filling user posts cache", 1);
         $this->fill_userposts_cache();
-        $this->logger->log_finish("Done", 1);
-        $this->logger->log_finish("All caches filled");
-        $this->logger->log_start("Queueing user tasks.");
+        $this->logger->log("Queueing user tasks.", 1);
         $this->queue_user_tasks();
-        $this->logger->log_finish("All tasks queued.");
 
         // Mark posts as mailed.
         if (count($this->posts)) {
@@ -148,6 +144,7 @@ class custom_task_digest {
             list($in, $params) = $DB->get_in_or_equal(array_keys($this->myconnectposts));
             $DB->set_field_select('myconnect_posts', 'mailed', 1, "id {$in}", $params);
         }
+        $this->logger->log("Digests Queued.");
     }
 
 
@@ -246,7 +243,7 @@ class custom_task_digest {
         global $DB;
 
         $numusers = count($this->users);
-        $this->logger->log("Processing " . $numusers . " users", 1);
+        $this->logger->log("Processing " . $numusers . " users.", 1);
 
         foreach ($this->users as $user) {
             $userdata = array(
