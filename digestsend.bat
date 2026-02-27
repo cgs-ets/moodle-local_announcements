@@ -1,4 +1,4 @@
-cd c:\cron
+cd c:\cron\announcements
 
 rem Create a timestamp
 for /f "usebackq tokens=1,2 delims=,=- " %%i in (`wmic os get LocalDateTime /value`) do @if %%i==LocalDateTime (
@@ -13,7 +13,7 @@ rem Create the tempfile filename
 set "tempfile=digestsendtemp%timestamp%.txt"
 set "logfile=digestsend%datestamp%.txt"
 
-rem Run the transcoder cron.
+rem Run the digest cron.
 echo %date% %startstring% - Running digestsend >> %tempfile%
 C:\php\php8.3.9\php.exe C:\inetpub\wwwroot\moodle\local\announcements\cli\senddigests.php >> %tempfile%
 echo ---------------------------------------- >> %tempfile%

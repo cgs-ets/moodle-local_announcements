@@ -102,10 +102,10 @@ class custom_send_digests {
         foreach ($rows as $row) {
             try {
                 $posttypes = json_decode($row->customdata);
-                $recipient = \core_user::get_user($row->userid);
+                $recipient = \core_user::get_user_by_username($row->username);
 
                 if (!$recipient || $recipient->deleted) {
-                    $this->logger->log("User {$row->username} ({$row->userid}) not found or deleted. Skipping.", 1);
+                    $this->logger->log("User {$row->username} not found or deleted. Skipping.", 1);
                     $DB->set_field('ann_digest_queue', 'status', 3, ['id' => $row->id]);
                     $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $row->id]);
                     continue;
@@ -120,8 +120,6 @@ class custom_send_digests {
                 $myconnectposts = array();
                 $myconnect_mentee_posts = array();
                 if ($inclmyconnect) {
-
-                    $this->logger->log("Direct MyConnect posts: " . json_encode($posttypes->myconnectposts), 1);
                     $myconnectpostids = json_decode(json_encode($posttypes->myconnectposts), true);
                     $myconnectposts = \local_myconnect\persistents\post::prepare_data(
                         $myconnectpostids,
@@ -185,7 +183,6 @@ class custom_send_digests {
         }
 
         $posts = array();
-
         $announcements = announcement::get_by_ids_and_username($postids, $recipient->username);
 
         $context = \context_system::instance();

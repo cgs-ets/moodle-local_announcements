@@ -206,7 +206,7 @@ function is_user_admin($user = null) {
         $user = $USER;
     }
 
-    if (is_siteadmin() || has_capability('moodle/site:config', context_system::instance(), $USER->id)) {
+    if (has_capability('moodle/site:config', context_system::instance(), $user->id)) {
         return true;
     }
 

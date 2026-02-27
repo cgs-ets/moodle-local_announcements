@@ -180,14 +180,16 @@ class announcement_exporter extends persistent_exporter {
 
 		// Author and impersonated user are both considered creator.
 		$iscreator = 0;
-		if ($this->data->authorusername == $USER->username || $this->data->impersonate == $USER->username) {
-			$iscreator = 1;
-		}
+		if (isset($USER->username)) { // CLI means no user rec.
+			if ($this->data->authorusername == $USER->username || $this->data->impersonate == $USER->username) {
+				$iscreator = 1;
+			}
 
-        // Give admins the same power as the creator.
-        if (is_user_admin()) {
-        	$iscreator = 1;
-        }
+			// Give admins the same power as the creator.
+			if (is_user_admin()) {
+				$iscreator = 1;
+			}
+		}
 
 		// Export the audiences for this announcement.
 	    $audiences = array();

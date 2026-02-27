@@ -282,7 +282,6 @@ class custom_task_digest {
             // Insert into digest queue.
             $record = new \stdClass();
             $record->username = $user->username;
-            $record->userid = $user->id;
             $record->customdata = json_encode($userdata);
             $record->status = 0;
             $record->timecreated = time();

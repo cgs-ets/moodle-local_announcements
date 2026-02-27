@@ -1481,7 +1481,7 @@ class announcement extends persistent {
         // Determine if viewing user is an admin or auditor.
         $role = false;
         $contextuser = \context_user::instance($user->id);
-        if ( is_user_admin() ) { 
+        if ( is_user_admin($user) ) { 
             $role = 'admin';
         }
 
