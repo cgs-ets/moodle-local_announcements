@@ -49,6 +49,16 @@ class custom_send_digests {
     protected $logger;
 
     /**
+     * @var int     The number of messages sent in this digest.
+     */
+    protected $sentcount = 0;
+
+    /**
+     * @var int     The number of myconnect messages sent in this digest.
+     */
+    protected $myconnectsentcount = 0;
+
+    /**
      * Constructor.
      *
      * @param digest_logger $logger
@@ -92,12 +102,6 @@ class custom_send_digests {
         $DB->set_field_select('ann_digest_queue', 'status', 1, "id {$insql}", $params);
 
         $inclmyconnect = $this->include_myconnect();
-        $postmarkapikey = isset($config->postmarkapikey) ? $config->postmarkapikey : '';
-        $postmarkfromemail = isset($config->postmarkfromemail) ? $config->postmarkfromemail : '';
-
-        // Phase 1: Prepare all digests, send notifications, and collect email payloads.
-        $emailbatch = [];
-        $batchmeta = [];
 
         foreach ($rows as $row) {
             try {
@@ -111,7 +115,7 @@ class custom_send_digests {
                     continue;
                 }
 
-                $this->logger->log("Preparing digest for {$recipient->username} ({$recipient->id}). Data: " . $row->customdata, 1);
+                $this->logger->log("Sending digest for {$recipient->username} ({$recipient->id}). Data: " . $row->customdata, 1);
 
                 // Prepare announcement posts.
                 $postids = $posttypes->announcements;
@@ -154,83 +158,17 @@ class custom_send_digests {
                     continue;
                 }
 
-                // Prepare the mail content (renders templates, checks user preferences).
-                $maildata = $this->prepare_mail_content($recipient, $announcements, $myconnectposts, $myconnect_mentee_posts);
+                // This digest has at least one post and should therefore be sent.
+                $this->send_mail($recipient, $announcements, $myconnectposts, $myconnect_mentee_posts);
 
-                // Send notification (independent of email).
-                $this->send_notification($recipient, $maildata);
-
-                if (!$maildata['wantsemail']) {
-                    // User doesn't want email digests — mark as complete and move on.
-                    $DB->set_field('ann_digest_queue', 'status', 2, ['id' => $row->id]);
-                    $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $row->id]);
-                    continue;
-                }
-
-                // Add email payload to batch.
-                $emailbatch[] = [
-                    'From' => $postmarkfromemail,
-                    'To' => $recipient->email,
-                    'Subject' => $maildata['subject'],
-                    'HtmlBody' => $maildata['digesthtml'],
-                    'TextBody' => '',
-                    'Headers' => [
-                        'Precedence' => 'Bulk',
-                        'X-Auto-Response-Suppress' => 'All',
-                        'Auto-Submitted' => 'auto-generated',
-                    ],
-                ];
-                $batchmeta[] = [
-                    'row' => $row,
-                    'recipient' => $recipient,
-                    'sentcount' => $maildata['sentcount'],
-                ];
+                // Mark as complete (status = 2).
+                $DB->set_field('ann_digest_queue', 'status', 2, ['id' => $row->id]);
+                $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $row->id]);
 
             } catch (\Exception $e) {
-                $this->logger->log("Error preparing digest for {$row->username}: " . $e->getMessage(), 1);
+                $this->logger->log("Error processing digest for {$row->username}: " . $e->getMessage(), 1);
                 $DB->set_field('ann_digest_queue', 'status', 3, ['id' => $row->id]);
                 $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $row->id]);
-            }
-        }
-
-        // Phase 2: Send all collected emails in a single Postmark batch.
-        if (empty($emailbatch)) {
-            return;
-        }
-
-        if (empty($postmarkapikey) || empty($postmarkfromemail)) {
-            $this->logger->log("PostMark API key or from email not configured. Skipping emails.", 1);
-            foreach ($batchmeta as $meta) {
-                $DB->set_field('ann_digest_queue', 'status', 2, ['id' => $meta['row']->id]);
-                $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $meta['row']->id]);
-            }
-            return;
-        }
-
-        try {
-            $client = new PostmarkClient($postmarkapikey);
-            $this->logger->log("Sending PostMark batch of " . count($emailbatch) . " email(s).", 1);
-            $results = $client->sendEmailBatch($emailbatch);
-
-            foreach ($results as $i => $result) {
-                $meta = $batchmeta[$i];
-                $row = $meta['row'];
-                $email = $meta['recipient']->email;
-
-                if ($result->ErrorCode === 0) {
-                    $this->logger->log("PostMark email digest sent to {$email} with {$meta['sentcount']} announcements.", 1);
-                    $DB->set_field('ann_digest_queue', 'status', 2, ['id' => $row->id]);
-                } else {
-                    $this->logger->log("PostMark error for {$email}: [{$result->ErrorCode}] {$result->Message}", 1);
-                    $DB->set_field('ann_digest_queue', 'status', 3, ['id' => $row->id]);
-                }
-                $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $row->id]);
-            }
-        } catch (\Exception $e) {
-            $this->logger->log("PostMark batch error: " . $e->getMessage(), 1);
-            foreach ($batchmeta as $meta) {
-                $DB->set_field('ann_digest_queue', 'status', 3, ['id' => $meta['row']->id]);
-                $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $meta['row']->id]);
             }
         }
     }
@@ -271,19 +209,27 @@ class custom_send_digests {
     }
 
     /**
-     * Prepare the mail content for a single recipient.
-     *
-     * Renders the digest templates and checks user preferences.
-     * Returns an array with the rendered HTML, subject, and preference flags.
+     * Send the composed message to the user.
      */
-    protected function prepare_mail_content($recipient, $announcements, $myconnect_direct_posts, $myconnect_mentee_posts) {
+    protected function send_mail($recipient, $announcements, $myconnect_direct_posts, $myconnect_mentee_posts) {
         global $OUTPUT, $DB;
 
         $config = get_config('local_announcements');
+        $this->sentcount = 0;
+        $this->myconnectsentcount = 0;
 
-        $subject = get_string('digest:mailsubject', 'local_announcements', fullname($recipient));
-        $sentcount = count($announcements);
+        // Headers to help prevent auto-responders.
+        $userfrom = \core_user::get_noreply_user();
+        $userfrom->customheaders = array(
+            'Precedence: Bulk',
+            'X-Auto-Response-Suppress: All',
+            'Auto-Submitted: auto-generated',
+        );
 
+        // Set the subject of the message.
+        $postsubject = get_string('digest:mailsubject', 'local_announcements', fullname($recipient));
+
+        // Render the digest template with the posts
         $content = [
             'posts' => $announcements,
             'myconnectposts' => $myconnect_direct_posts,
@@ -302,69 +248,88 @@ class custom_send_digests {
 
         $digesthtml = $OUTPUT->render_from_template('local_announcements/message_digest_email', $content);
 
-        // Check user preferences.
+        $this->sentcount = count($announcements);
+
+
+        // CHECK USER PREFERENCES.
         $digests = $DB->get_field('ann_user_preferences', 'digests', array('username' => $recipient->username));
         if ($digests === false) {
+            // By default, do not send emails.
             $digests = 1;
         }
-        $wantsemail = (bool) $digests;
 
-        if (!$wantsemail) {
-            $this->logger->log("User {$recipient->username} does not want digests. Not sending email.", 1);
+        if (!$digests) {
+            $this->logger->log("User {$recipient->username} does not want digests. Not sending.", 1);
+            return false;
         }
 
         $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $recipient->username));
         if ($notify === false) {
+            // By default, send notifications.
             $notify = 1;
         }
 
-        return [
-            'subject' => $subject,
-            'digesthtml' => $digesthtml,
-            'content' => $content,
-            'sentcount' => $sentcount,
-            'wantsemail' => $wantsemail,
-            'wantsnotify' => (bool) $notify,
-        ];
-    }
-
-    /**
-     * Send the Moodle notification for a single recipient.
-     */
-    protected function send_notification($recipient, $maildata) {
-        global $OUTPUT;
-
-        if (!$maildata['wantsnotify']) {
-            $this->logger->log("User {$recipient->username} does not want notifications. Not notifying.", 1);
-            return;
+        // THE EMAIL - Send via PostMark.
+        $result = false;
+        $postmarkapikey = isset($config->postmarkapikey) ? $config->postmarkapikey : '';
+        $postmarkfromemail = isset($config->postmarkfromemail) ? $config->postmarkfromemail : '';
+        if (!empty($postmarkapikey) && !empty($postmarkfromemail)) {
+            try {
+                $client = new PostmarkClient($postmarkapikey);
+                $client->sendEmail(
+                    $postmarkfromemail,
+                    $recipient->email,
+                    $postsubject,
+                    $digesthtml,
+                    '',
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    [
+                        'Precedence' => 'Bulk',
+                        'X-Auto-Response-Suppress' => 'All',
+                        'Auto-Submitted' => 'auto-generated',
+                    ]
+                );
+                $result = true;
+                $this->logger->log("PostMark email digest sent to {$recipient->email} with {$this->sentcount} announcements.", 1);
+            } catch (\Exception $e) {
+                $this->logger->log("PostMark error sending to {$recipient->email}: " . $e->getMessage(), 1);
+            }
+        } else {
+            $this->logger->log("PostMark API key or from email not configured. Skipping email.", 1);
         }
 
+        // THE NOTIFICATION.
         try {
-            $userfrom = \core_user::get_noreply_user();
-            $userfrom->customheaders = array(
-                'Precedence: Bulk',
-                'X-Auto-Response-Suppress: All',
-                'Auto-Submitted: auto-generated',
-            );
-
-            $digesttext = $OUTPUT->render_from_template('local_announcements/message_digest', $maildata['content']);
-            $eventdata = new \core\message\message();
-            $eventdata->courseid = SITEID;
-            $eventdata->component = 'local_announcements';
-            $eventdata->name = 'notificationsv2';
-            $eventdata->userfrom = $userfrom;
-            $eventdata->userto = $recipient;
-            $eventdata->subject = $maildata['subject'];
-            $eventdata->fullmessage = '';
-            $eventdata->fullmessageformat = FORMAT_PLAIN;
-            $eventdata->fullmessagehtml = $digesttext;
-            $eventdata->notification = 1;
-            $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', $maildata['sentcount']);
-            //message_send($eventdata);
-            $this->logger->log("Notification digest sent with {$maildata['sentcount']} announcements.", 1);
+            if ($notify) {
+                $digesttext = $OUTPUT->render_from_template('local_announcements/message_digest', $content);
+                $eventdata = new \core\message\message();
+                $eventdata->courseid = SITEID;
+                $eventdata->component = 'local_announcements';
+                $eventdata->name = 'notificationsv2';
+                $eventdata->userfrom = $userfrom;
+                $eventdata->userto = $recipient;
+                $eventdata->subject = $postsubject;
+                $eventdata->fullmessage = '';
+                $eventdata->fullmessageformat = FORMAT_PLAIN;
+                $eventdata->fullmessagehtml = $digesttext;
+                $eventdata->notification = 1;
+                $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', ($this->sentcount));
+                //message_send($eventdata);
+                $this->logger->log("Notification digest sent with {$this->sentcount} announcements.", 1);
+            } else {
+                $this->logger->log("User {$recipient->username} does not want notifications. Not notifying.", 1);
+            }
         } catch (\Exception $e) {
             $this->logger->log("Error sending notification: " . $e->getMessage(), 1);
         }
+
+        return $result;
+
+
     }
 
 
