@@ -1,0 +1,13 @@
+.DS_Store
+oracle.sqlite
+.phpintel
+test_keys.json
+testing_keys.json
+/vendor
+/build
+docs/_build
+*.swp
+/composer.lock
+.idea
+.phpunit.cache/
+.phpunit.result.cache

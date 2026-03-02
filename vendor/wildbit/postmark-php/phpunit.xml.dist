@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit 
+        colors="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>tests/</directory>
+            <exclude>tests/PostmarkClientBaseTest.php</exclude>
+        </testsuite>
+    </testsuites>
+
+    <logging>
+        <junit outputFile="build/unit_report.xml"/>
+    </logging>
+</phpunit>

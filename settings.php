@@ -161,6 +161,22 @@ if ($hassiteconfig) {
     $setting = new admin_setting_configtext($name, $title, $description, $default, $type);
     $settings->add($setting);
 
+    // PostMark API key for sending digest emails.
+    $name = 'local_announcements/postmarkapikey';
+    $title = 'PostMark API Key';
+    $description = 'Server API token from your PostMark account. Used to send digest emails via the PostMark REST API.';
+    $default = '';
+    $setting = new admin_setting_configpasswordunmask($name, $title, $description, $default);
+    $settings->add($setting);
+
+    // PostMark sender email address.
+    $name = 'local_announcements/postmarkfromemail';
+    $title = 'PostMark From Email';
+    $description = 'Verified sender email address in PostMark (e.g. noreply@school.edu).';
+    $default = '';
+    $setting = new admin_setting_configtext($name, $title, $description, $default);
+    $settings->add($setting);
+
     // Check if moodle-local_myconnect is installed.
     $myconnect = '/local/myconnect/version.php';
     if (file_exists($CFG->dirroot.$myconnect)) {

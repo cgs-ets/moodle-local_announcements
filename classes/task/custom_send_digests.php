@@ -28,10 +28,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__.'/../utils.php');
 require_once($CFG->dirroot . '/local/announcements/locallib.php');
+require_once($CFG->dirroot . '/local/announcements/vendor/autoload.php');
 
 use local_announcements\persistents\announcement;
 use local_announcements\external\announcement_exporter;
 use \local_announcements\utils;
+use Postmark\PostmarkClient;
 
 
 /**
@@ -267,10 +269,38 @@ class custom_send_digests {
             $notify = 1;
         }
 
-        // THE EMAIL.
-        //$result = utils::email_to_user($recipient, $userfrom, $postsubject, '', $digesthtml, '');
-        // Send via PostMark instead...
-        $this->logger->log("Email digest sent with {$this->sentcount} announcements.", 1);
+        // THE EMAIL - Send via PostMark.
+        $result = false;
+        $postmarkapikey = isset($config->postmarkapikey) ? $config->postmarkapikey : '';
+        $postmarkfromemail = isset($config->postmarkfromemail) ? $config->postmarkfromemail : '';
+        if (!empty($postmarkapikey) && !empty($postmarkfromemail)) {
+            try {
+                $client = new PostmarkClient($postmarkapikey);
+                $client->sendEmail(
+                    $postmarkfromemail,
+                    $recipient->email,
+                    $postsubject,
+                    $digesthtml,
+                    '',
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    [
+                        ['Name' => 'Precedence', 'Value' => 'Bulk'],
+                        ['Name' => 'X-Auto-Response-Suppress', 'Value' => 'All'],
+                        ['Name' => 'Auto-Submitted', 'Value' => 'auto-generated'],
+                    ]
+                );
+                $result = true;
+                $this->logger->log("PostMark email digest sent to {$recipient->email} with {$this->sentcount} announcements.", 1);
+            } catch (\Exception $e) {
+                $this->logger->log("PostMark error sending to {$recipient->email}: " . $e->getMessage(), 1);
+            }
+        } else {
+            $this->logger->log("PostMark API key or from email not configured. Skipping email.", 1);
+        }
 
         // THE NOTIFICATION.
         try {
