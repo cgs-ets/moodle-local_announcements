@@ -288,9 +288,9 @@ class custom_send_digests {
                     null,
                     null,
                     [
-                        ['Name' => 'Precedence', 'Value' => 'Bulk'],
-                        ['Name' => 'X-Auto-Response-Suppress', 'Value' => 'All'],
-                        ['Name' => 'Auto-Submitted', 'Value' => 'auto-generated'],
+                        'Precedence' => 'Bulk',
+                        'X-Auto-Response-Suppress' => 'All',
+                        'Auto-Submitted' => 'auto-generated',
                     ]
                 );
                 $result = true;
