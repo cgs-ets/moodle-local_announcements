@@ -62,6 +62,8 @@ class send_user_digests extends \core\task\adhoc_task {
     public function execute() {
         global $CFG;
 
+        return; // DISABLE THIS TASK.
+
         $config = get_config('local_announcements');
 
         $starttime = time();

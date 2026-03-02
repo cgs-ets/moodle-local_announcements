@@ -95,6 +95,8 @@ class cron_task_digests extends \core\task\scheduled_task {
     public function execute() {
         global $DB, $CFG;
 
+        return; // DISABLE THIS TASK.
+
         $config = get_config('local_announcements');
 
         if (!$config->enabledigest) {

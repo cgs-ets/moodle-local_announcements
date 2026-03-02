@@ -218,10 +218,10 @@ class custom_send_digests {
                 $email = $meta['recipient']->email;
 
                 if ($result->ErrorCode === 0) {
-                    $this->logger->log("PostMark email digest sent to {$email} with {$meta['sentcount']} announcements.", 1);
+                    $this->logger->log("PostMark email digest sent to {$email} with {$meta['sentcount']} announcements.", 2);
                     $DB->set_field('ann_digest_queue', 'status', 2, ['id' => $row->id]);
                 } else {
-                    $this->logger->log("PostMark error for {$email}: [{$result->ErrorCode}] {$result->Message}", 1);
+                    $this->logger->log("PostMark error for {$email}: [{$result->ErrorCode}] {$result->Message}", 2);
                     $DB->set_field('ann_digest_queue', 'status', 3, ['id' => $row->id]);
                 }
                 $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $row->id]);
@@ -361,9 +361,9 @@ class custom_send_digests {
             $eventdata->notification = 1;
             $eventdata->smallmessage = get_string('digest:smallmessage', 'local_announcements', $maildata['sentcount']);
             //message_send($eventdata);
-            $this->logger->log("Notification digest sent with {$maildata['sentcount']} announcements.", 1);
+            $this->logger->log("Sent digest as push notification to {$recipient->username} with {$maildata['sentcount']} announcements.", 2);
         } catch (\Exception $e) {
-            $this->logger->log("Error sending notification: " . $e->getMessage(), 1);
+            $this->logger->log("Error sending push notification to {$recipient->username}: " . $e->getMessage(), 2);
         }
     }
 
