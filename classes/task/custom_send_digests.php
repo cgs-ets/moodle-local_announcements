@@ -68,6 +68,11 @@ class custom_send_digests {
 
         $this->logger->log("Sending Digests " . date('Y-m-d H:i:s') . ".");
 
+        // Initialise $USER, $PAGE, and $OUTPUT for CLI context.
+        // This ensures tokenized URLs and template rendering work outside of a web request.
+        \core\cron::setup_user();
+        \core\cron::prepare_core_renderer();
+
         // Read up to N pending rows from the queue.
         $rows = $DB->get_records_select(
             'ann_digest_queue',
@@ -110,6 +115,10 @@ class custom_send_digests {
                     $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $row->id]);
                     continue;
                 }
+
+                // Switch $USER to the recipient so tokenized URLs are generated for them.
+                \core\cron::setup_user($recipient);
+                \core\cron::prepare_core_renderer();
 
                 $this->logger->log("Preparing digest for {$recipient->username} ({$recipient->id}). Data: " . $row->customdata, 1);
 
@@ -192,6 +201,9 @@ class custom_send_digests {
                 $DB->set_field('ann_digest_queue', 'timeprocessed', time(), ['id' => $row->id]);
             }
         }
+
+        // Reset $USER back to the cron admin user.
+        \core\cron::setup_user();
 
         // Phase 2: Send all collected emails in a single Postmark batch.
         if (empty($emailbatch)) {
