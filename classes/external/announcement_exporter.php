@@ -530,4 +530,21 @@ class announcement_exporter extends persistent_exporter {
         ];
     }
 
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
