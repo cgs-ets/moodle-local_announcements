@@ -38,8 +38,9 @@ class digest_logger {
      * Constructor.
      *
      * @param bool $verbose If true, also echo to stdout via mtrace().
+     * @param string $prefix Log file prefix (default: 'digest').
      */
-    public function __construct($verbose = false) {
+    public function __construct($verbose = false, $prefix = 'digest') {
         global $CFG;
 
         $this->verbose = $verbose;
@@ -49,7 +50,7 @@ class digest_logger {
             mkdir($logdir, 0777, true);
         }
 
-        $logfile = $logdir . '/digest_' . date('Ymd') . '.log';
+        $logfile = $logdir . '/' . $prefix . '_' . date('Ymd') . '.log';
         $this->fh = fopen($logfile, 'a');
     }
 
