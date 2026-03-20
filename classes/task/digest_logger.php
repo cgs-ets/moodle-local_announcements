@@ -45,7 +45,7 @@ class digest_logger {
 
         $this->verbose = $verbose;
 
-        $logdir = $CFG->dataroot . '/temp/local_announcements';
+        $logdir = $CFG->dataroot . '/local_announcements';
         if (!is_dir($logdir)) {
             mkdir($logdir, 0777, true);
         }
