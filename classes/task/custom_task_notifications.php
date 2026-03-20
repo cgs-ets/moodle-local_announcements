@@ -168,13 +168,21 @@ class custom_task_notifications {
                 continue;
             }
 
-            // Insert into notifications queue.
+            // Insert into notifications queue (email via Postmark).
             $record = new \stdClass();
             $record->username = $user->username;
             $record->customdata = json_encode(['posts' => $notificationposts]);
             $record->status = 0;
             $record->timecreated = time();
             $DB->insert_record('ann_notifications_queue', $record);
+
+            // Insert into push notifications queue (app notifications via message_send).
+            $pushrecord = new \stdClass();
+            $pushrecord->username = $user->username;
+            $pushrecord->customdata = json_encode(['posts' => $notificationposts]);
+            $pushrecord->status = 0;
+            $pushrecord->timecreated = time();
+            $DB->insert_record('ann_pushnotifications_queue', $pushrecord);
         }
     }
 

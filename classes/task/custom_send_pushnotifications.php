@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Processes the notification queue and sends emails via Postmark.
+ * Processes the push notification queue and sends notifications via message_send.
  *
  * @package   local_announcements
  * @copyright 2026 Michael Vangelovski
@@ -28,15 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__.'/../utils.php');
 require_once($CFG->dirroot . '/local/announcements/locallib.php');
-require_once($CFG->dirroot . '/local/announcements/vendor/autoload.php');
 
 use local_announcements\persistents\announcement;
 use local_announcements\external\announcement_exporter;
 use \local_announcements\utils;
-use Postmark\PostmarkClient;
 
 
-class custom_send_notifications {
+class custom_send_pushnotifications {
 
     /** @var digest_logger */
     protected $logger;
@@ -54,7 +52,7 @@ class custom_send_notifications {
     }
 
     /**
-     * Process pending notification queue entries and send emails via Postmark.
+     * Process pending push notification queue entries.
      */
     public function execute() {
         global $DB, $CFG;
@@ -62,7 +60,7 @@ class custom_send_notifications {
         $config = get_config('local_announcements');
         $batchsize = isset($config->cronsendnum) ? (int) $config->cronsendnum : 1;
 
-        $this->logger->log("Sending Notification Emails " . date('Y-m-d H:i:s') . ".");
+        $this->logger->log("Sending Push Notifications " . date('Y-m-d H:i:s') . ".");
 
         // Initialise $USER, $PAGE, and $OUTPUT for CLI context.
         \core\cron::setup_user();
@@ -70,7 +68,7 @@ class custom_send_notifications {
 
         // Read up to N pending rows from the queue.
         $rows = $DB->get_records_select(
-            'ann_notifications_queue',
+            'ann_pushnotifications_queue',
             'status = 0',
             null,
             'id ASC',
@@ -80,23 +78,16 @@ class custom_send_notifications {
         );
 
         if (empty($rows)) {
-            $this->logger->log("No pending notification queue entries found.", 1);
+            $this->logger->log("No pending push notification queue entries found.", 1);
             return;
         }
 
-        $this->logger->log("Found " . count($rows) . " pending notification(s) to process.", 1);
+        $this->logger->log("Found " . count($rows) . " pending push notification(s) to process.", 1);
 
         // Mark selected rows as processing (status = 1).
         $ids = array_keys($rows);
         list($insql, $params) = $DB->get_in_or_equal($ids);
-        $DB->set_field_select('ann_notifications_queue', 'status', 1, "id {$insql}", $params);
-
-        $postmarkapikey = isset($config->postmarkapikey) ? $config->postmarkapikey : '';
-        $postmarkfromemail = isset($config->postmarkfromemail) ? $config->postmarkfromemail : '';
-
-        // Phase 1: Loop rows, prepare data, check email pref, render templates, collect Postmark batch payloads.
-        $emailbatch = [];
-        $batchmeta = [];
+        $DB->set_field_select('ann_pushnotifications_queue', 'status', 1, "id {$insql}", $params);
 
         foreach ($rows as $row) {
             try {
@@ -107,8 +98,8 @@ class custom_send_notifications {
 
                 if (!$this->recipient || $this->recipient->deleted) {
                     $this->logger->log("User {$row->username} not found or deleted. Skipping.", 1);
-                    $DB->set_field('ann_notifications_queue', 'status', 3, ['id' => $row->id]);
-                    $DB->set_field('ann_notifications_queue', 'timeprocessed', time(), ['id' => $row->id]);
+                    $DB->set_field('ann_pushnotifications_queue', 'status', 3, ['id' => $row->id]);
+                    $DB->set_field('ann_pushnotifications_queue', 'timeprocessed', time(), ['id' => $row->id]);
                     continue;
                 }
 
@@ -118,94 +109,59 @@ class custom_send_notifications {
                 \core\cron::setup_user($this->recipient);
                 \core\cron::prepare_core_renderer();
 
-                $this->logger->log("Processing notification emails for {$this->recipient->username} ({$this->recipient->id}). Posts: " . implode(',', $postids), 1);
+                $this->logger->log("Processing push notifications for {$this->recipient->username} ({$this->recipient->id}). Posts: " . implode(',', $postids), 1);
 
                 $posts = $this->prepare_data($postids);
 
                 if (empty($posts)) {
                     $this->logger->log("No posts found to send for {$this->recipient->username}.", 1);
-                    $DB->set_field('ann_notifications_queue', 'status', 2, ['id' => $row->id]);
-                    $DB->set_field('ann_notifications_queue', 'timeprocessed', time(), ['id' => $row->id]);
+                    $DB->set_field('ann_pushnotifications_queue', 'status', 2, ['id' => $row->id]);
+                    $DB->set_field('ann_pushnotifications_queue', 'timeprocessed', time(), ['id' => $row->id]);
                     continue;
                 }
 
-                // Check user email preference.
-                $email = $DB->get_field('ann_user_preferences', 'email', array('username' => $this->recipient->username));
-                if ($email === false) {
-                    // By default, do not send emails.
-                    $email = 0;
+                // Check user preferences.
+                $notify = $DB->get_field('ann_user_preferences', 'notify', array('username' => $this->recipient->username));
+                if ($notify === false) {
+                    // By default, send notifications.
+                    $notify = 1;
                 }
 
-                $emailcount = 0;
+                $errorcount = 0;
+                $sentcount = 0;
                 foreach ($posts as $post) {
                     // Check forcesend override.
-                    $postemail = $email;
+                    $postnotify = $notify;
                     if ($post->forcesend) {
-                        $postemail = 1;
+                        $postnotify = 1;
                     }
 
-                    if ($postemail != 1) {
-                        $this->logger->log("User {$this->recipient->username} does not want emails. Not sending {$post->id}.", 2);
+                    if ($postnotify != 1) {
+                        $this->logger->log("User {$this->recipient->username} does not want notifications. Not sending {$post->id}.", 2);
                         continue;
                     }
 
-                    $payload = $this->prepare_email_payload($post, $postmarkfromemail);
-                    if ($payload) {
-                        $emailbatch[] = $payload;
-                        $emailcount++;
+                    if ($this->send_push_notification($post)) {
+                        $sentcount++;
+                    } else {
+                        $errorcount++;
                     }
                 }
 
-                $this->logger->log("Collected {$emailcount} email payloads for {$this->recipient->username}.", 1);
+                $this->logger->log("Sent {$sentcount} push notifications with {$errorcount} failures for {$this->recipient->username}.", 1);
 
-                $batchmeta[] = [
-                    'row' => $row,
-                    'recipient' => $this->recipient,
-                    'emailcount' => $emailcount,
-                ];
+                $DB->set_field('ann_pushnotifications_queue', 'status', 2, ['id' => $row->id]);
+                $DB->set_field('ann_pushnotifications_queue', 'timeprocessed', time(), ['id' => $row->id]);
 
             } catch (\Exception $e) {
-                $this->logger->log("Error processing notification emails for {$row->username}: " . $e->getMessage(), 1);
-                $DB->set_field('ann_notifications_queue', 'status', 3, ['id' => $row->id]);
-                $DB->set_field('ann_notifications_queue', 'timeprocessed', time(), ['id' => $row->id]);
+                $this->logger->log("Error processing push notifications for {$row->username}: " . $e->getMessage(), 1);
+                $DB->set_field('ann_pushnotifications_queue', 'status', 3, ['id' => $row->id]);
+                $DB->set_field('ann_pushnotifications_queue', 'timeprocessed', time(), ['id' => $row->id]);
             }
         }
 
         // Reset $USER back to the cron admin user.
         \core\cron::setup_user();
-
-        // Mark all rows that made it to batchmeta as complete (they were processed successfully).
-        foreach ($batchmeta as $meta) {
-            $DB->set_field('ann_notifications_queue', 'status', 2, ['id' => $meta['row']->id]);
-            $DB->set_field('ann_notifications_queue', 'timeprocessed', time(), ['id' => $meta['row']->id]);
-        }
-
-        // Phase 2: Send all collected emails in a single Postmark batch.
-        if (empty($emailbatch)) {
-            $this->logger->log("No emails to send.", 1);
-            return;
-        }
-
-        if (empty($postmarkapikey) || empty($postmarkfromemail)) {
-            $this->logger->log("PostMark API key or from email not configured. Skipping emails.", 1);
-            return;
-        }
-
-        try {
-            $client = new PostmarkClient($postmarkapikey);
-            $this->logger->log("Sending PostMark batch of " . count($emailbatch) . " email(s).", 1);
-            $results = $client->sendEmailBatch($emailbatch);
-
-            foreach ($results as $i => $result) {
-                if ($result->ErrorCode === 0) {
-                    $this->logger->log("PostMark email sent: {$emailbatch[$i]['To']} - {$emailbatch[$i]['Subject']}", 2);
-                } else {
-                    $this->logger->log("PostMark error for {$emailbatch[$i]['To']}: [{$result->ErrorCode}] {$result->Message}", 2);
-                }
-            }
-        } catch (\Exception $e) {
-            $this->logger->log("PostMark batch error: " . $e->getMessage(), 1);
-        }
     }
 
     /**
@@ -242,13 +198,12 @@ class custom_send_notifications {
     }
 
     /**
-     * Prepare a single Postmark email payload for a post.
+     * Send a push notification for the specified post to the current recipient.
      *
      * @param   \stdClass   $post
-     * @param   string      $fromEmail
-     * @return  array|null
+     * @return  bool
      */
-    protected function prepare_email_payload($post, $fromEmail) {
+    protected function send_push_notification($post) {
         global $OUTPUT;
 
         $config = get_config('local_announcements');
@@ -272,34 +227,37 @@ class custom_send_notifications {
             $postsubject = '[Updated] ' . $postsubject;
         }
 
-        $fullmessagehtml = $OUTPUT->render_from_template('local_announcements/message_notification_email', $data);
+        $userfrom = \core_user::get_noreply_user();
+        $userfrom->customheaders = array(
+            'Precedence: Bulk',
+            'X-Auto-Response-Suppress: All',
+            'Auto-Submitted: auto-generated',
+        );
 
-        // Convert message headers to Postmark key-value format.
-        $headers = $this->get_message_headers($post, $a);
-
-        return [
-            'From' => $fromEmail,
-            'To' => $this->recipient->email,
-            'Subject' => $postsubject,
-            'HtmlBody' => $fullmessagehtml,
-            'TextBody' => '',
-            'Headers' => $headers,
-        ];
-    }
-
-    /**
-     * Get the list of message headers as Postmark key-value pairs.
-     *
-     * @param   \stdClass   $post
-     * @param   \stdClass   $a The list of strings for this post
-     * @return  array
-     */
-    protected function get_message_headers($post, $a) {
-        return [
-            'Precedence' => 'Bulk',
-            'X-Auto-Response-Suppress' => 'All',
-            'Auto-Submitted' => 'auto-generated',
-        ];
+        try {
+            $notificationhtml = $OUTPUT->render_from_template('local_announcements/message_notification', $data);
+            $eventdata = new \core\message\message();
+            $eventdata->courseid = SITEID;
+            $eventdata->component = 'local_announcements';
+            $eventdata->name = 'notificationsv2';
+            $eventdata->userfrom = $userfrom;
+            $eventdata->userto = $this->recipient;
+            $eventdata->subject = $postsubject;
+            $eventdata->fullmessage = '';
+            $eventdata->fullmessageformat = FORMAT_PLAIN;
+            $eventdata->fullmessagehtml = $notificationhtml;
+            $eventdata->notification = 1;
+            $eventdata->smallmessage = get_string('notification:smallmessage', 'local_announcements', (object) [
+                'user' => $post->authorfullname,
+                'subject' => $postsubject,
+            ]);
+            $result = message_send($eventdata);
+            $this->logger->log("Push notification sent for announcement {$post->id}", 2);
+            return $result;
+        } catch (\Exception $e) {
+            $this->logger->log("Error sending push notification: " . $e->getMessage(), 2);
+            return false;
+        }
     }
 
     /**
