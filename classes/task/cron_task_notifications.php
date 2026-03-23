@@ -76,6 +76,8 @@ class cron_task_notifications extends \core\task\scheduled_task {
      */
     public function execute() {
         global $DB;
+        
+        return; // DISABLE THIS TASK.
 
         $config = get_config('local_announcements');
 
