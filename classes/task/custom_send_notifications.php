@@ -101,7 +101,17 @@ class custom_send_notifications {
         foreach ($rows as $row) {
             try {
                 $data = json_decode($row->customdata);
-                $postids = $data->posts;
+
+                // Support new format (array of objects with id+forcesend) and old format (array of plain IDs).
+                $forcesendmap = [];
+                if (!empty($data->posts) && is_object($data->posts[0])) {
+                    $postids = array_map(function($p) { return $p->id; }, $data->posts);
+                    foreach ($data->posts as $p) {
+                        $forcesendmap[$p->id] = !empty($p->forcesend);
+                    }
+                } else {
+                    $postids = $data->posts;
+                }
 
                 $this->recipient = \core_user::get_user_by_username($row->username);
 
@@ -138,9 +148,11 @@ class custom_send_notifications {
 
                 $emailcount = 0;
                 foreach ($posts as $post) {
-                    // Check forcesend override.
+                    // Check forcesend override. Use the value captured at queue time if available,
+                    // otherwise fall back to the live post value (old queue format).
                     $postemail = $email;
-                    if ($post->forcesend) {
+                    $isforcesend = !empty($forcesendmap) ? !empty($forcesendmap[$post->id]) : $post->forcesend;
+                    if ($isforcesend) {
                         $postemail = 1;
                     }
 

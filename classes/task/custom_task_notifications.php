@@ -195,7 +195,10 @@ class custom_task_notifications {
         $notificationposts = [];
         if (isset($this->userposts[$user->id])) {
             foreach ($this->userposts[$user->id] as $postid) {
-                $notificationposts[] = $postid;
+                $notificationposts[] = [
+                    'id' => $postid,
+                    'forcesend' => (int) $this->posts[$postid]->get('forcesend'),
+                ];
             }
         }
         return $notificationposts;
