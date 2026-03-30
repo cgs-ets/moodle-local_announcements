@@ -350,7 +350,7 @@ class announcement_exporter extends persistent_exporter {
 		$emailmessage = trim($dom->saveHTML());
 
     	// Append view more link to short message.
-		$viewlink = '<p><a class="view-full-link btn btn-secondary" href="' . $viewurl . '">' . get_string('list:viewmore', 'local_announcements') . '</a></p>';
+		$viewlink = '<p><a target="_blank" class="view-full-link-popout btn btn-secondary" href="' . $viewurl . '">' . get_string('list:viewmore', 'local_announcements') . '</a></p>';
 		if ($islong) {
 			$shortmessage .= $viewlink;
 		}
