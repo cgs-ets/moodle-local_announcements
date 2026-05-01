@@ -731,18 +731,16 @@ class moderation {
         }
 
         // Does privilegs > modusername contain the user id?
-        $sql = "SELECT * 
-                  FROM {" . static::TABLE_PRIVILEGES . "}
-                  WHERE active = 1
-                  AND ( modusername LIKE '[" . $USER->username . ",%'
-                    OR modusername LIKE '%," . $USER->username . ",%'
-                    OR modusername LIKE '%," . $USER->username . "]'
-                  )";
-        if ($DB->record_exists_sql($sql)) {
-            return true;
-        }
-
-        if ($DB->record_exists(static::TABLE_PRIVILEGES, array('modusername' => $USER->username, 'active' => 1))) {
+        $sql = "SELECT *
+                FROM {" . static::TABLE_PRIVILEGES . "}
+                WHERE active = 1
+                AND (
+                    modusername LIKE '[[]{$USER->username},%'
+                    OR modusername LIKE '%,{$USER->username},%'
+                    OR modusername LIKE '%,{$USER->username}[]]'
+                )";
+        $result = $DB->get_records_sql($sql);
+        if ($result) {
             return true;
         }
 
