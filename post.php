@@ -57,6 +57,7 @@ $redirectdefault = new moodle_url('/local/announcements/index.php');
 // Initialise a default post.
 $post = new stdClass();
 $post->subject       = '';
+$post->category      = '';
 $post->message       = '';
 $post->messageformat = editors_get_preferred_format();
 $post->messagetrust = 1; // True to allow for special content such as clickview.
@@ -73,6 +74,7 @@ if (!empty($edit)) {
         $announcement         = new announcement($edit);
         $post->id             = $announcement->get('id');
         $post->subject        = $announcement->get('subject');
+        $post->category       = $announcement->get('category');
         $post->authorusername = $announcement->get('authorusername');
         $post->message        = $announcement->get('message');
         $post->messageformat  = editors_get_preferred_format();
@@ -124,6 +126,7 @@ $mformpost->set_data(
         'attachments' => $draftitemid,
         'general' => get_string('postform:yournewpost', 'local_announcements'),
         'subject' => $post->subject,
+        'category' => $post->category,
         'message' => array(
             'text' => $currenttext,
             'format' => empty($post->messageformat) ? editors_get_preferred_format() : $post->messageformat,

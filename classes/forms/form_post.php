@@ -27,6 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/repository/lib.php');
 
+use \local_announcements\persistents\announcement;
+
 
 class form_post extends \moodleform {
 
@@ -94,6 +96,18 @@ class form_post extends \moodleform {
         $mform->setType('subject', PARAM_TEXT);
         $mform->addRule('subject', get_string('required'), 'required', null, 'client');
         $mform->addRule('subject', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
+
+        // Category.
+        $mform->addElement('selectgroups', 'category',
+            get_string('postform:category', 'local_announcements'),
+            announcement::get_category_select_options());
+        $mform->addHelpButton('category', 'postform:category', 'local_announcements');
+        $mform->setType('category', PARAM_RAW);
+        $mform->addRule('category', get_string('required'), 'required', null, 'client');
+        $mform->addElement('static', 'categorydesc', '',
+            '<small class="form-text text-muted">'
+            . get_string('postform:categorydesc', 'local_announcements')
+            . '</small>');
 
         // Message.
         $mform->addElement('editor', 'message', get_string('postform:message', 'local_announcements'), null, self::editor_options((empty($post->id) ? null : $post->id)));
@@ -244,6 +258,9 @@ class form_post extends \moodleform {
         }
         if (empty($data['subject'])) {
             $errors['subject'] = get_string('postform:erroremptysubject', 'local_announcements');
+        }
+        if (empty($data['category'])) {
+            $errors['category'] = get_string('postform:erroremptycategory', 'local_announcements');
         }
         if (empty($data['audiencesjson'])) {
             $errors['audiencesjson'] = get_string('postform:errornoaudienceselected', 'local_announcements');

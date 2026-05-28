@@ -120,6 +120,9 @@ $string['announcements:unmoderatedannouncer'] = 'Send announcements without mode
 
 $string['postform:yournewpost'] = 'Your new announcement';
 $string['postform:subject'] = 'Subject';
+$string['postform:category'] = 'Category';
+$string['postform:category_help'] = 'Select the type of announcement for categorisation in the digest.';
+$string['postform:categorydesc'] = 'Select the type of announcement for categorisation in the digest.';
 $string['postform:message'] = 'Message';
 $string['postform:forcesend'] = 'Force send';
 $string['postform:forcesendnote'] = 'Override individual preferences and email a copy of this announcement immediately. This should only be used for emergencies.';
@@ -135,6 +138,7 @@ $string['postform:areaattachment'] = 'Attachment';
 $string['postform:post'] = 'Post';
 $string['postform:timestartenderror'] = 'Display end date cannot be earlier than the start date';
 $string['postform:erroremptysubject'] = 'Post subject cannot be empty';
+$string['postform:erroremptycategory'] = 'You must select a category';
 $string['postform:erroremptymessage'] = 'Post message cannot be empty';
 $string['postform:erroremptymoderator'] = 'You must select a moderator';
 $string['postform:errornoaudienceselected'] = 'You must select an audience.';

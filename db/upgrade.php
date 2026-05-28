@@ -335,6 +335,17 @@ function xmldb_local_announcements_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025052105, 'local', 'announcements');
     }
 
+    if ($oldversion < 2025052801) {
+        $table = new xmldb_table('ann_posts');
+        $field = new xmldb_field('category', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'subject');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2025052801, 'local', 'announcements');
+    }
+
     return true;
 
 }

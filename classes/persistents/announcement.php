@@ -49,6 +49,59 @@ class announcement extends persistent {
     const TABLE_POSTS_AUDIENCES_CONDITIONS = 'ann_posts_audiences_cond';
     const TABLE_AUDIENCE_TYPES = 'ann_audience_types';
 
+    /** Announcement categories. Referenced by the post form and elsewhere. */
+    const CATEGORIES = [
+        ['shortname' => 'From Head',              'title' => 'From Head',              'sortorder' => 10],
+        ['shortname' => 'From HoSS',              'title' => 'From HoSS',              'sortorder' => 20],
+        ['shortname' => 'From HoPS',              'title' => 'From HoPS',              'sortorder' => 30],
+        ['shortname' => 'Newsletter link',        'title' => 'Newsletter link',        'sortorder' => 40],
+        ['shortname' => 'Student > Academic',     'title' => 'Student > Academic',     'sortorder' => 50],
+        ['shortname' => 'Student > Co-curricular','title' => 'Student > Co-curricular','sortorder' => 60],
+        ['shortname' => 'Student > House',        'title' => 'Student > House',        'sortorder' => 70],
+        ['shortname' => 'Student > Boarding',     'title' => 'Student > Boarding',     'sortorder' => 80],
+        ['shortname' => 'Staff > Teaching',       'title' => 'Staff > Teaching',       'sortorder' => 90],
+        ['shortname' => 'Staff > Operations',     'title' => 'Staff > Operations',     'sortorder' => 100],
+        ['shortname' => 'Staff > HR',             'title' => 'Staff > HR',             'sortorder' => 110],
+        ['shortname' => 'Staff > Wellbeing',      'title' => 'Staff > Wellbeing',      'sortorder' => 120],
+        ['shortname' => 'Events & Community',     'title' => 'Events & Community',     'sortorder' => 130],
+    ];
+
+    /**
+     * Build the categories list shaped for Moodle's `selectgroups` mform element.
+     * Items whose shortname contains ' > ' are placed in an <optgroup> named
+     * after the prefix (label = suffix). Items without ' > ' are placed in an
+     * unnamed group so they appear at the top of the dropdown.
+     *
+     * @return array [groupLabel => [shortname => optionLabel, ...], ...]
+     */
+    public static function get_category_select_options() {
+        $categories = static::CATEGORIES;
+        usort($categories, function($a, $b) {
+            return $a['sortorder'] <=> $b['sortorder'];
+        });
+
+        // Use a single space as the key for the ungrouped bucket so it
+        // renders as an <optgroup label=" "> at the top of the list.
+        // The empty-value "Choose..." placeholder sits at the top of that
+        // bucket so it is selected by default for new announcements.
+        $ungroupedkey = ' ';
+        $options = [$ungroupedkey => ['' => get_string('choosedots')]];
+        foreach ($categories as $category) {
+            $shortname = $category['shortname'];
+            $title = $category['title'];
+            if (strpos($shortname, ' > ') !== false) {
+                list($group, $label) = explode(' > ', $title, 2);
+                if (!isset($options[$group])) {
+                    $options[$group] = [];
+                }
+                $options[$group][$shortname] = $label;
+            } else {
+                $options[$ungroupedkey][$shortname] = $title;
+            }
+        }
+        return $options;
+    }
+
     /**
      * Return the definition of the properties of this model.
      *
@@ -73,6 +126,10 @@ class announcement extends persistent {
             ],
             "subject" => [
                 'type' => PARAM_RAW,
+            ],
+            "category" => [
+                'type' => PARAM_RAW,
+                'default' => '',
             ],
             "message" => [
                 'type' => PARAM_RAW,
@@ -1072,6 +1129,7 @@ class announcement extends persistent {
         $timenow = time();
         $announcement->set('timeedited', $timenow);
         $announcement->set('subject', $data->subject);
+        $announcement->set('category', $data->category);
         $announcement->set('message', '');
         $announcement->set('messageformat', $data->messageformat);
         $announcement->set('messagetrust', $data->messagetrust);
