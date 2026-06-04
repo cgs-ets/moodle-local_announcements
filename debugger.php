@@ -60,12 +60,16 @@ $output = '';
 echo "<pre>";
 
 
-$cron = new \local_announcements\task\cron_task_digests();
-$cron->execute();
+$logger = new \local_announcements\task\digest_logger($options['verbose']);
+$digest = new \local_announcements\task\custom_task_digest_categorised($logger);
+$digest->execute();
+$logger->close();
+exit;
+
 echo "<hr>";
 
-$cron = new \local_announcements\task\send_user_digests();
-$cron->set_component('local_announcements');
+//$cron = new \local_announcements\task\send_user_digests();
+//$cron->set_component('local_announcements');
 /*$cron->set_custom_data(array (
     2 => 
     array (
@@ -87,22 +91,8 @@ $cron->set_component('local_announcements');
       ),
     ),
 ));*/
-$cron->set_custom_data(array (
-    6849 => 
-    array (
-      'announcements' => 
-      array (
-        0 => 41021,
-      ),
-      'myconnectposts' => 
-      array (
-        0 => 129162,
-      ),
-    ),
-));
 
-$cron->execute();
-echo "<hr>";
+
 
 
 /*

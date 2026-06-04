@@ -101,7 +101,6 @@ class custom_task_digest_categorised {
 
         $this->logger->log("Running Digest for " . date('Y-m-d') . ".");
 
-
         if (!$config->enabledigest) {
             $this->logger->log("Digest is not enabled in plugin configuration. Exiting.", 1);
             return;
@@ -421,12 +420,12 @@ class custom_task_digest_categorised {
     protected function recategorise($category, $role) {
         if ($role === 'staff') {
             if (strpos($category, 'Student > ') === 0) {
-                return 'Staff > ' . substr($category, strlen('Student > '));
+                return 'Staff > Teaching';
             }
         } else {
             // Student and parent recipients.
             if (strpos($category, 'Staff > ') === 0) {
-                return 'Student > ' . substr($category, strlen('Staff > '));
+                return 'Student > Academic';
             }
         }
         return $category;

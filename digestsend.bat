@@ -1,1 +1,1 @@
-C:\php\php8.3.9\php.exe C:\inetpub\wwwroot\moodle\local\announcements\cli\senddigests.php
+C:\php\php8.3.9\php.exe C:\inetpub\wwwroot\moodle\local\announcements\cli\senddigests_categorised.php

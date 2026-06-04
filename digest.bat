@@ -1,1 +1,1 @@
-C:\php\php8.3.9\php.exe C:\inetpub\wwwroot\moodle\local\announcements\cli\digest.php
+C:\php\php8.3.9\php.exe C:\inetpub\wwwroot\moodle\local\announcements\cli\digest_categorised.php
