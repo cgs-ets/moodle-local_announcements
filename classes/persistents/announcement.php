@@ -75,10 +75,32 @@ class announcement extends persistent {
      * @return array [groupLabel => [shortname => optionLabel, ...], ...]
      */
     public static function get_category_select_options() {
+        global $USER;
+
         $categories = static::CATEGORIES;
         usort($categories, function($a, $b) {
             return $a['sortorder'] <=> $b['sortorder'];
         });
+
+        // Work out which restricted (ungrouped) categories the current user
+        // may post in, based on the poster lists configured in settings.
+        // Grouped categories ("Student > ..." and "Staff > ...") are always
+        // shown. CDO posters can see every category.
+        $config = get_config('local_announcements');
+        $username = \core_text::strtolower(trim($USER->username));
+        $inlist = function($raw) use ($username) {
+            $usernames = array_filter(array_map(function($u) {
+                return \core_text::strtolower(trim($u));
+            }, preg_split('/\R/', (string) $raw)));
+            return in_array($username, $usernames, true);
+        };
+        $iscdo = $inlist($config->cdoposters ?? '');
+        // Map of restricted category shortname => whether this user may see it.
+        $restrictedvisible = [
+            'From Head' => $iscdo || $inlist($config->hosposters ?? ''),
+            'From HoSS' => $iscdo || $inlist($config->hossposters ?? ''),
+            'From HoPS' => $iscdo || $inlist($config->hopsposters ?? ''),
+        ];
 
         // Use a single space as the key for the ungrouped bucket so it
         // renders as an <optgroup label=" "> at the top of the list.
@@ -96,6 +118,16 @@ class announcement extends persistent {
                 }
                 $options[$group][$shortname] = $label;
             } else {
+                // Ungrouped categories are restricted. Those explicitly mapped
+                // to a poster list are shown only to matching users (or CDO);
+                // any other ungrouped category is visible to CDO posters only.
+                if (array_key_exists($shortname, $restrictedvisible)) {
+                    if (!$restrictedvisible[$shortname]) {
+                        continue;
+                    }
+                } else if (!$iscdo) {
+                    continue;
+                }
                 $options[$ungroupedkey][$shortname] = $title;
             }
         }

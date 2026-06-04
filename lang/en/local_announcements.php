@@ -112,6 +112,7 @@ $string['config:digestbatchnumdesc'] = 'User digests to process in a single ad h
 $string['config:myconnectdigest'] = 'Include MyConnect in digest';
 $string['config:myconnectdigestdesc'] = 'Include new MyConnect posts in the announcement daily digest.';
 
+
 $string['announcements:post'] = 'Post announcements';
 $string['announcements:administer'] = 'Administer announcements';
 $string['announcements:auditor'] = 'Audit announcements';

@@ -143,6 +143,32 @@ if ($hassiteconfig) {
     $setting = new admin_setting_configcheckbox($name, $title, $description, 0);
     $settings->add($setting);
 
+    // Category poster lists. One username per line. Used to filter the
+    // category select in the post form.
+    $name = 'local_announcements/hosposters';
+    $title = 'HoS posters'; //get_string('config:hosposters', 'local_announcements');
+    $description = 'Usernames (one per line) of users who may post in the "From Head" category.'; //get_string('config:hospostersdesc', 'local_announcements');
+    $setting = new admin_setting_configtextarea($name, $title, $description, '');
+    $settings->add($setting);
+
+    $name = 'local_announcements/hossposters';
+    $title = 'HoSS posters'; //get_string('config:hossposters', 'local_announcements');
+    $description = 'Usernames (one per line) of users who may post in the "From HoSS" category.'; //get_string('config:hosspostersdesc', 'local_announcements');
+    $setting = new admin_setting_configtextarea($name, $title, $description, '');
+    $settings->add($setting);
+
+    $name = 'local_announcements/hopsposters';
+    $title = 'HoPS posters'; //get_string('config:hopsposters', 'local_announcements');
+    $description = 'Usernames (one per line) of users who may post in the "From HoPS" category.'; //get_string('config:hopspostersdesc', 'local_announcements');
+    $setting = new admin_setting_configtextarea($name, $title, $description, '');
+    $settings->add($setting);
+
+    $name = 'local_announcements/cdoposters';
+    $title = 'CDO posters'; //get_string('config:cdoposters', 'local_announcements');
+    $description = 'Usernames (one per line) of users who may post in any category.'; //get_string('config:cdopostersdesc', 'local_announcements');
+    $setting = new admin_setting_configtextarea($name, $title, $description, '');
+    $settings->add($setting);
+
     // Number of notifications to batch process in a single go.
     $name = 'local_announcements/cronsendnum';
     $title = get_string('config:cronsendnum', 'local_announcements');
