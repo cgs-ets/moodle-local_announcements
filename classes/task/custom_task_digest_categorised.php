@@ -328,6 +328,29 @@ class custom_task_digest_categorised {
             $buckets = array();
             $childbuckets = array();
             $digestposts = $this->fetch_posts_for_user($user);
+
+            // The parent's featured children: the union of causing-children across
+            // this parent's "Student > *" announcements. Used to deduplicate posts
+            // that are caused by every featured child (see the bucketing loop).
+            $parentchildren = array();
+            if ($isparent) {
+                foreach ($digestposts as $postid) {
+                    if (!isset($this->posts[$postid])) {
+                        continue;
+                    }
+                    $cat = $this->recategorise($this->posts[$postid]->category, $role);
+                    if (strpos($cat, 'Student > ') !== 0) {
+                        continue;
+                    }
+                    $cids = isset($this->postmentees[$postid][$user->username])
+                        ? $this->postmentees[$postid][$user->username] : array();
+                    foreach (array_unique($cids) as $cid) {
+                        $parentchildren[$cid] = true;
+                    }
+                }
+            }
+            $numfeatured = count($parentchildren);
+
             foreach ($digestposts as $postid) {
                 if (!isset($this->posts[$postid])) {
                     continue;
@@ -338,15 +361,24 @@ class custom_task_digest_categorised {
                 }
                 // For parents, split causing-child "Student > *" posts per child.
                 $mentees = ($isparent && isset($this->postmentees[$postid][$user->username]))
-                    ? $this->postmentees[$postid][$user->username] : array();
+                    ? array_unique($this->postmentees[$postid][$user->username]) : array();
                 if (!empty($mentees) && strpos($category, 'Student > ') === 0) {
-                    foreach (array_unique($mentees) as $childid) {
-                        if (!isset($childbuckets[$childid][$category])) {
-                            $childbuckets[$childid][$category] = array('announcements' => array());
+                    // Deduplicate: when a post is caused by EVERY featured child (and
+                    // there is more than one), show it once in the general Student
+                    // section instead of repeating it under each child. A post caused
+                    // by only some children stays per-child. Since $mentees is always a
+                    // subset of $parentchildren, "all" reduces to a count match.
+                    $linkedall = ($numfeatured > 1 && count($mentees) === $numfeatured);
+                    if (!$linkedall) {
+                        foreach ($mentees as $childid) {
+                            if (!isset($childbuckets[$childid][$category])) {
+                                $childbuckets[$childid][$category] = array('announcements' => array());
+                            }
+                            $childbuckets[$childid][$category]['announcements'][] = $postid;
                         }
-                        $childbuckets[$childid][$category]['announcements'][] = $postid;
+                        continue;
                     }
-                    continue;
+                    // else: fall through to the generic bucket below (single copy).
                 }
                 if (!isset($buckets[$category])) {
                     $buckets[$category] = array(
