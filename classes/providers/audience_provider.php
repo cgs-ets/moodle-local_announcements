@@ -170,6 +170,73 @@ abstract class audience_provider {
     abstract public static function get_audience_usernames($code, $type = '', $roles = array());
 
     /**
+    * Gets a map of parent (mentor) usernames to the student userids that caused their inclusion.
+    *
+    * Used to capture provenance when the "Mentors" role is selected, so the digest can later
+    * separate announcements by child. Default returns an empty map for providers that do not
+    * resolve mentors. Providers that resolve parents override this.
+    *
+    * @param string $code.
+    * @param string $type. The audience type.
+    * @param array $roles. Array of roles.
+    * @return array. Map of [ parentusername => [studentuserid, ...], ... ].
+    */
+    public static function get_mentee_map($code, $type = '', $roles = array()) {
+        return array();
+    }
+
+    /**
+    * Resolves the parents (mentors) of the given student userids.
+    *
+    * Runs the standard parent lookup (role shortname "parent" assigned at the student's user
+    * context) as a single batched query and returns a map of parent username to the student
+    * userids they are a mentor of.
+    *
+    * @param array $studentids. List of student user ids.
+    * @return array. Map of [ parentusername => [studentuserid, ...], ... ].
+    */
+    protected static function resolve_mentors_of_studentids(array $studentids) {
+        global $DB;
+
+        $menteemap = array();
+
+        $studentids = array_values(array_unique(array_filter($studentids)));
+        if (empty($studentids)) {
+            return $menteemap;
+        }
+
+        $mentorrole = $DB->get_record('role', array('shortname' => 'parent'));
+        if (empty($mentorrole)) {
+            return $menteemap;
+        }
+
+        list($insql, $inparams) = $DB->get_in_or_equal($studentids);
+        $sql = "SELECT ra.id, u.username AS parentusername, c.instanceid AS studentid
+                  FROM {role_assignments} ra
+            INNER JOIN {user} u ON u.id = ra.userid
+            INNER JOIN {context} c ON c.id = ra.contextid
+                 WHERE ra.roleid = ?
+                   AND c.contextlevel = ?
+                   AND c.instanceid $insql";
+        $params = array_merge(array($mentorrole->id, CONTEXT_USER), $inparams);
+
+        $records = $DB->get_records_sql($sql, $params);
+        foreach ($records as $record) {
+            if (!isset($menteemap[$record->parentusername])) {
+                $menteemap[$record->parentusername] = array();
+            }
+            $menteemap[$record->parentusername][] = (int) $record->studentid;
+        }
+
+        // Dedupe student ids per parent.
+        foreach ($menteemap as $parent => $ids) {
+            $menteemap[$parent] = array_values(array_unique($ids));
+        }
+
+        return $menteemap;
+    }
+
+    /**
     * Converts a flat array of audiences to a tree. Audiences must contain a groupby param.
     *
     * @param array audiences as a flat array.

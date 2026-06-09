@@ -544,7 +544,34 @@ class audience_mdlcourse extends \local_announcements\providers\audience_provide
     }
 
     /**
-    * Implementation. Determines whether the provider has roles. 
+    * Implementation. Gets a map of parent usernames to the student userids that caused their inclusion.
+    *
+    * @param string $code. The audience code (course idnumber).
+    * @param string $type. The audience type.
+    * @param array $roles. The roles to extract.
+    * @return array. Map of [ parentusername => [studentuserid, ...], ... ].
+    */
+    public static function get_mentee_map($code, $type = '', $roles = array()) {
+        global $DB;
+
+        // Only relevant when mentors are targeted.
+        if (empty($roles) || !in_array('Mentors', $roles)) {
+            return array();
+        }
+
+        // Load the courseid.
+        $courseid = $DB->get_field('course', 'id', array('idnumber' => $code));
+        if (!$courseid) {
+            return array();
+        }
+
+        $studentids = array_keys(enrol_get_course_users_roles($courseid));
+
+        return static::resolve_mentors_of_studentids($studentids);
+    }
+
+    /**
+    * Implementation. Determines whether the provider has roles.
     *
     * @return boolean.
     */

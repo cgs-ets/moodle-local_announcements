@@ -344,6 +344,27 @@ class audience_mdlprofile extends \local_announcements\providers\audience_provid
     }
 
     /**
+    * Implementation. Gets a map of parent usernames to the student userids that caused their inclusion.
+    *
+    * @param string $code. The audience code.
+    * @param string $type. The audience type (scope when called from a combination audience).
+    * @param array $roles. The roles to extract.
+    * @param boolean $iscombo. Whether this call is coming from a combination audience.
+    * @return array. Map of [ parentusername => [studentuserid, ...], ... ].
+    */
+    public static function get_mentee_map($code, $type = '', $roles = array(), $iscombo = false) {
+        // Only relevant when mentors are targeted.
+        if (empty($roles) || !in_array('Mentors', $roles)) {
+            return array();
+        }
+
+        // Get users that have this profile field value.
+        list($profusernames, $userids) = static::get_profilefield_userinfo($code, $type, $iscombo);
+
+        return static::resolve_mentors_of_studentids($userids);
+    }
+
+    /**
     * Implementation. Gets the usernames for the audience
     *
     * @param string $code. The audience code. E.g. @PC

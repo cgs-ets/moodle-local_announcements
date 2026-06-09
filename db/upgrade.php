@@ -346,6 +346,32 @@ function xmldb_local_announcements_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025052801, 'local', 'announcements');
     }
 
+    if ($oldversion < 2025060901) {
+        // Define table ann_posts_users_mentees to be created.
+        $table = new xmldb_table('ann_posts_users_mentees');
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('postid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('postsusersid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('parentusername', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('menteeuserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('menteeusername', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('fk_postid', XMLDB_KEY_FOREIGN, ['postid'], 'ann_posts', ['id']);
+        $table->add_key('fk_postsusersid', XMLDB_KEY_FOREIGN, ['postsusersid'], 'ann_posts_users', ['id']);
+
+        $table->add_index('parentusername', XMLDB_INDEX_NOTUNIQUE, ['parentusername']);
+        $table->add_index('menteeuserid', XMLDB_INDEX_NOTUNIQUE, ['menteeuserid']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Announcements savepoint reached.
+        upgrade_plugin_savepoint(true, 2025060901, 'local', 'announcements');
+    }
+
     return true;
 
 }

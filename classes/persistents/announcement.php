@@ -44,6 +44,7 @@ class announcement extends persistent {
 
     /** Related tables. */
     const TABLE_POSTS_USERS = 'ann_posts_users';
+    const TABLE_POSTS_USERS_MENTEES = 'ann_posts_users_mentees';
     const TABLE_POSTS_USERS_AUDIENCES = 'ann_posts_users_audiences';
     const TABLE_POSTS_AUDIENCES = 'ann_posts_audiences';
     const TABLE_POSTS_AUDIENCES_CONDITIONS = 'ann_posts_audiences_cond';
@@ -1244,6 +1245,8 @@ class announcement extends persistent {
         global $DB;
 
         // Delete existing audiences before adding new ones.
+        // Mentees first, to respect the foreign key to posts_users.
+        $DB->delete_records(static::TABLE_POSTS_USERS_MENTEES, array('postid' => $postid));
         $DB->delete_records(static::TABLE_POSTS_USERS_AUDIENCES, array('postid' => $postid));
         $DB->delete_records(static::TABLE_POSTS_USERS, array('postid' => $postid));
         $DB->delete_records(static::TABLE_POSTS_AUDIENCES_CONDITIONS, array('postid' => $postid));
@@ -1251,23 +1254,47 @@ class announcement extends persistent {
 
         $postusers = array();
         $postsusersaudiences = array();
+        // Map of parentusername => [studentuserid, ...] capturing which child caused each parent's inclusion.
+        $postmenteemap = array();
         foreach ($tags as $tag) {
+            $tagmenteemap = array();
             if ($tag->type == "union") {
-                list($audienceusers, $postsusersaudiences) = static::create_union_tag($postid, $tag, $postsusersaudiences);
+                list($audienceusers, $postsusersaudiences, $tagmenteemap) = static::create_union_tag($postid, $tag, $postsusersaudiences);
             } elseif ($tag->type == "intersection") {
-                list($audienceusers, $postsusersaudiences) = static::create_intersection_tag($postid, $tag, $postsusersaudiences);
+                list($audienceusers, $postsusersaudiences, $tagmenteemap) = static::create_intersection_tag($postid, $tag, $postsusersaudiences);
             }
             $postusers[] = $audienceusers;
+            $postmenteemap = static::merge_mentee_maps($postmenteemap, $tagmenteemap);
         }
         $postusers = array_values(array_unique(array_merge(...$postusers)));
 
         $additionalusers = static::get_additional_audience_users($tags);
         $postusers = array_unique(array_merge($postusers, $additionalusers));
 
+        // Only keep mentee provenance for parents that survived into the final recipient set.
+        $postmenteemap = array_intersect_key($postmenteemap, array_flip($postusers));
+
         if (!empty($postusers)) {
             // Insert post users and their relevant audiences.
-            static::create_posts_users($postid, $postusers, $postsusersaudiences);
+            static::create_posts_users($postid, $postusers, $postsusersaudiences, $postmenteemap);
         }
+    }
+
+    /**
+    * Helper method to merge two parent => [studentuserid, ...] mentee maps.
+    *
+    * @param array $base.
+    * @param array $additional.
+    * @return array. The merged map with deduped student ids per parent.
+    */
+    private static function merge_mentee_maps($base, $additional) {
+        foreach ($additional as $parent => $studentids) {
+            if (!isset($base[$parent])) {
+                $base[$parent] = array();
+            }
+            $base[$parent] = array_values(array_unique(array_merge($base[$parent], $studentids)));
+        }
+        return $base;
     }
 
     /**
@@ -1282,6 +1309,7 @@ class announcement extends persistent {
         // Unions have one audience, and one or more selected items.
         $audience = $tag->audiences[0];
         $itemusers = array();
+        $menteemap = array();
         // Insert a posts_audiences record for each selected item.
         foreach ($audience->selecteditems as $item) {
             // Create the posts audiences record.
@@ -1291,6 +1319,8 @@ class announcement extends persistent {
             // Get the users for this audience item.
             $usernames = static::get_audience_usernames($audience, $item);
             $itemusers[] = $usernames;
+            // Capture which child caused each parent's inclusion for this item.
+            $menteemap = static::merge_mentee_maps($menteemap, static::get_audience_mentee_map($audience, $item));
             if (!empty($usernames)) {
                 // Cache this audience as "relevant" for the users.
                 $postsusersaudiences = static::cache_relevant_user_audiences($usernames, $postsaudiencesid, $postsusersaudiences);
@@ -1302,7 +1332,7 @@ class announcement extends persistent {
             $audienceusers = array_values(array_unique(array_merge(...$itemusers)));
         }
 
-        return [$audienceusers, $postsusersaudiences];
+        return [$audienceusers, $postsusersaudiences, $menteemap];
     }
 
     /**
@@ -1318,6 +1348,7 @@ class announcement extends persistent {
         // Insert a single posts_audiences record for the tag.          
         $postsaudiencesid = static::create_posts_audiences($postid, $tag);
         $itemusers = array();
+        $menteemap = array();
         // Insert multiple condition records, one for each audience in this tag.
         foreach ($tag->audiences as $audience) {
             // Get the selected item.
@@ -1327,15 +1358,19 @@ class announcement extends persistent {
             // Get the list of users for this audience item.
             $usernames = static::get_audience_usernames($audience, $item);
             $itemusers[] = $usernames;
+            // Capture which child caused each parent's inclusion for this audience.
+            $menteemap = static::merge_mentee_maps($menteemap, static::get_audience_mentee_map($audience, $item));
         }
         // Get the interection of the selected audiences.
         $audienceusers = array_intersect(...$itemusers);
+        // Only keep mentee provenance for parents who survived the intersection.
+        $menteemap = array_intersect_key($menteemap, array_flip($audienceusers));
         if (!empty($audienceusers)) {
             // Cache this audience as "relevant" for the users.
             $postsusersaudiences = static::cache_relevant_user_audiences($audienceusers, $postsaudiencesid, $postsusersaudiences);
         }
 
-        return [$audienceusers, $postsusersaudiences];
+        return [$audienceusers, $postsusersaudiences, $menteemap];
     }
 
     /**
@@ -1346,8 +1381,10 @@ class announcement extends persistent {
     * @param array $postsusersaudiences. 
     * @return void.
     */
-    private static function create_posts_users($postid, $postusers, $postsusersaudiences) {
+    private static function create_posts_users($postid, $postusers, $postsusersaudiences, $postmenteemap = array()) {
         global $DB;
+        // Cache of studentuserid => username to avoid repeated user lookups.
+        $menteeusernamecache = array();
         foreach ($postusers as $username) {
             // Insert post users.
             $record = new \stdClass();
@@ -1365,6 +1402,21 @@ class announcement extends persistent {
                 $record->postsaudiencesid = $postsaudiencesid;
                 $record->postid = $postid;
                 $postsusersaudiencesid = $DB->insert_record(static::TABLE_POSTS_USERS_AUDIENCES, $record);
+            }
+            // If this user is a parent included via the Mentors role, record which child(ren) caused it.
+            if (!empty($postmenteemap[$username])) {
+                foreach (array_unique($postmenteemap[$username]) as $menteeuserid) {
+                    if (!array_key_exists($menteeuserid, $menteeusernamecache)) {
+                        $menteeusernamecache[$menteeuserid] = (string) $DB->get_field('user', 'username', array('id' => $menteeuserid));
+                    }
+                    $record = new \stdClass();
+                    $record->postid = $postid;
+                    $record->postsusersid = $postsusersid;
+                    $record->parentusername = $username;
+                    $record->menteeuserid = $menteeuserid;
+                    $record->menteeusername = $menteeusernamecache[$menteeuserid];
+                    $DB->insert_record(static::TABLE_POSTS_USERS_MENTEES, $record);
+                }
             }
         }
     }
@@ -1438,6 +1490,29 @@ class announcement extends persistent {
         $usernames = array_unique($providers[$provname]::get_audience_usernames($item->code, $audience->audiencetype, $roles));
 
         return $usernames;
+    }
+
+    /**
+    * Helper method to get the parent => [studentuserid, ...] mentee map for an audience item.
+    *
+    * Captures which child caused each parent (mentor) to be included for this audience item.
+    *
+    * @param stdClass $audience.
+    * @param stdClass $item.
+    * @return array. Map of [ parentusername => [studentuserid, ...], ... ].
+    */
+    private static function get_audience_mentee_map($audience, $item) {
+        // Load the providers.
+        $providers = audience_loader::get();
+        $provname = $audience->audienceprovider;
+
+        // Pluck the selected roles.
+        $roles = array();
+        if (!empty($audience->selectedroles)) {
+            $roles = array_column($audience->selectedroles, 'code');
+        }
+
+        return $providers[$provname]::get_mentee_map($item->code, $audience->audiencetype, $roles);
     }
 
     /**
@@ -1920,6 +1995,8 @@ class announcement extends persistent {
         $announcement->update();
 
         // Hard delete the audiences.
+        // Mentees first, to respect the foreign key to posts_users.
+        $DB->delete_records(static::TABLE_POSTS_USERS_MENTEES, array('postid' => $id));
         $DB->delete_records(static::TABLE_POSTS_USERS_AUDIENCES, array('postid' => $id));
         $DB->delete_records(static::TABLE_POSTS_USERS, array('postid' => $id));
         $DB->delete_records(static::TABLE_POSTS_AUDIENCES_CONDITIONS, array('postid' => $id));

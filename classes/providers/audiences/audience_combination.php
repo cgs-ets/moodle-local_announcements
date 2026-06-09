@@ -315,6 +315,45 @@ class audience_combination extends \local_announcements\providers\audience_provi
     }
 
     /**
+    * Implementation. Gets a map of parent usernames to the student userids that caused their inclusion.
+    *
+    * @param string $code. The combination audience code.
+    * @param string $type. The audience type.
+    * @param array $roles. The selected roles to extract.
+    * @return array. Map of [ parentusername => [studentuserid, ...], ... ].
+    */
+    public static function get_mentee_map($code, $type = '', $roles = array()) {
+        // Load the audience type.
+        $audiencetype = get_audiencetype($type);
+
+        // Check that the code truly exists for security.
+        if (strpos($audiencetype->itemsoverride, $code) === false) {
+            return array();
+        }
+
+        // Split the combocode, format is [provider]|[(optional)scope=][code]|[name]|[(optional)groupby]|[(optional)roles].
+        list($providerstr, $scope, $code, $name, $groupby, $coderoles) = static::get_combocode_parts($code);
+
+        $provider = get_provider($providerstr);
+        if (empty($provider)) {
+            return array();
+        }
+
+        if (empty($roles)) {
+            // Select all roles.
+            $roles = $provider::ROLES;
+        }
+
+        if ($coderoles) {
+            // Limit to roles that are allowed by the item override.
+            $roles = array_intersect($roles, explode(',', $coderoles));
+        }
+
+        // $scope is required by mdlprofile.
+        return $provider::get_mentee_map($code, $scope, $roles, true);
+    }
+
+    /**
     * Implementation. Determines whether the provider has roles. 
     *
     * @return boolean.

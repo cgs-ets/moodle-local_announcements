@@ -465,6 +465,34 @@ class audience_mdlgroup extends \local_announcements\providers\audience_provider
     }
 
     /**
+    * Implementation. Gets a map of parent usernames to the student userids that caused their inclusion.
+    *
+    * @param string $code. The audience code (group id).
+    * @param string $type. The audience type.
+    * @param array $roles. The roles to extract.
+    * @return array. Map of [ parentusername => [studentuserid, ...], ... ].
+    */
+    public static function get_mentee_map($code, $type = '', $roles = array()) {
+        global $DB;
+
+        // Only relevant when mentors are targeted.
+        if (empty($roles) || !in_array('Mentors', $roles)) {
+            return array();
+        }
+
+        // Get the group members.
+        $sql = "SELECT u.id
+                  FROM {user} u, {groups} g, {groups_members} gm
+                 WHERE u.id = gm.userid
+                   AND gm.groupid = g.id
+                   AND g.id = ?";
+        $members = $DB->get_records_sql($sql, array($code));
+        $studentids = array_keys($members);
+
+        return static::resolve_mentors_of_studentids($studentids);
+    }
+
+    /**
     * Implementation. Determines whether the provider has roles. 
     *
     * @return boolean.
