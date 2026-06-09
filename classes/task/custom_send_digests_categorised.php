@@ -124,7 +124,8 @@ class custom_send_digests_categorised {
                 $this->logger->log("Preparing digest for {$recipient->username} ({$recipient->id}). Data: " . $row->customdata, 1);
 
                 $sections = (isset($data->sections) && is_array($data->sections)) ? $data->sections : array();
-                $prepared = $this->prepare_sections($sections, $recipient, $inclmyconnect);
+                $childsections = (isset($data->childsections) && is_array($data->childsections)) ? $data->childsections : array();
+                $prepared = $this->prepare_sections($sections, $childsections, $recipient, $inclmyconnect);
 
                 if (!$prepared['hascontent']) {
                     $this->logger->log("No posts found to send for {$recipient->username}.", 1);
@@ -229,39 +230,117 @@ class custom_send_digests_categorised {
      * @param   bool       $inclmyconnect
      * @return  array  ['groups' => [...], 'sentcount' => int, 'hascontent' => bool]
      */
-    protected function prepare_sections($sections, $recipient, $inclmyconnect) {
+    protected function prepare_sections($sections, $childsections, $recipient, $inclmyconnect) {
         $groups = array();
         $groupindex = array();
         $sentcount = 0;
         $hascontent = false;
 
+        // School-wide / generic groups, derived from the category prefix.
         foreach ($sections as $section) {
-            $category = isset($section->category) ? $section->category : '';
-            if ($category === '') {
+            $prepared = $this->prepare_subsection($section, $recipient, $inclmyconnect, false);
+            if ($prepared === null) {
                 continue;
             }
+            $hascontent = true;
+            $sentcount += $prepared['postcount'];
+            $grouptitle = $prepared['grouptitle'];
+            if (!isset($groupindex[$grouptitle])) {
+                $groupindex[$grouptitle] = count($groups);
+                $groups[] = array(
+                    'grouptitle' => $grouptitle,
+                    'subsections' => array(),
+                );
+            }
+            $groups[$groupindex[$grouptitle]]['subsections'][] = $prepared['subsection'];
+        }
 
-            // Prepare announcement posts for this section.
-            $postids = (isset($section->announcements) && is_array($section->announcements)) ? $section->announcements : array();
-            $posts = $this->prepare_data($postids, $recipient);
-
-            // Prepare MyConnect posts for this section.
-            $myconnectposts = array();
-            $myconnectmenteeposts = array();
-            if ($inclmyconnect) {
-                if (!empty($section->myconnectposts)) {
-                    $mcids = json_decode(json_encode($section->myconnectposts), true);
-                    $myconnectposts = \local_myconnect\persistents\post::prepare_data($mcids, $recipient, null);
+        // Per-child groups (parents): each child's name heads its own copy of the
+        // "Student > *" sub-sections. Mentee MyConnect posts are folded in as plain
+        // posts (the child heading already names the child).
+        $childordinal = 0;
+        foreach ($childsections as $childsection) {
+            $subsections = array();
+            $childposts = 0;
+            $childsubs = (isset($childsection->sections) && is_array($childsection->sections)) ? $childsection->sections : array();
+            foreach ($childsubs as $section) {
+                $prepared = $this->prepare_subsection($section, $recipient, $inclmyconnect, true);
+                if ($prepared === null) {
+                    continue;
                 }
-                if (!empty($section->myconnectmenteeposts)) {
-                    $menteemap = json_decode(json_encode($section->myconnectmenteeposts), true);
-                    foreach ($menteemap as $menteeid => $menteeposts) {
-                        $preparedposts = \local_myconnect\persistents\post::prepare_data_for_mentee(
-                            $menteeposts,
-                            $menteeid,
-                            $recipient,
-                            null
-                        );
+                $childposts += $prepared['postcount'];
+                $subsections[] = $prepared['subsection'];
+            }
+            if (empty($subsections)) {
+                continue;
+            }
+            $hascontent = true;
+            $sentcount += $childposts;
+            $grouptitle = isset($childsection->childname) ? $childsection->childname : '';
+            $childordinal++;
+            $groups[] = array(
+                'grouptitle' => $grouptitle,
+                'subsections' => $subsections,
+                'grouprank' => 50 + $childordinal,
+            );
+        }
+
+        // Order groups so per-child groups sit in the natural "Student" slot.
+        usort($groups, function($a, $b) {
+            $ra = isset($a['grouprank']) ? $a['grouprank'] : $this->group_rank($a['grouptitle']);
+            $rb = isset($b['grouprank']) ? $b['grouprank'] : $this->group_rank($b['grouptitle']);
+            return $ra <=> $rb;
+        });
+
+        return array(
+            'groups' => $groups,
+            'sentcount' => $sentcount,
+            'hascontent' => $hascontent,
+        );
+    }
+
+    /**
+     * Build a single subsection (label + posts + myconnect) from a section.
+     *
+     * @param   \stdClass  $section   Decoded section object.
+     * @param   \stdClass  $recipient
+     * @param   bool       $inclmyconnect
+     * @param   bool       $foldmentee  When true, mentee MyConnect posts are rendered
+     *                                  as plain posts (no per-mentee "Posts for X"
+     *                                  heading) — used inside per-child groups.
+     * @return  array|null  ['grouptitle','label','subsection','postcount'] or null when empty.
+     */
+    protected function prepare_subsection($section, $recipient, $inclmyconnect, $foldmentee) {
+        $category = isset($section->category) ? $section->category : '';
+        if ($category === '') {
+            return null;
+        }
+
+        // Prepare announcement posts for this section.
+        $postids = (isset($section->announcements) && is_array($section->announcements)) ? $section->announcements : array();
+        $posts = $this->prepare_data($postids, $recipient);
+
+        // Prepare MyConnect posts for this section.
+        $myconnectposts = array();
+        $myconnectmenteeposts = array();
+        if ($inclmyconnect) {
+            if (!empty($section->myconnectposts)) {
+                $mcids = json_decode(json_encode($section->myconnectposts), true);
+                $myconnectposts = \local_myconnect\persistents\post::prepare_data($mcids, $recipient, null);
+            }
+            if (!empty($section->myconnectmenteeposts)) {
+                $menteemap = json_decode(json_encode($section->myconnectmenteeposts), true);
+                foreach ($menteemap as $menteeid => $menteeposts) {
+                    $preparedposts = \local_myconnect\persistents\post::prepare_data_for_mentee(
+                        $menteeposts,
+                        $menteeid,
+                        $recipient,
+                        null
+                    );
+                    if ($foldmentee) {
+                        // Render under the child heading without a per-mentee label.
+                        $myconnectposts = array_merge($myconnectposts, $preparedposts);
+                    } else {
                         $mentee = \core_user::get_user($menteeid);
                         $myconnectmenteeposts[] = array(
                             'user' => $mentee,
@@ -270,46 +349,57 @@ class custom_send_digests_categorised {
                     }
                 }
             }
+        }
 
-            if (empty($posts) && empty($myconnectposts) && empty($myconnectmenteeposts)) {
-                continue;
-            }
+        if (empty($posts) && empty($myconnectposts) && empty($myconnectmenteeposts)) {
+            return null;
+        }
 
-            $hascontent = true;
-            $sentcount += count($posts);
+        // Split the category into a group title and an (optional) sub-label.
+        if (strpos($category, ' > ') !== false) {
+            list($grouptitle, $label) = explode(' > ', $category, 2);
+        } else {
+            $grouptitle = $category;
+            $label = '';
+        }
 
-            // Split the category into a group title and an (optional) sub-label.
-            if (strpos($category, ' > ') !== false) {
-                list($grouptitle, $label) = explode(' > ', $category, 2);
-            } else {
-                $grouptitle = $category;
-                $label = '';
-            }
-
-            $subsection = array(
+        return array(
+            'grouptitle' => $grouptitle,
+            'label' => $label,
+            'postcount' => count($posts),
+            'subsection' => array(
                 'label' => $label,
                 'posts' => $posts,
                 'hasposts' => !empty($posts),
                 'myconnectposts' => $myconnectposts,
                 'myconnectmenteeposts' => $myconnectmenteeposts,
                 'hasmyconnectposts' => !empty($myconnectposts) || !empty($myconnectmenteeposts),
-            );
-
-            if (!isset($groupindex[$grouptitle])) {
-                $groupindex[$grouptitle] = count($groups);
-                $groups[] = array(
-                    'grouptitle' => $grouptitle,
-                    'subsections' => array(),
-                );
-            }
-            $groups[$groupindex[$grouptitle]]['subsections'][] = $subsection;
-        }
-
-        return array(
-            'groups' => $groups,
-            'sentcount' => $sentcount,
-            'hascontent' => $hascontent,
+            ),
         );
+    }
+
+    /**
+     * Rank a group by its title for ordering, derived from announcement::CATEGORIES
+     * sortorder (the part before ' > '). Per-child groups carry their own grouprank
+     * (50 + ordinal) so they sort just after the generic "Student" group.
+     *
+     * @param   string  $grouptitle
+     * @return  int
+     */
+    protected function group_rank($grouptitle) {
+        static $ranks = null;
+        if ($ranks === null) {
+            $ranks = array();
+            foreach (announcement::CATEGORIES as $category) {
+                $shortname = $category['shortname'];
+                $prefix = (strpos($shortname, ' > ') !== false) ? explode(' > ', $shortname, 2)[0] : $shortname;
+                // Keep the smallest sortorder seen for each prefix.
+                if (!isset($ranks[$prefix]) || $category['sortorder'] < $ranks[$prefix]) {
+                    $ranks[$prefix] = $category['sortorder'];
+                }
+            }
+        }
+        return isset($ranks[$grouptitle]) ? $ranks[$grouptitle] : PHP_INT_MAX;
     }
 
     /**

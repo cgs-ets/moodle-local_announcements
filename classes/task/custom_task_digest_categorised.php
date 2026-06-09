@@ -56,6 +56,17 @@ class custom_task_digest_categorised {
     protected $userposts = [];
 
     /**
+     * @var Map of postid => parentusername => [childuserid, ...] capturing which
+     * child caused each parent to be included in a post (ann_posts_users_mentees).
+     */
+    protected $postmentees = [];
+
+    /**
+     * @var Map of childuserid => full name, for rendering per-child digest headings.
+     */
+    protected $menteenames = [];
+
+    /**
      * MyConnect Vars
      */
     protected $includemyconnect = false;
@@ -136,6 +147,7 @@ class custom_task_digest_categorised {
         // Please note, this order is intentional.
         $this->fill_postusers_cache();
         $this->fill_userposts_cache();
+        $this->fill_postmentees_cache();
         $this->logger->log("Queueing user tasks.", 1);
         $this->queue_user_tasks();
 
@@ -241,6 +253,58 @@ class custom_task_digest_categorised {
     }
 
     /**
+     * Fill the cache of announcement parent->child provenance.
+     *
+     * For each announcement in this run, loads which child (mentee) caused each
+     * parent to be included (from ann_posts_users_mentees) so the parent digest
+     * can be split per child. Also resolves each child's display name once.
+     */
+    protected function fill_postmentees_cache() {
+        global $DB;
+
+        if (empty($this->posts)) {
+            return;
+        }
+
+        list($insql, $params) = $DB->get_in_or_equal(array_keys($this->posts));
+        $sql = "SELECT id, postid, parentusername, menteeuserid, menteeusername
+                  FROM {ann_posts_users_mentees}
+                 WHERE postid {$insql}";
+        $records = $DB->get_records_sql($sql, $params);
+
+        $childids = array();
+        foreach ($records as $record) {
+            $this->postmentees[$record->postid][$record->parentusername][] = (int) $record->menteeuserid;
+            $childids[$record->menteeuserid] = $record->menteeusername;
+        }
+
+        if (empty($childids)) {
+            return;
+        }
+
+        // Resolve child display names once. Reuse already-loaded users where possible.
+        $unresolved = array();
+        foreach ($childids as $childid => $username) {
+            if (isset($this->users[$childid])) {
+                $this->menteenames[$childid] = fullname($this->users[$childid]);
+            } else {
+                $unresolved[] = $childid;
+            }
+        }
+        if (!empty($unresolved)) {
+            $childusers = $DB->get_records_list('user', 'id', $unresolved);
+            foreach ($unresolved as $childid) {
+                if (isset($childusers[$childid])) {
+                    $this->menteenames[$childid] = fullname($childusers[$childid]);
+                } else {
+                    // Fall back to the stored username if the user record is gone.
+                    $this->menteenames[$childid] = $childids[$childid];
+                }
+            }
+        }
+    }
+
+    /**
      * Queue one row per user into ann_digest_queue.
      *
      * Each row's customdata holds the announcements sectioned by category, with
@@ -258,8 +322,11 @@ class custom_task_digest_categorised {
             $role = $this->get_user_role($user);
 
             // Bucket the user's announcements into sections keyed by their
-            // (recategorised) leaf category.
+            // (recategorised) leaf category. For parents, "Student > *" posts
+            // caused by a specific child are bucketed per child instead.
+            $isparent = ($role === 'parent');
             $buckets = array();
+            $childbuckets = array();
             $digestposts = $this->fetch_posts_for_user($user);
             foreach ($digestposts as $postid) {
                 if (!isset($this->posts[$postid])) {
@@ -267,6 +334,18 @@ class custom_task_digest_categorised {
                 }
                 $category = $this->recategorise($this->posts[$postid]->category, $role);
                 if ($category === '' || $category === null) {
+                    continue;
+                }
+                // For parents, split causing-child "Student > *" posts per child.
+                $mentees = ($isparent && isset($this->postmentees[$postid][$user->username]))
+                    ? $this->postmentees[$postid][$user->username] : array();
+                if (!empty($mentees) && strpos($category, 'Student > ') === 0) {
+                    foreach (array_unique($mentees) as $childid) {
+                        if (!isset($childbuckets[$childid][$category])) {
+                            $childbuckets[$childid][$category] = array('announcements' => array());
+                        }
+                        $childbuckets[$childid][$category]['announcements'][] = $postid;
+                    }
                     continue;
                 }
                 if (!isset($buckets[$category])) {
@@ -290,14 +369,29 @@ class custom_task_digest_categorised {
             $myconnectcat = $this->recategorise('Student > Academic', $role);
             $directmyconnect = isset($this->myconnectuserposts[$user->id]) ? $this->myconnectuserposts[$user->id] : array();
             $menteemyconnect = isset($this->myconnectmenteeposts[$user->id]) ? $this->myconnectmenteeposts[$user->id] : array();
-            if (!empty($directmyconnect) || !empty($menteemyconnect)) {
+            // Direct MyConnect posts (the recipient's own) always go in the generic section.
+            if (!empty($directmyconnect)) {
                 if (!isset($buckets[$myconnectcat])) {
                     $buckets[$myconnectcat] = array('announcements' => array());
                 }
-                if (!empty($directmyconnect)) {
-                    $buckets[$myconnectcat]['myconnectposts'] = array_values($directmyconnect);
-                }
-                if (!empty($menteemyconnect)) {
+                $buckets[$myconnectcat]['myconnectposts'] = array_values($directmyconnect);
+            }
+            // Mentee MyConnect posts are keyed by child. For parents, fold them
+            // under the matching child; otherwise keep the generic grouping.
+            if (!empty($menteemyconnect)) {
+                if ($isparent) {
+                    foreach ($menteemyconnect as $childid => $menteeposts) {
+                        $childbuckets[$childid][$myconnectcat]['myconnectmenteeposts'][$childid] = array_values($menteeposts);
+                        // Resolve the child's heading name if not already known from
+                        // announcement provenance (MyConnect children live in $this->users).
+                        if (!isset($this->menteenames[$childid]) && isset($this->users[$childid])) {
+                            $this->menteenames[$childid] = fullname($this->users[$childid]);
+                        }
+                    }
+                } else {
+                    if (!isset($buckets[$myconnectcat])) {
+                        $buckets[$myconnectcat] = array('announcements' => array());
+                    }
                     $buckets[$myconnectcat]['myconnectmenteeposts'] = $menteemyconnect;
                 }
             }
@@ -323,19 +417,59 @@ class custom_task_digest_categorised {
                 $sections[] = $section;
             }
 
-            if (empty($sections)) {
+            // Emit per-child sections (parents only), ordered by child name, each
+            // with its own copy of the "Student > *" sub-sections in canonical order.
+            $childsections = array();
+            if (!empty($childbuckets)) {
+                uksort($childbuckets, function($a, $b) {
+                    $na = isset($this->menteenames[$a]) ? $this->menteenames[$a] : '';
+                    $nb = isset($this->menteenames[$b]) ? $this->menteenames[$b] : '';
+                    return strcasecmp($na, $nb);
+                });
+                foreach ($childbuckets as $childid => $catbuckets) {
+                    $secs = array();
+                    foreach ($this->student_category_order() as $category) {
+                        if (empty($catbuckets[$category])) {
+                            continue;
+                        }
+                        $bucket = $catbuckets[$category];
+                        $announcements = isset($bucket['announcements']) ? array_values($bucket['announcements']) : array();
+                        if (empty($announcements) && empty($bucket['myconnectmenteeposts'])) {
+                            continue;
+                        }
+                        $sec = array('category' => $category, 'announcements' => $announcements);
+                        if (!empty($bucket['myconnectmenteeposts'])) {
+                            $sec['myconnectmenteeposts'] = $bucket['myconnectmenteeposts'];
+                        }
+                        $secs[] = $sec;
+                    }
+                    if (!empty($secs)) {
+                        $childsections[] = array(
+                            'childid' => $childid,
+                            'childname' => isset($this->menteenames[$childid]) ? $this->menteenames[$childid] : '',
+                            'sections' => $secs,
+                        );
+                    }
+                }
+            }
+
+            if (empty($sections) && empty($childsections)) {
                 continue;
             }
 
             $userdata = array(
-                'version' => 2,
+                'version' => 3,
                 'role' => $role,
                 'sections' => $sections,
             );
+            if (!empty($childsections)) {
+                $userdata['childsections'] = $childsections;
+            }
 
             // Stats.
-            $this->logger->log(sprintf("Built %d sections (role=%s) from %d announcements, %d direct myconnect posts, %d mentee myconnect posts, for %s (%d)",
+            $this->logger->log(sprintf("Built %d sections + %d child group(s) (role=%s) from %d announcements, %d direct myconnect posts, %d mentee myconnect posts, for %s (%d)",
                 count($sections),
+                count($childsections),
                 $role,
                 count($digestposts),
                 count($directmyconnect),
@@ -442,6 +576,18 @@ class custom_task_digest_categorised {
             return $a['sortorder'] <=> $b['sortorder'];
         });
         return array_column($categories, 'shortname');
+    }
+
+    /**
+     * The canonical order of the "Student > *" leaf categories (Academic,
+     * Co-curricular, House, Boarding), used for the per-child digest sub-sections.
+     *
+     * @return  string[]  Ordered list of "Student > *" category shortnames.
+     */
+    protected function student_category_order() {
+        return array_values(array_filter($this->category_order(), function($category) {
+            return strpos($category, 'Student > ') === 0;
+        }));
     }
 
     /**
