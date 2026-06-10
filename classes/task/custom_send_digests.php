@@ -133,8 +133,8 @@ class custom_send_digests {
                     $myconnectposts = \local_myconnect\persistents\post::prepare_data(
                         $myconnectpostids,
                         $recipient,
-                        null
-                    );
+                        new \null_progress_trace()
+                    ) ?: array();
 
                     if (isset($posttypes->myconnectmenteeposts)) {
                         $this->logger->log("Mentee MyConnect posts: " . json_encode($posttypes->myconnectmenteeposts), 1);
@@ -144,8 +144,8 @@ class custom_send_digests {
                                 $menteeposts,
                                 $menteeid,
                                 $recipient,
-                                null
-                            );
+                                new \null_progress_trace()
+                            ) ?: array();
                             $mentee = \core_user::get_user($menteeid);
                             $myconnect_mentee_posts[] = array(
                                 'user' => $mentee,

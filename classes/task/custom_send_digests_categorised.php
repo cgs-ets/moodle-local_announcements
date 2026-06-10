@@ -326,7 +326,7 @@ class custom_send_digests_categorised {
         if ($inclmyconnect) {
             if (!empty($section->myconnectposts)) {
                 $mcids = json_decode(json_encode($section->myconnectposts), true);
-                $myconnectposts = \local_myconnect\persistents\post::prepare_data($mcids, $recipient, null);
+                $myconnectposts = \local_myconnect\persistents\post::prepare_data($mcids, $recipient, new \null_progress_trace()) ?: array();
             }
             if (!empty($section->myconnectmenteeposts)) {
                 $menteemap = json_decode(json_encode($section->myconnectmenteeposts), true);
@@ -335,8 +335,8 @@ class custom_send_digests_categorised {
                         $menteeposts,
                         $menteeid,
                         $recipient,
-                        null
-                    );
+                        new \null_progress_trace()
+                    ) ?: array();
                     if ($foldmentee) {
                         // Render under the child heading without a per-mentee label.
                         $myconnectposts = array_merge($myconnectposts, $preparedposts);
