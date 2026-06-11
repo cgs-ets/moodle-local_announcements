@@ -204,9 +204,11 @@
                         <td class="one-column">
                             <table width="100%">
                             {{#groups}}
-                                <tr class="section-group-title">
-                                    <td>{{grouptitle}}</td>
-                                </tr>
+                                {{#grouptitle}}
+                                  <tr class="section-group-title">
+                                      <td>{{grouptitle}}</td>
+                                  </tr>
+                                {{/grouptitle}}
                                 {{#subsections}}
                                     {{#label}}
                                     <tr class="section-label">

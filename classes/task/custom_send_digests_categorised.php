@@ -359,12 +359,12 @@ class custom_send_digests_categorised {
         if (strpos($category, ' > ') !== false) {
             list($grouptitle, $label) = explode(' > ', $category, 2);
         } else {
-            $grouptitle = $category;
+            //$grouptitle = $category;
             $label = '';
         }
 
         return array(
-            'grouptitle' => $grouptitle,
+            'grouptitle' => '',//$grouptitle,
             'label' => $label,
             'postcount' => count($posts),
             'subsection' => array(
