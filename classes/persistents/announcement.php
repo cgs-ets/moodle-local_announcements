@@ -52,19 +52,19 @@ class announcement extends persistent {
 
     /** Announcement categories. Referenced by the post form and elsewhere. */
     const CATEGORIES = [
-        ['shortname' => 'From Head',              'title' => 'From Head',              'sortorder' => 10],
-        ['shortname' => 'From HoSS',              'title' => 'From HoSS',              'sortorder' => 20],
-        ['shortname' => 'From HoPS',              'title' => 'From HoPS',              'sortorder' => 30],
-        ['shortname' => 'Newsletter link',        'title' => 'Newsletter link',        'sortorder' => 40],
-        ['shortname' => 'Student > Academic',     'title' => 'Student > Academic',     'sortorder' => 50],
-        ['shortname' => 'Student > Co-curricular','title' => 'Student > Co-curricular','sortorder' => 60],
-        ['shortname' => 'Student > House',        'title' => 'Student > House',        'sortorder' => 70],
-        ['shortname' => 'Student > Boarding',     'title' => 'Student > Boarding',     'sortorder' => 80],
-        ['shortname' => 'Staff > Teaching',       'title' => 'Staff > Teaching',       'sortorder' => 90],
-        ['shortname' => 'Staff > Operations',     'title' => 'Staff > Operations',     'sortorder' => 100],
-        ['shortname' => 'Staff > HR',             'title' => 'Staff > HR',             'sortorder' => 110],
-        ['shortname' => 'Staff > Wellbeing',      'title' => 'Staff > Wellbeing',      'sortorder' => 120],
-        ['shortname' => 'Events & Community',     'title' => 'Events & Community',     'sortorder' => 130],
+        ['shortname' => 'From Head',                'title' => 'From Head',                 'sortorder' => 10],
+        ['shortname' => 'From HoSS',                'title' => 'From HoSS',                 'sortorder' => 20],
+        ['shortname' => 'From HoPS',                'title' => 'From HoPS',                 'sortorder' => 30],
+        ['shortname' => 'Newsletter link',          'title' => 'Newsletter link',           'sortorder' => 40],
+        ['shortname' => 'Students > Academic',      'title' => 'Students > Academic',       'sortorder' => 50],
+        ['shortname' => 'Students > Co-curricular', 'title' => 'Students > Co-curricular',  'sortorder' => 60],
+        ['shortname' => 'Students > House',         'title' => 'Students > House',          'sortorder' => 70],
+        ['shortname' => 'Students > Boarding',      'title' => 'Students > Boarding',       'sortorder' => 80],
+        ['shortname' => 'Staff > Teaching',         'title' => 'Staff > Teaching',          'sortorder' => 90],
+        ['shortname' => 'Staff > Operations',       'title' => 'Staff > Operations',        'sortorder' => 100],
+        ['shortname' => 'Staff > HR',               'title' => 'Staff > HR',                'sortorder' => 110],
+        ['shortname' => 'Staff > Wellbeing',        'title' => 'Staff > Wellbeing',         'sortorder' => 120],
+        ['shortname' => 'Events & Community',       'title' => 'Events & Community',        'sortorder' => 130],
     ];
 
     /**

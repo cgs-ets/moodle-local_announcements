@@ -123,14 +123,14 @@
             font-weight: bold;
             color: #121212;
             background-color: #eeeeee;
-            padding: 8px 20px;
+            padding: 8px 0 8px 20px;
             border-bottom: 1px solid #dddddd;
         }
         .section-label td {
             font-size: 15px;
             font-weight: bold;
             color: #454545;
-            background-color: #ffffff;
+            background-color: #eeeeee;
             padding: 8px 20px;
             border-bottom: 1px solid #dddddd;
         }
@@ -211,8 +211,17 @@
                             <table width="100%">
                             {{#groups}}
                                 {{#grouptitle}}
-                                  <tr class="section-group-title">
-                                      <td>{{#grouptitlephoto}}<img src="{{grouptitlephoto}}" class="userpicture" width="35" height="35" alt="" style="vertical-align: middle; margin-right: 8px; border-radius: 50%;">{{/grouptitlephoto}}{{grouptitle}}</td>
+                                  <tr>
+                                    <td>
+                                        <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                            <tbody>
+                                                <tr class="section-group-title">
+                                                    {{#grouptitlephoto}}<td width="25" valign="top" class="picture left"><img src="{{grouptitlephoto}}" class="userpicture" width="28" height="28" alt="" style="vertical-align: middle; border-radius: 50%;"></td>{{/grouptitlephoto}}
+                                                    <td>{{grouptitle}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
                                   </tr>
                                 {{/grouptitle}}
                                 {{#subsections}}
