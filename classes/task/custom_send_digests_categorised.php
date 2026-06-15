@@ -258,7 +258,7 @@ class custom_send_digests_categorised {
         }
 
         // Per-child groups (parents): each child's name heads its own copy of the
-        // "Student > *" sub-sections. Mentee MyConnect posts are folded in as plain
+        // "Students > *" sub-sections. Mentee MyConnect posts are folded in as plain
         // posts (the child heading already names the child).
         $childordinal = 0;
         foreach ($childsections as $childsection) {

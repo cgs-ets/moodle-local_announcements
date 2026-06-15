@@ -322,7 +322,7 @@ class custom_task_digest_categorised {
             $role = $this->get_user_role($user);
 
             // Bucket the user's announcements into sections keyed by their
-            // (recategorised) leaf category. For parents, "Student > *" posts
+            // (recategorised) leaf category. For parents, "Students > *" posts
             // caused by a specific child are bucketed per child instead.
             $isparent = ($role === 'parent');
             $buckets = array();
@@ -330,7 +330,7 @@ class custom_task_digest_categorised {
             $digestposts = $this->fetch_posts_for_user($user);
 
             // The parent's featured children: the union of causing-children across
-            // this parent's "Student > *" announcements. Used to deduplicate posts
+            // this parent's "Students > *" announcements. Used to deduplicate posts
             // that are caused by every featured child (see the bucketing loop).
             $parentchildren = array();
             if ($isparent) {
@@ -339,7 +339,7 @@ class custom_task_digest_categorised {
                         continue;
                     }
                     $cat = $this->recategorise($this->posts[$postid]->category, $role);
-                    if (strpos($cat, 'Student > ') !== 0) {
+                    if (strpos($cat, 'Students > ') !== 0) {
                         continue;
                     }
                     $cids = isset($this->postmentees[$postid][$user->username])
@@ -359,10 +359,10 @@ class custom_task_digest_categorised {
                 if ($category === '' || $category === null) {
                     continue;
                 }
-                // For parents, split causing-child "Student > *" posts per child.
+                // For parents, split causing-child "Students > *" posts per child.
                 $mentees = ($isparent && isset($this->postmentees[$postid][$user->username]))
                     ? array_unique($this->postmentees[$postid][$user->username]) : array();
-                if (!empty($mentees) && strpos($category, 'Student > ') === 0) {
+                if (!empty($mentees) && strpos($category, 'Students > ') === 0) {
                     // Deduplicate: when a post is caused by EVERY featured child (and
                     // there is more than one), show it once in the general Student
                     // section instead of repeating it under each child. A post caused
@@ -398,7 +398,7 @@ class custom_task_digest_categorised {
 
             // Merge MyConnect posts into the Academic section (recategorised for
             // the recipient's role, e.g. Staff > Academic for staff).
-            $myconnectcat = $this->recategorise('Student > Academic', $role);
+            $myconnectcat = $this->recategorise('Students > Academic', $role);
             $directmyconnect = isset($this->myconnectuserposts[$user->id]) ? $this->myconnectuserposts[$user->id] : array();
             $menteemyconnect = isset($this->myconnectmenteeposts[$user->id]) ? $this->myconnectmenteeposts[$user->id] : array();
             // Direct MyConnect posts (the recipient's own) always go in the generic section.
@@ -450,7 +450,7 @@ class custom_task_digest_categorised {
             }
 
             // Emit per-child sections (parents only), ordered by child name, each
-            // with its own copy of the "Student > *" sub-sections in canonical order.
+            // with its own copy of the "Students > *" sub-sections in canonical order.
             $childsections = array();
             if (!empty($childbuckets)) {
                 uksort($childbuckets, function($a, $b) {
@@ -585,13 +585,13 @@ class custom_task_digest_categorised {
      */
     protected function recategorise($category, $role) {
         if ($role === 'staff') {
-            if (strpos($category, 'Student > ') === 0) {
+            if (strpos($category, 'Students > ') === 0) {
                 return 'Staff > Teaching';
             }
         } else {
             // Student and parent recipients.
             if (strpos($category, 'Staff > ') === 0) {
-                return 'Student > Academic';
+                return 'Students > Academic';
             }
         }
         return $category;
@@ -611,14 +611,14 @@ class custom_task_digest_categorised {
     }
 
     /**
-     * The canonical order of the "Student > *" leaf categories (Academic,
+     * The canonical order of the "Students > *" leaf categories (Academic,
      * Co-curricular, House, Boarding), used for the per-child digest sub-sections.
      *
-     * @return  string[]  Ordered list of "Student > *" category shortnames.
+     * @return  string[]  Ordered list of "Students > *" category shortnames.
      */
     protected function student_category_order() {
         return array_values(array_filter($this->category_order(), function($category) {
-            return strpos($category, 'Student > ') === 0;
+            return strpos($category, 'Students > ') === 0;
         }));
     }
 

@@ -85,7 +85,7 @@ class announcement extends persistent {
 
         // Work out which restricted (ungrouped) categories the current user
         // may post in, based on the poster lists configured in settings.
-        // Grouped categories ("Student > ..." and "Staff > ...") are always
+        // Grouped categories ("Students > ..." and "Staff > ...") are always
         // shown. CDO posters can see every category.
         $config = get_config('local_announcements');
         $username = \core_text::strtolower(trim($USER->username));
