@@ -135,7 +135,7 @@ class custom_send_digests_categorised {
                 }
 
                 // Prepare the mail content (renders templates, checks user preferences).
-                $maildata = $this->prepare_mail_content($recipient, $prepared);
+                $maildata = $this->prepare_mail_content($recipient, $prepared, $data->role);
 
                 // Send notification (independent of email).
                 $this->send_notification($recipient, $maildata);
@@ -358,6 +358,8 @@ class custom_send_digests_categorised {
         // Split the category into a group title and an (optional) sub-label.
         if (strpos($category, ' > ') !== false) {
             list($grouptitle, $label) = explode(' > ', $category, 2);
+            //$grouptitle = "$grouptitle > $label";
+            //$label = '';
         } else {
             $grouptitle = $category;
             $label = '';
@@ -439,12 +441,13 @@ class custom_send_digests_categorised {
      * Renders the categorised digest templates and checks user preferences.
      * Returns an array with the rendered HTML, subject, and preference flags.
      */
-    protected function prepare_mail_content($recipient, $prepared) {
+    protected function prepare_mail_content($recipient, $prepared, $role) {
         global $OUTPUT, $DB;
 
         $config = get_config('local_announcements');
 
-        $subject = get_string('digest:mailsubject', 'local_announcements', fullname($recipient));
+        $name = fullname($recipient);
+        $subject = "My Daily Announcements from CGS Connect for $name ($role digest)";
         $sentcount = $prepared['sentcount'];
 
         $content = [
