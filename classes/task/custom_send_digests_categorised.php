@@ -231,6 +231,8 @@ class custom_send_digests_categorised {
      * @return  array  ['groups' => [...], 'sentcount' => int, 'hascontent' => bool]
      */
     protected function prepare_sections($sections, $childsections, $recipient, $inclmyconnect) {
+        global $PAGE;
+
         $groups = array();
         $groupindex = array();
         $sentcount = 0;
@@ -278,8 +280,24 @@ class custom_send_digests_categorised {
             $sentcount += $childposts;
             $grouptitle = isset($childsection->childname) ? $childsection->childname : '';
             $childordinal++;
+
+            // Build the child's tokenised profile picture. This is done here (send
+            // time) rather than at queue time because the recipient is the active
+            // $USER and $PAGE/renderer are initialised, so the token is minted for
+            // them — mirroring how the author photo is built in announcement_exporter.
+            $childphoto = '';
+            if (!empty($childsection->childid)) {
+                $childuser = \core_user::get_user($childsection->childid);
+                if ($childuser) {
+                    $up = new \user_picture($childuser, ['size' => 35]);
+                    $up->includetoken = $childuser->id;
+                    $childphoto = $up->get_url($PAGE)->out(false);
+                }
+            }
+
             $groups[] = array(
                 'grouptitle' => $grouptitle,
+                'grouptitlephoto' => $childphoto,
                 'subsections' => $subsections,
                 'grouprank' => 50 + $childordinal,
             );
