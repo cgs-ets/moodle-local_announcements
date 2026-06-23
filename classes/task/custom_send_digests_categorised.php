@@ -125,7 +125,7 @@ class custom_send_digests_categorised {
 
                 $sections = (isset($data->sections) && is_array($data->sections)) ? $data->sections : array();
                 $childsections = (isset($data->childsections) && is_array($data->childsections)) ? $data->childsections : array();
-                $prepared = $this->prepare_sections($sections, $childsections, $recipient, $inclmyconnect);
+                $prepared = $this->prepare_sections($sections, $childsections, $recipient, $inclmyconnect, $data->role);
 
                 if (!$prepared['hascontent']) {
                     $this->logger->log("No posts found to send for {$recipient->username}.", 1);
@@ -228,9 +228,10 @@ class custom_send_digests_categorised {
      * @param   array      $sections  Decoded section objects from customdata.
      * @param   \stdClass  $recipient
      * @param   bool       $inclmyconnect
+     * @param   string     $role  'staff', 'student' or 'parent'
      * @return  array  ['groups' => [...], 'sentcount' => int, 'hascontent' => bool]
      */
-    protected function prepare_sections($sections, $childsections, $recipient, $inclmyconnect) {
+    protected function prepare_sections($sections, $childsections, $recipient, $inclmyconnect, $role) {
         global $PAGE;
 
         $groups = array();
@@ -240,7 +241,7 @@ class custom_send_digests_categorised {
 
         // School-wide / generic groups, derived from the category prefix.
         foreach ($sections as $section) {
-            $prepared = $this->prepare_subsection($section, $recipient, $inclmyconnect, false);
+            $prepared = $this->prepare_subsection($section, $recipient, $inclmyconnect, false, $role);
             if ($prepared === null) {
                 continue;
             }
@@ -249,10 +250,17 @@ class custom_send_digests_categorised {
             $grouptitle = $prepared['grouptitle'];
             if (!isset($groupindex[$grouptitle])) {
                 $groupindex[$grouptitle] = count($groups);
-                $groups[] = array(
+                $group = array(
                     'grouptitle' => $grouptitle,
                     'subsections' => array(),
                 );
+                // Promoted student sub-categories carry their own rank (the
+                // original "Students > *" sortorder) since their title is no
+                // longer a prefix known to group_rank().
+                if (isset($prepared['grouprank'])) {
+                    $group['grouprank'] = $prepared['grouprank'];
+                }
+                $groups[] = $group;
             }
             $groups[$groupindex[$grouptitle]]['subsections'][] = $prepared['subsection'];
         }
@@ -266,7 +274,7 @@ class custom_send_digests_categorised {
             $childposts = 0;
             $childsubs = (isset($childsection->sections) && is_array($childsection->sections)) ? $childsection->sections : array();
             foreach ($childsubs as $section) {
-                $prepared = $this->prepare_subsection($section, $recipient, $inclmyconnect, true);
+                $prepared = $this->prepare_subsection($section, $recipient, $inclmyconnect, true, $role);
                 if ($prepared === null) {
                     continue;
                 }
@@ -326,9 +334,10 @@ class custom_send_digests_categorised {
      * @param   bool       $foldmentee  When true, mentee MyConnect posts are rendered
      *                                  as plain posts (no per-mentee "Posts for X"
      *                                  heading) — used inside per-child groups.
+     * @param   string     $role  'staff', 'student' or 'parent'
      * @return  array|null  ['grouptitle','label','subsection','postcount'] or null when empty.
      */
-    protected function prepare_subsection($section, $recipient, $inclmyconnect, $foldmentee) {
+    protected function prepare_subsection($section, $recipient, $inclmyconnect, $foldmentee, $role) {
         $category = isset($section->category) ? $section->category : '';
         if ($category === '') {
             return null;
@@ -396,7 +405,18 @@ class custom_send_digests_categorised {
             $label = '';
         }
 
-        return array(
+        // For student digests, promote the "Students > *" sub-category (Academic,
+        // Co-curricular, House, Boarding) to be the group heading itself, dropping
+        // the redundant "Students" parent heading. The promoted group keeps the
+        // original category's sortorder so ordering is preserved.
+        $grouprank = null;
+        if ($role === 'student' && strpos($category, 'Students > ') === 0) {
+            $grouptitle = $label;
+            $label = '';
+            $grouprank = $this->category_sortorder($category);
+        }
+
+        $result = array(
             'grouptitle' => $grouptitle,
             'label' => $label,
             'postcount' => count($posts),
@@ -409,6 +429,10 @@ class custom_send_digests_categorised {
                 'hasmyconnectposts' => !empty($myconnectposts) || !empty($myconnectmenteeposts),
             ),
         );
+        if ($grouprank !== null) {
+            $result['grouprank'] = $grouprank;
+        }
+        return $result;
     }
 
     /**
@@ -433,6 +457,25 @@ class custom_send_digests_categorised {
             }
         }
         return isset($ranks[$grouptitle]) ? $ranks[$grouptitle] : PHP_INT_MAX;
+    }
+
+    /**
+     * The sortorder of a full category shortname from announcement::CATEGORIES.
+     * Used to rank promoted student sub-category groups (e.g. "Students > Academic")
+     * by their original category position.
+     *
+     * @param   string  $category  Full category shortname.
+     * @return  int
+     */
+    protected function category_sortorder($category) {
+        static $orders = null;
+        if ($orders === null) {
+            $orders = array();
+            foreach (announcement::CATEGORIES as $cat) {
+                $orders[$cat['shortname']] = $cat['sortorder'];
+            }
+        }
+        return isset($orders[$category]) ? $orders[$category] : PHP_INT_MAX;
     }
 
     /**
