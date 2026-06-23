@@ -373,6 +373,19 @@ class custom_send_digests_categorised {
             return null;
         }
 
+        // Drop the trailing separator border from the very last item in the section so it closes cleanly.
+        if (!empty($myconnectmenteeposts)) {
+            $lastmentee = count($myconnectmenteeposts) - 1;
+            if (!empty($myconnectmenteeposts[$lastmentee]['posts'])) {
+                $menteeposts = $myconnectmenteeposts[$lastmentee]['posts'];
+                $menteeposts[count($menteeposts) - 1]->islast = true;
+            }
+        } else if (!empty($myconnectposts)) {
+            $myconnectposts[count($myconnectposts) - 1]->islast = true;
+        } else if (!empty($posts)) {
+            $posts[count($posts) - 1]->islast = true;
+        }
+
         // Split the category into a group title and an (optional) sub-label.
         if (strpos($category, ' > ') !== false) {
             list($grouptitle, $label) = explode(' > ', $category, 2);
@@ -448,10 +461,6 @@ class custom_send_digests_categorised {
                 'audiences' => $announcement->audiences,
             ]);
             $posts[] = $exporter->export($output);
-        }
-
-        if (!empty($posts)) {
-            $posts[count($posts) - 1]->islast = true;
         }
 
         return $posts;
