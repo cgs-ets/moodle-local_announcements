@@ -450,6 +450,10 @@ class custom_send_digests_categorised {
             $posts[] = $exporter->export($output);
         }
 
+        if (!empty($posts)) {
+            $posts[count($posts) - 1]->islast = true;
+        }
+
         return $posts;
     }
 
