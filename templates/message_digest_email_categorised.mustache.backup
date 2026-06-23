@@ -117,7 +117,23 @@
             font-size: 16px;
             Margin-bottom: 10px;
         }
-        /* Category section styling (group bands use inline styles for email-client safety) */
+        /* Category section styling */
+        .section-group-title td {
+            font-size: 15px;
+            font-weight: bold;
+            color: #121212;
+            background-color: #eeeeee;
+            padding: 8px 0 8px 20px;
+            border-bottom: 1px solid #dddddd;
+        }
+        .section-label td {
+            font-size: 15px;
+            font-weight: bold;
+            color: #454545;
+            background-color: #eeeeee;
+            padding: 8px 20px;
+            border-bottom: 1px solid #dddddd;
+        }
         /* Announcement styling */
         .announcement td.announcement-padding {
             padding: 20px 20px;
@@ -194,67 +210,57 @@
                         <td class="one-column">
                             <table width="100%">
                             {{#groups}}
-                              <tr>
-                                <td style="padding-bottom:26px;">
-                                    <table role="presentation" border="0" cellspacing="0" cellpadding="0" width="100%" style="border:1px solid #d3dae0;">
-                                        {{#grouptitle}}
-                                        <tr>
-                                            <td style="background-color:#103c63;border-bottom:3px solid #f3b00a;padding:13px 18px;">
-                                                <table role="presentation" border="0" cellspacing="0" cellpadding="0">
-                                                    <tr>
-                                                        {{#grouptitlephoto}}<td width="34" valign="middle" style="width:34px;"><img src="{{grouptitlephoto}}" width="34" height="34" alt="" style="display:block;border-radius:50%;"></td>{{/grouptitlephoto}}
-                                                        <td valign="middle" style="padding-left:12px;">
-                                                            <div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:bold;color:#ffffff;line-height:20px;">{{grouptitle}}</div>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                        {{/grouptitle}}
-                                        <tr>
-                                            <td style="background-color:#ffffff;padding:16px;">
-                                            {{#subsections}}
-                                                {{#label}}
-                                                <table role="presentation" border="0" cellspacing="0" cellpadding="0" width="100%" style="background-color:#e9f1f9;border-left:4px solid #2c6fa8;">
-                                                    <tr>
-                                                        <td style="padding:8px 12px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#103c63;">{{label}}</td>
-                                                    </tr>
-                                                </table>
-                                                <div style="font-size:0;line-height:0;height:12px;">&nbsp;</div>
-                                                {{/label}}
-                                                {{#posts}}
-                                                    {{>local_announcements/message_announcement_email}}
-                                                {{/posts}}
-                                                {{#myconnectposts}}
-                                                    {{>local_announcements/myconnect_post_email}}
-                                                {{/myconnectposts}}
-                                                {{#myconnectmenteeposts}}
-                                                  <table class="myconnectpost" border="0" cellspacing="0" cellpadding="20" width="100%">
-                                                    <tbody>
-                                                        <tr>
-                                                            <table class="myconnectpost-content" border="0" cellspacing="0" cellpadding="0" width="100%">
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td>
-                                                                            Posts for {{user.firstname}} {{user.lastname}}
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </tr>
-                                                    </tbody>
-                                                  </table>
-                                                  {{#posts}}
-                                                    {{>local_announcements/myconnect_post_email}}
-                                                  {{/posts}}
-                                                {{/myconnectmenteeposts}}
-                                                <div style="font-size:0;line-height:0;height:18px;">&nbsp;</div>
-                                            {{/subsections}}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                              </tr>
+                                {{#grouptitle}}
+                                  <tr>
+                                    <td>
+                                        <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                            <tbody>
+                                                <tr class="section-group-title">
+                                                    {{#grouptitlephoto}}<td width="25" valign="top" class="picture left"><img src="{{grouptitlephoto}}" class="userpicture" width="28" height="28" alt="" style="vertical-align: middle; border-radius: 50%;"></td>{{/grouptitlephoto}}
+                                                    <td>{{grouptitle}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                  </tr>
+                                {{/grouptitle}}
+                                {{#subsections}}
+                                    {{#label}}
+                                    <tr class="section-label">
+                                        <td>{{label}}</td>
+                                    </tr>
+                                    {{/label}}
+                                    <tr>
+                                        <td class="inner contents">
+                                        {{#posts}}
+                                            {{>local_announcements/message_announcement_email}}
+                                        {{/posts}}
+                                        {{#myconnectposts}}
+                                            {{>local_announcements/myconnect_post_email}}
+                                        {{/myconnectposts}}
+                                        {{#myconnectmenteeposts}}
+                                          <table class="myconnectpost" border="0" cellspacing="0" cellpadding="20" width="100%">
+                                            <tbody>
+                                                <tr>
+                                                    <table class="myconnectpost-content" border="0" cellspacing="0" cellpadding="0" width="100%">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>
+                                                                    Posts for {{user.firstname}} {{user.lastname}}
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </tr>
+                                            </tbody>
+                                          </table>
+                                          {{#posts}}
+                                            {{>local_announcements/myconnect_post_email}}
+                                          {{/posts}}
+                                        {{/myconnectmenteeposts}}
+                                        </td>
+                                    </tr>
+                                {{/subsections}}
                             {{/groups}}
                             </table>
                         </td>
