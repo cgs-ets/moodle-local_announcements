@@ -59,26 +59,22 @@ class announcement extends persistent {
         ['shortname' => 'Newsletter link',          'title' => 'Newsletter link',                               'selectorder' => 50, 'digestorder' => 50],
 
         ['shortname' => 'Staff',                    'title' => 'Staff',                                         'selectorder' => 60, 'digestorder' => 60],
+       
         // Synthetic, digest-only categories: staff recipients see "Students > *"
         // content rerouted here (see custom_task_digest_categorised::recategorise).
         // Not selectable in the post form (excluded via the 'digestonly' flag).
-        ['shortname' => 'Staff > Students Academic',      'title' => 'Staff > Students Academic',      'selectorder' => 70, 'digestorder' => 70, 'digestonly' => true],
-        ['shortname' => 'Staff > Students Boarding',      'title' => 'Staff > Students Boarding',      'selectorder' => 71, 'digestorder' => 71, 'digestonly' => true],
-        ['shortname' => 'Staff > Students Co-curricular', 'title' => 'Staff > Students Co-curricular', 'selectorder' => 72, 'digestorder' => 72, 'digestonly' => true],
-        ['shortname' => 'Staff > Students House',         'title' => 'Staff > Students House',         'selectorder' => 73, 'digestorder' => 73, 'digestonly' => true],
+        ['shortname' => 'Staff > Students Academic',      'title' => 'Staff > Students Academic',               'selectorder' => 70, 'digestorder' => 70, 'digestonly' => true],
+        ['shortname' => 'Staff > Students Boarding',      'title' => 'Staff > Students Boarding',               'selectorder' => 71, 'digestorder' => 71, 'digestonly' => true],
+        ['shortname' => 'Staff > Students Co-curricular', 'title' => 'Staff > Students Co-curricular',          'selectorder' => 72, 'digestorder' => 72, 'digestonly' => true],
+        ['shortname' => 'Staff > Students House',         'title' => 'Staff > Students House',                  'selectorder' => 73, 'digestorder' => 73, 'digestonly' => true],
         
         ['shortname' => 'Students > Academic',      'title' => 'Students > Academic',                           'selectorder' => 80, 'digestorder' => 80],
         ['shortname' => 'Students > Co-curricular', 'title' => 'Students > Co-curricular',                      'selectorder' => 90, 'digestorder' => 100],
         ['shortname' => 'Students > House',         'title' => 'Students > House',                              'selectorder' => 100, 'digestorder' => 110],
         ['shortname' => 'Students > Boarding',      'title' => 'Students > Boarding',                           'selectorder' => 110, 'digestorder' => 90],
        
-        
-        //['shortname' => 'Staff > Teaching',         'title' => 'Staff > Teaching',                              'selectorder' => 100, 'digestorder' => 100],
-        //['shortname' => 'Staff > Operations',       'title' => 'Staff > Operations',                            'selectorder' => 110, 'digestorder' => 110],
-        //['shortname' => 'Staff > HR',               'title' => 'Staff > HR',                                    'selectorder' => 120, 'digestorder' => 120],
-        //['shortname' => 'Staff > Wellbeing',        'title' => 'Staff > Wellbeing',                             'selectorder' => 130, 'digestorder' => 130],
         ['shortname' => 'Events & Community',       'title' => 'Events & Community',                            'selectorder' => 120, 'digestorder' => 120],
-        ['shortname' => 'Other',         'title' => 'Other',         'selectorder' => 120, 'digestorder' => 120, 'digestonly' => true],
+        ['shortname' => 'Other',                    'title' => 'Other',                                         'selectorder' => 130, 'digestorder' => 130, 'digestonly' => true],
     ];
 
     /**
@@ -131,13 +127,16 @@ class announcement extends persistent {
             }
             $shortname = $category['shortname'];
             $title = $category['title'];
-            if (strpos($shortname, ' > ') !== false) {
-                list($group, $label) = explode(' > ', $title, 2);
-                if (!isset($options[$group])) {
-                    $options[$group] = [];
-                }
-                $options[$group][$shortname] = $label;
-            } else {
+
+            $title = str_replace(' > ', ' • ', $title);
+
+            //if (strpos($shortname, ' > ') !== false) {
+            //    list($group, $label) = explode(' > ', $title, 2);
+            //    if (!isset($options[$group])) {
+            //        $options[$group] = [];
+            //    }
+            //    $options[$group][$shortname] = $label;
+            //} else {
                 // Ungrouped categories are restricted. Those explicitly mapped
                 // to a poster list are shown only to matching users (or CDO);
                 // any other ungrouped category is visible to CDO posters only.
@@ -149,7 +148,7 @@ class announcement extends persistent {
                     continue;
                 }
                 $options[$ungroupedkey][$shortname] = $title;
-            }
+            //}
         }
         return $options;
     }
