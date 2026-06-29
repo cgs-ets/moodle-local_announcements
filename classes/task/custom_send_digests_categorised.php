@@ -255,7 +255,7 @@ class custom_send_digests_categorised {
                     'subsections' => array(),
                 );
                 // Promoted student sub-categories carry their own rank (the
-                // original "Students > *" sortorder) since their title is no
+                // original "Students > *" digestorder) since their title is no
                 // longer a prefix known to group_rank().
                 if (isset($prepared['grouprank'])) {
                     $group['grouprank'] = $prepared['grouprank'];
@@ -296,7 +296,9 @@ class custom_send_digests_categorised {
             $childphoto = '';
             if (!empty($childsection->childid)) {
                 $childuser = \core_user::get_user($childsection->childid);
-                if ($childuser) {
+                // Only show a photo when the child has actually uploaded one; otherwise
+                // leave it empty so the template skips the placeholder image.
+                if ($childuser && !empty($childuser->picture)) {
                     $up = new \user_picture($childuser, ['size' => 35]);
                     $up->includetoken = $childuser->id;
                     $childphoto = $up->get_url($PAGE)->out(false);
@@ -408,12 +410,12 @@ class custom_send_digests_categorised {
         // For student digests, promote the "Students > *" sub-category (Academic,
         // Co-curricular, House, Boarding) to be the group heading itself, dropping
         // the redundant "Students" parent heading. The promoted group keeps the
-        // original category's sortorder so ordering is preserved.
+        // original category's digestorder so ordering is preserved.
         $grouprank = null;
         if ($role === 'student' && strpos($category, 'Students > ') === 0) {
             $grouptitle = $label;
             $label = '';
-            $grouprank = $this->category_sortorder($category);
+            $grouprank = $this->category_digestorder($category);
         }
 
         $result = array(
@@ -437,7 +439,7 @@ class custom_send_digests_categorised {
 
     /**
      * Rank a group by its title for ordering, derived from announcement::CATEGORIES
-     * sortorder (the part before ' > '). Per-child groups carry their own grouprank
+     * digestorder (the part before ' > '). Per-child groups carry their own grouprank
      * (50 + ordinal) so they sort just after the generic "Student" group.
      *
      * @param   string  $grouptitle
@@ -450,9 +452,9 @@ class custom_send_digests_categorised {
             foreach (announcement::CATEGORIES as $category) {
                 $shortname = $category['shortname'];
                 $prefix = (strpos($shortname, ' > ') !== false) ? explode(' > ', $shortname, 2)[0] : $shortname;
-                // Keep the smallest sortorder seen for each prefix.
-                if (!isset($ranks[$prefix]) || $category['sortorder'] < $ranks[$prefix]) {
-                    $ranks[$prefix] = $category['sortorder'];
+                // Keep the smallest digestorder seen for each prefix.
+                if (!isset($ranks[$prefix]) || $category['digestorder'] < $ranks[$prefix]) {
+                    $ranks[$prefix] = $category['digestorder'];
                 }
             }
         }
@@ -460,19 +462,19 @@ class custom_send_digests_categorised {
     }
 
     /**
-     * The sortorder of a full category shortname from announcement::CATEGORIES.
+     * The digestorder of a full category shortname from announcement::CATEGORIES.
      * Used to rank promoted student sub-category groups (e.g. "Students > Academic")
      * by their original category position.
      *
      * @param   string  $category  Full category shortname.
      * @return  int
      */
-    protected function category_sortorder($category) {
+    protected function category_digestorder($category) {
         static $orders = null;
         if ($orders === null) {
             $orders = array();
             foreach (announcement::CATEGORIES as $cat) {
-                $orders[$cat['shortname']] = $cat['sortorder'];
+                $orders[$cat['shortname']] = $cat['digestorder'];
             }
         }
         return isset($orders[$category]) ? $orders[$category] : PHP_INT_MAX;

@@ -67,6 +67,11 @@ class custom_task_digest_categorised {
     protected $menteenames = [];
 
     /**
+     * @var Map of childuserid => raw "year" profile value, for sorting children.
+     */
+    protected $menteeyears = [];
+
+    /**
      * MyConnect Vars
      */
     protected $includemyconnect = false;
@@ -329,28 +334,6 @@ class custom_task_digest_categorised {
             $childbuckets = array();
             $digestposts = $this->fetch_posts_for_user($user);
 
-            // The parent's featured children: the union of causing-children across
-            // this parent's "Students > *" announcements. Used to deduplicate posts
-            // that are caused by every featured child (see the bucketing loop).
-            $parentchildren = array();
-            if ($isparent) {
-                foreach ($digestposts as $postid) {
-                    if (!isset($this->posts[$postid])) {
-                        continue;
-                    }
-                    $cat = $this->recategorise($this->posts[$postid]->category, $role);
-                    if (strpos($cat, 'Students > ') !== 0) {
-                        continue;
-                    }
-                    $cids = isset($this->postmentees[$postid][$user->username])
-                        ? $this->postmentees[$postid][$user->username] : array();
-                    foreach (array_unique($cids) as $cid) {
-                        $parentchildren[$cid] = true;
-                    }
-                }
-            }
-            $numfeatured = count($parentchildren);
-
             foreach ($digestposts as $postid) {
                 if (!isset($this->posts[$postid])) {
                     continue;
@@ -363,22 +346,14 @@ class custom_task_digest_categorised {
                 $mentees = ($isparent && isset($this->postmentees[$postid][$user->username]))
                     ? array_unique($this->postmentees[$postid][$user->username]) : array();
                 if (!empty($mentees) && strpos($category, 'Students > ') === 0) {
-                    // Deduplicate: when a post is caused by EVERY featured child (and
-                    // there is more than one), show it once in the general Student
-                    // section instead of repeating it under each child. A post caused
-                    // by only some children stays per-child. Since $mentees is always a
-                    // subset of $parentchildren, "all" reduces to a count match.
-                    $linkedall = ($numfeatured > 1 && count($mentees) === $numfeatured);
-                    if (!$linkedall) {
-                        foreach ($mentees as $childid) {
-                            if (!isset($childbuckets[$childid][$category])) {
-                                $childbuckets[$childid][$category] = array('announcements' => array());
-                            }
-                            $childbuckets[$childid][$category]['announcements'][] = $postid;
+                    // Place a copy under each child that caused this post to be included.
+                    foreach ($mentees as $childid) {
+                        if (!isset($childbuckets[$childid][$category])) {
+                            $childbuckets[$childid][$category] = array('announcements' => array());
                         }
-                        continue;
+                        $childbuckets[$childid][$category]['announcements'][] = $postid;
                     }
-                    // else: fall through to the generic bucket below (single copy).
+                    continue;
                 }
                 if (!isset($buckets[$category])) {
                     $buckets[$category] = array(
@@ -390,7 +365,7 @@ class custom_task_digest_categorised {
 
             // Dedup single-sender categories: if user error produced more than
             // one, keep only the latest (by sorttime, then timecreated).
-            foreach (array('From Head', 'Newsletter link') as $dedupcat) {
+            foreach (array('Newsletter link') as $dedupcat) {
                 if (isset($buckets[$dedupcat]) && count($buckets[$dedupcat]['announcements']) > 1) {
                     $buckets[$dedupcat]['announcements'] = array($this->latest_post($buckets[$dedupcat]['announcements']));
                 }
@@ -449,11 +424,17 @@ class custom_task_digest_categorised {
                 $sections[] = $section;
             }
 
-            // Emit per-child sections (parents only), ordered by child name, each
+            // Emit per-child sections (parents only), ordered by year level, each
             // with its own copy of the "Students > *" sub-sections in canonical order.
             $childsections = array();
             if (!empty($childbuckets)) {
                 uksort($childbuckets, function($a, $b) {
+                    $ra = $this->year_rank($this->child_year($a));
+                    $rb = $this->year_rank($this->child_year($b));
+                    if ($ra !== $rb) {
+                        return $ra <=> $rb;
+                    }
+                    // Tiebreak: alphabetical by child name.
                     $na = isset($this->menteenames[$a]) ? $this->menteenames[$a] : '';
                     $nb = isset($this->menteenames[$b]) ? $this->menteenames[$b] : '';
                     return strcasecmp($na, $nb);
@@ -586,26 +567,29 @@ class custom_task_digest_categorised {
     protected function recategorise($category, $role) {
         if ($role === 'staff') {
             if (strpos($category, 'Students > ') === 0) {
-                return 'Staff > Teaching';
+                // Staff see student-targeted content under "Staff > Students *",
+                // e.g. "Students > Academic" => "Staff > Students Academic".
+                return 'Staff > Students ' . substr($category, strlen('Students > '));
             }
         } else {
-            // Student and parent recipients.
-            if (strpos($category, 'Staff > ') === 0) {
-                return 'Students > Academic';
+            // Student and parent recipients. Staff-targeted content is moved to the
+            // "Other" bucket, which sorts to the bottom of the digest.
+            if ($category === 'Staff' || strpos($category, 'Staff > ') === 0) {
+                return 'Other';
             }
         }
         return $category;
     }
 
     /**
-     * The canonical category order, taken from announcement::CATEGORIES sortorder.
+     * The canonical category order, taken from announcement::CATEGORIES digestorder.
      *
      * @return  string[]  Ordered list of category shortnames.
      */
     protected function category_order() {
         $categories = announcement::CATEGORIES;
         usort($categories, function($a, $b) {
-            return $a['sortorder'] <=> $b['sortorder'];
+            return $a['digestorder'] <=> $b['digestorder'];
         });
         return array_column($categories, 'shortname');
     }
@@ -620,6 +604,53 @@ class custom_task_digest_categorised {
         return array_values(array_filter($this->category_order(), function($category) {
             return strpos($category, 'Students > ') === 0;
         }));
+    }
+
+    /**
+     * Resolve and cache a child's year level from the "year" custom profile field.
+     *
+     * Reuses an already-loaded user where possible (children may live in
+     * $this->users or need a fresh load, mirroring fill_postmentees_cache()).
+     *
+     * @param   int     $childid
+     * @return  string  The raw "year" value, or '' if unavailable.
+     */
+    protected function child_year($childid) {
+        global $CFG;
+        if (array_key_exists($childid, $this->menteeyears)) {
+            return $this->menteeyears[$childid];
+        }
+        require_once($CFG->dirroot . '/user/profile/lib.php');
+        $user = isset($this->users[$childid]) ? $this->users[$childid] : \core_user::get_user($childid);
+        $year = '';
+        if ($user) {
+            if (!isset($user->profile)) {
+                profile_load_custom_fields($user);
+            }
+            if (isset($user->profile['year'])) {
+                $year = $user->profile['year'];
+            }
+        }
+        $this->menteeyears[$childid] = $year;
+        return $year;
+    }
+
+    /**
+     * Rank a child's "year" value for digest ordering (youngest first).
+     *
+     * Year levels 0..12 sort ascending; the early-years codes (>= 100) sort before
+     * year 0, with 200 before 100. Non-numeric/unknown years sort last.
+     *
+     * @param   string|int  $year
+     * @return  int
+     */
+    protected function year_rank($year) {
+        if (!is_numeric($year)) {
+            return PHP_INT_MAX;
+        }
+        $y = (int) $year;
+        // 100/200 are the youngest cohorts and must precede year 0; 200 before 100.
+        return ($y >= 100) ? -$y : $y;
     }
 
     /**

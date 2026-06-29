@@ -52,19 +52,33 @@ class announcement extends persistent {
 
     /** Announcement categories. Referenced by the post form and elsewhere. */
     const CATEGORIES = [
-        ['shortname' => 'From Head',                'title' => 'From Head',                 'sortorder' => 10],
-        ['shortname' => 'From HoSS',                'title' => 'From HoSS',                 'sortorder' => 20],
-        ['shortname' => 'From HoPS',                'title' => 'From HoPS',                 'sortorder' => 30],
-        ['shortname' => 'Newsletter link',          'title' => 'Newsletter link',           'sortorder' => 40],
-        ['shortname' => 'Students > Academic',      'title' => 'Students > Academic',       'sortorder' => 50],
-        ['shortname' => 'Students > Co-curricular', 'title' => 'Students > Co-curricular',  'sortorder' => 60],
-        ['shortname' => 'Students > House',         'title' => 'Students > House',          'sortorder' => 70],
-        ['shortname' => 'Students > Boarding',      'title' => 'Students > Boarding',       'sortorder' => 80],
-        ['shortname' => 'Staff > Teaching',         'title' => 'Staff > Teaching',          'sortorder' => 90],
-        ['shortname' => 'Staff > Operations',       'title' => 'Staff > Operations',        'sortorder' => 100],
-        ['shortname' => 'Staff > HR',               'title' => 'Staff > HR',                'sortorder' => 110],
-        ['shortname' => 'Staff > Wellbeing',        'title' => 'Staff > Wellbeing',         'sortorder' => 120],
-        ['shortname' => 'Events & Community',       'title' => 'Events & Community',        'sortorder' => 130],
+        ['shortname' => 'From Head',                'title' => 'From the Head of School',                       'selectorder' => 10, 'digestorder' => 10],
+        ['shortname' => 'From HoSS',                'title' => 'From the Head of Senior School',                'selectorder' => 20, 'digestorder' => 20],
+        ['shortname' => 'From HoPS',                'title' => 'From the Head of Primary School',               'selectorder' => 30, 'digestorder' => 30],
+        ['shortname' => 'From DCCE',                'title' => 'From the Director of Co-Curricular Education',  'selectorder' => 40, 'digestorder' => 40],
+        ['shortname' => 'Newsletter link',          'title' => 'Newsletter link',                               'selectorder' => 50, 'digestorder' => 50],
+
+        ['shortname' => 'Staff',                    'title' => 'Staff',                                         'selectorder' => 60, 'digestorder' => 60],
+        // Synthetic, digest-only categories: staff recipients see "Students > *"
+        // content rerouted here (see custom_task_digest_categorised::recategorise).
+        // Not selectable in the post form (excluded via the 'digestonly' flag).
+        ['shortname' => 'Staff > Students Academic',      'title' => 'Staff > Students Academic',      'selectorder' => 70, 'digestorder' => 70, 'digestonly' => true],
+        ['shortname' => 'Staff > Students Boarding',      'title' => 'Staff > Students Boarding',      'selectorder' => 71, 'digestorder' => 71, 'digestonly' => true],
+        ['shortname' => 'Staff > Students Co-curricular', 'title' => 'Staff > Students Co-curricular', 'selectorder' => 72, 'digestorder' => 72, 'digestonly' => true],
+        ['shortname' => 'Staff > Students House',         'title' => 'Staff > Students House',         'selectorder' => 73, 'digestorder' => 73, 'digestonly' => true],
+        
+        ['shortname' => 'Students > Academic',      'title' => 'Students > Academic',                           'selectorder' => 80, 'digestorder' => 80],
+        ['shortname' => 'Students > Co-curricular', 'title' => 'Students > Co-curricular',                      'selectorder' => 90, 'digestorder' => 100],
+        ['shortname' => 'Students > House',         'title' => 'Students > House',                              'selectorder' => 100, 'digestorder' => 110],
+        ['shortname' => 'Students > Boarding',      'title' => 'Students > Boarding',                           'selectorder' => 110, 'digestorder' => 90],
+       
+        
+        //['shortname' => 'Staff > Teaching',         'title' => 'Staff > Teaching',                              'selectorder' => 100, 'digestorder' => 100],
+        //['shortname' => 'Staff > Operations',       'title' => 'Staff > Operations',                            'selectorder' => 110, 'digestorder' => 110],
+        //['shortname' => 'Staff > HR',               'title' => 'Staff > HR',                                    'selectorder' => 120, 'digestorder' => 120],
+        //['shortname' => 'Staff > Wellbeing',        'title' => 'Staff > Wellbeing',                             'selectorder' => 130, 'digestorder' => 130],
+        ['shortname' => 'Events & Community',       'title' => 'Events & Community',                            'selectorder' => 120, 'digestorder' => 120],
+        ['shortname' => 'Other',         'title' => 'Other',         'selectorder' => 120, 'digestorder' => 120, 'digestonly' => true],
     ];
 
     /**
@@ -80,7 +94,7 @@ class announcement extends persistent {
 
         $categories = static::CATEGORIES;
         usort($categories, function($a, $b) {
-            return $a['sortorder'] <=> $b['sortorder'];
+            return $a['selectorder'] <=> $b['selectorder'];
         });
 
         // Work out which restricted (ungrouped) categories the current user
@@ -101,6 +115,7 @@ class announcement extends persistent {
             'From Head' => $iscdo || $inlist($config->hosposters ?? ''),
             'From HoSS' => $iscdo || $inlist($config->hossposters ?? ''),
             'From HoPS' => $iscdo || $inlist($config->hopsposters ?? ''),
+            'From DCCE' => $iscdo || $inlist($config->dcceposters ?? ''),
         ];
 
         // Use a single space as the key for the ungrouped bucket so it
@@ -110,6 +125,10 @@ class announcement extends persistent {
         $ungroupedkey = ' ';
         $options = [$ungroupedkey => ['' => get_string('choosedots')]];
         foreach ($categories as $category) {
+            // Digest-only categories are never selectable in the post form.
+            if (!empty($category['digestonly'])) {
+                continue;
+            }
             $shortname = $category['shortname'];
             $title = $category['title'];
             if (strpos($shortname, ' > ') !== false) {

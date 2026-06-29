@@ -163,6 +163,12 @@ if ($hassiteconfig) {
     $setting = new admin_setting_configtextarea($name, $title, $description, '');
     $settings->add($setting);
 
+    $name = 'local_announcements/dcceposters';
+    $title = 'DCCE posters'; //get_string('config:dcceposters', 'local_announcements');
+    $description = 'Usernames (one per line) of users who may post in the "From DCCE" category.'; //get_string('config:dccepostersdesc', 'local_announcements');
+    $setting = new admin_setting_configtextarea($name, $title, $description, '');
+    $settings->add($setting);
+
     $name = 'local_announcements/cdoposters';
     $title = 'CDO posters'; //get_string('config:cdoposters', 'local_announcements');
     $description = 'Usernames (one per line) of users who may post in any category.'; //get_string('config:cdopostersdesc', 'local_announcements');
