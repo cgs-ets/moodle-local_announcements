@@ -584,21 +584,21 @@ class custom_task_digest_categorised {
     /**
      * The canonical category order, taken from announcement::CATEGORIES digestorder.
      *
-     * @return  string[]  Ordered list of category shortnames.
+     * @return  string[]  Ordered list of category titles.
      */
     protected function category_order() {
         $categories = announcement::CATEGORIES;
         usort($categories, function($a, $b) {
             return $a['digestorder'] <=> $b['digestorder'];
         });
-        return array_column($categories, 'shortname');
+        return array_column($categories, 'title');
     }
 
     /**
      * The canonical order of the "Students > *" leaf categories (Academic,
      * Co-curricular, House, Boarding), used for the per-child digest sub-sections.
      *
-     * @return  string[]  Ordered list of "Students > *" category shortnames.
+     * @return  string[]  Ordered list of "Students > *" category titles.
      */
     protected function student_category_order() {
         return array_values(array_filter($this->category_order(), function($category) {

@@ -450,8 +450,8 @@ class custom_send_digests_categorised {
         if ($ranks === null) {
             $ranks = array();
             foreach (announcement::CATEGORIES as $category) {
-                $shortname = $category['shortname'];
-                $prefix = (strpos($shortname, ' > ') !== false) ? explode(' > ', $shortname, 2)[0] : $shortname;
+                $title = $category['title'];
+                $prefix = (strpos($title, ' > ') !== false) ? explode(' > ', $title, 2)[0] : $title;
                 // Keep the smallest digestorder seen for each prefix.
                 if (!isset($ranks[$prefix]) || $category['digestorder'] < $ranks[$prefix]) {
                     $ranks[$prefix] = $category['digestorder'];
@@ -462,11 +462,11 @@ class custom_send_digests_categorised {
     }
 
     /**
-     * The digestorder of a full category shortname from announcement::CATEGORIES.
+     * The digestorder of a full category title from announcement::CATEGORIES.
      * Used to rank promoted student sub-category groups (e.g. "Students > Academic")
      * by their original category position.
      *
-     * @param   string  $category  Full category shortname.
+     * @param   string  $category  Full category title.
      * @return  int
      */
     protected function category_digestorder($category) {
@@ -474,7 +474,7 @@ class custom_send_digests_categorised {
         if ($orders === null) {
             $orders = array();
             foreach (announcement::CATEGORIES as $cat) {
-                $orders[$cat['shortname']] = $cat['digestorder'];
+                $orders[$cat['title']] = $cat['digestorder'];
             }
         }
         return isset($orders[$category]) ? $orders[$category] : PHP_INT_MAX;

@@ -52,38 +52,38 @@ class announcement extends persistent {
 
     /** Announcement categories. Referenced by the post form and elsewhere. */
     const CATEGORIES = [
-        ['shortname' => 'From Head',                'title' => 'From the Head of School',                       'selectorder' => 10, 'digestorder' => 10],
-        ['shortname' => 'From HoSS',                'title' => 'From the Head of Senior School',                'selectorder' => 20, 'digestorder' => 20],
-        ['shortname' => 'From HoPS',                'title' => 'From the Head of Primary School',               'selectorder' => 30, 'digestorder' => 30],
-        ['shortname' => 'From DCCE',                'title' => 'From the Director of Co-Curricular Education',  'selectorder' => 40, 'digestorder' => 40],
-        ['shortname' => 'Newsletter link',          'title' => 'Newsletter link',                               'selectorder' => 50, 'digestorder' => 50],
+        ['title' => 'From the Head of School',                       'selectorder' => 10, 'digestorder' => 10],
+        ['title' => 'From the Head of Senior School',                'selectorder' => 20, 'digestorder' => 20],
+        ['title' => 'From the Head of Primary School',               'selectorder' => 30, 'digestorder' => 30],
+        ['title' => 'From the Director of Co-Curricular Education',  'selectorder' => 40, 'digestorder' => 40],
+        ['title' => 'Newsletter link',                              'selectorder' => 50, 'digestorder' => 50],
 
-        ['shortname' => 'Staff',                    'title' => 'Staff',                                         'selectorder' => 60, 'digestorder' => 60],
-       
+        ['title' => 'Staff',                                        'selectorder' => 60, 'digestorder' => 60],
+
         // Synthetic, digest-only categories: staff recipients see "Students > *"
         // content rerouted here (see custom_task_digest_categorised::recategorise).
         // Not selectable in the post form (excluded via the 'digestonly' flag).
-        ['shortname' => 'Staff > Students Academic',      'title' => 'Staff > Students Academic',               'selectorder' => 70, 'digestorder' => 72, 'digestonly' => true],
-        ['shortname' => 'Staff > Students Boarding',      'title' => 'Staff > Students Boarding',               'selectorder' => 71, 'digestorder' => 70, 'digestonly' => true],
-        ['shortname' => 'Staff > Students Co-curricular', 'title' => 'Staff > Students Co-curricular',          'selectorder' => 72, 'digestorder' => 73, 'digestonly' => true],
-        ['shortname' => 'Staff > Students House',         'title' => 'Staff > Students House',                  'selectorder' => 73, 'digestorder' => 71, 'digestonly' => true],
-        
-        ['shortname' => 'Students > Academic',      'title' => 'Students > Academic',                           'selectorder' => 80, 'digestorder' => 100],
-        ['shortname' => 'Students > Boarding',      'title' => 'Students > Boarding',                           'selectorder' => 90, 'digestorder' => 80],
-        ['shortname' => 'Students > Co-curricular', 'title' => 'Students > Co-curricular',                      'selectorder' => 100, 'digestorder' => 110],
-        ['shortname' => 'Students > House',         'title' => 'Students > House',                              'selectorder' => 110, 'digestorder' => 90],
-       
-        ['shortname' => 'Events & Community',       'title' => 'Events & Community',                            'selectorder' => 120, 'digestorder' => 120],
-        ['shortname' => 'Other',                    'title' => 'Other',                                         'selectorder' => 130, 'digestorder' => 130, 'digestonly' => true],
+        ['title' => 'Staff > Students Academic',               'selectorder' => 70, 'digestorder' => 72, 'digestonly' => true],
+        ['title' => 'Staff > Students Boarding',               'selectorder' => 71, 'digestorder' => 70, 'digestonly' => true],
+        ['title' => 'Staff > Students Co-curricular',          'selectorder' => 72, 'digestorder' => 73, 'digestonly' => true],
+        ['title' => 'Staff > Students House',                  'selectorder' => 73, 'digestorder' => 71, 'digestonly' => true],
+
+        ['title' => 'Students > Academic',                          'selectorder' => 80, 'digestorder' => 100],
+        ['title' => 'Students > Boarding',                          'selectorder' => 90, 'digestorder' => 80],
+        ['title' => 'Students > Co-curricular',                     'selectorder' => 100, 'digestorder' => 110],
+        ['title' => 'Students > House',                             'selectorder' => 110, 'digestorder' => 90],
+
+        ['title' => 'Events & Community',                           'selectorder' => 120, 'digestorder' => 120],
+        ['title' => 'Other',                                        'selectorder' => 130, 'digestorder' => 130, 'digestonly' => true],
     ];
 
     /**
      * Build the categories list shaped for Moodle's `selectgroups` mform element.
-     * Items whose shortname contains ' > ' are placed in an <optgroup> named
+     * Items whose title contains ' > ' are placed in an <optgroup> named
      * after the prefix (label = suffix). Items without ' > ' are placed in an
      * unnamed group so they appear at the top of the dropdown.
      *
-     * @return array [groupLabel => [shortname => optionLabel, ...], ...]
+     * @return array [groupLabel => [title => optionLabel, ...], ...]
      */
     public static function get_category_select_options() {
         global $USER;
@@ -106,12 +106,12 @@ class announcement extends persistent {
             return in_array($username, $usernames, true);
         };
         $iscdo = $inlist($config->cdoposters ?? '');
-        // Map of restricted category shortname => whether this user may see it.
+        // Map of restricted category title => whether this user may see it.
         $restrictedvisible = [
-            'From Head' => $iscdo || $inlist($config->hosposters ?? ''),
-            'From HoSS' => $iscdo || $inlist($config->hossposters ?? ''),
-            'From HoPS' => $iscdo || $inlist($config->hopsposters ?? ''),
-            'From DCCE' => $iscdo || $inlist($config->dcceposters ?? ''),
+            'From the Head of School' => $iscdo || $inlist($config->hosposters ?? ''),
+            'From the Head of Senior School' => $iscdo || $inlist($config->hossposters ?? ''),
+            'From the Head of Primary School' => $iscdo || $inlist($config->hopsposters ?? ''),
+            'From the Director of Co-Curricular Education' => $iscdo || $inlist($config->dcceposters ?? ''),
         ];
 
         // Use a single space as the key for the ungrouped bucket so it
@@ -125,30 +125,20 @@ class announcement extends persistent {
             if (!empty($category['digestonly'])) {
                 continue;
             }
-            $shortname = $category['shortname'];
             $title = $category['title'];
+            $label = str_replace(' > ', ' • ', $title);
 
-            $title = str_replace(' > ', ' • ', $title);
-
-            //if (strpos($shortname, ' > ') !== false) {
-            //    list($group, $label) = explode(' > ', $title, 2);
-            //    if (!isset($options[$group])) {
-            //        $options[$group] = [];
-            //    }
-            //    $options[$group][$shortname] = $label;
-            //} else {
-                // Ungrouped categories are restricted. Those explicitly mapped
-                // to a poster list are shown only to matching users (or CDO);
-                // any other ungrouped category is visible to CDO posters only.
-                if (array_key_exists($shortname, $restrictedvisible)) {
-                    if (!$restrictedvisible[$shortname]) {
-                        continue;
-                    }
-                } else if (!$iscdo) {
+            // Ungrouped categories are restricted. Those explicitly mapped
+            // to a poster list are shown only to matching users (or CDO);
+            // any other ungrouped category is visible to CDO posters only.
+            if (array_key_exists($title, $restrictedvisible)) {
+                if (!$restrictedvisible[$title]) {
                     continue;
                 }
-                $options[$ungroupedkey][$shortname] = $title;
-            //}
+            } else if (!$iscdo) {
+                continue;
+            }
+            $options[$ungroupedkey][$title] = $label;
         }
         return $options;
     }
