@@ -63,15 +63,15 @@ class announcement extends persistent {
         // Synthetic, digest-only categories: staff recipients see "Students > *"
         // content rerouted here (see custom_task_digest_categorised::recategorise).
         // Not selectable in the post form (excluded via the 'digestonly' flag).
-        ['shortname' => 'Staff > Students Academic',      'title' => 'Staff > Students Academic',               'selectorder' => 70, 'digestorder' => 70, 'digestonly' => true],
-        ['shortname' => 'Staff > Students Boarding',      'title' => 'Staff > Students Boarding',               'selectorder' => 71, 'digestorder' => 71, 'digestonly' => true],
-        ['shortname' => 'Staff > Students Co-curricular', 'title' => 'Staff > Students Co-curricular',          'selectorder' => 72, 'digestorder' => 72, 'digestonly' => true],
-        ['shortname' => 'Staff > Students House',         'title' => 'Staff > Students House',                  'selectorder' => 73, 'digestorder' => 73, 'digestonly' => true],
+        ['shortname' => 'Staff > Students Academic',      'title' => 'Staff > Students Academic',               'selectorder' => 70, 'digestorder' => 72, 'digestonly' => true],
+        ['shortname' => 'Staff > Students Boarding',      'title' => 'Staff > Students Boarding',               'selectorder' => 71, 'digestorder' => 70, 'digestonly' => true],
+        ['shortname' => 'Staff > Students Co-curricular', 'title' => 'Staff > Students Co-curricular',          'selectorder' => 72, 'digestorder' => 73, 'digestonly' => true],
+        ['shortname' => 'Staff > Students House',         'title' => 'Staff > Students House',                  'selectorder' => 73, 'digestorder' => 71, 'digestonly' => true],
         
-        ['shortname' => 'Students > Academic',      'title' => 'Students > Academic',                           'selectorder' => 80, 'digestorder' => 80],
-        ['shortname' => 'Students > Co-curricular', 'title' => 'Students > Co-curricular',                      'selectorder' => 90, 'digestorder' => 100],
-        ['shortname' => 'Students > House',         'title' => 'Students > House',                              'selectorder' => 100, 'digestorder' => 110],
-        ['shortname' => 'Students > Boarding',      'title' => 'Students > Boarding',                           'selectorder' => 110, 'digestorder' => 90],
+        ['shortname' => 'Students > Academic',      'title' => 'Students > Academic',                           'selectorder' => 80, 'digestorder' => 100],
+        ['shortname' => 'Students > Boarding',      'title' => 'Students > Boarding',                           'selectorder' => 90, 'digestorder' => 80],
+        ['shortname' => 'Students > Co-curricular', 'title' => 'Students > Co-curricular',                      'selectorder' => 100, 'digestorder' => 110],
+        ['shortname' => 'Students > House',         'title' => 'Students > House',                              'selectorder' => 110, 'digestorder' => 90],
        
         ['shortname' => 'Events & Community',       'title' => 'Events & Community',                            'selectorder' => 120, 'digestorder' => 120],
         ['shortname' => 'Other',                    'title' => 'Other',                                         'selectorder' => 130, 'digestorder' => 130, 'digestonly' => true],
