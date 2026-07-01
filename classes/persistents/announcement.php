@@ -1198,6 +1198,12 @@ class announcement extends persistent {
         // Strip HTML comments from message text to prevent things like IE conditional comments from causing issues.
         $data->message = preg_replace('/<!--(.|\s)*?-->/', '', $data->message);
 
+        // Strip pasted font-family / font-size (e.g. from Word) so content renders in
+        // the site's consistent font (see styles.css and the email templates). Other
+        // inline styles (colour, alignment, etc.) are preserved.
+        $data->message = preg_replace('/font-family\s*:[^;"\']*;?/i', '', $data->message);
+        $data->message = preg_replace('/font-size\s*:[^;"\']*;?/i', '', $data->message);
+
         // Store message files to a permanent file area.
         $context = \context_system::instance();
         $message = file_save_draft_area_files(
